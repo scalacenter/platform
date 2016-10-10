@@ -1,4 +1,8 @@
-# Joining the Platform
+# Joining the Platform [WIP]
+
+> {.note}
+> The following page is not complete and should not be reviewed. There
+> is a lot missing and its structure will change.
 
 When the Committee has incubated your project, the Process lead subscribes
 you to all the Platform services and you start benefiting from its tools
