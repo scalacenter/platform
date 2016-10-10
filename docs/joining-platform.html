@@ -47,7 +47,7 @@ is a lot missing and its structure will change.</p>
 </blockquote>
 <p>When the Committee has incubated your project, the Process lead subscribes
 you to all the Platform services and you start benefiting from its tools
-and infrastructure.</p>
+and infrastructure right away.</p>
 <p>The Scala Center strives to make this process as easy as possible,
 and let you focus on the truly hard tasks: building a community,
 tooling, growing your module, and fixing bugs. For that, we provide a
@@ -56,22 +56,36 @@ simple step-by-step tutorial to help you migrate.</p>
 <p>Our Drone servers provide quick development experience to module maintainers.
 With 48 cores and 64 gigabytes of memory, we ensure that PRs are built fast and that the
 turnaround is short.</p>
-<p>Setting up the CI is just one link away. Go to <a href="http://stats.lassie.io:8001">our Drone setup</a>,
-log in and enable your project. Then, push a <code class="hljs">drone.yml</code> file with the build logic
-and the CI will kick in. From the CI web interface you can add <a href="http://readme.drone.io/usage/secrets/">secrets</a>
+<p>Here are the steps for setting up the CI:</p>
+<ol>
+<li>Go to <a href="http://stats.lassie.io:8001">our Drone setup</a>.</li>
+<li>Log in with your GitHub credentials and turn on the CI in your module.</li>
+<li>Push a <code class="hljs">drone.yml</code> file with the build logic and see the CI kicking in.</li>
+</ol>
+<p>If you're using Travis, follow <a href="http://github.com/scalaplatform/">this guide</a> to find out
+the most straightforward way to translate the configuration logic.</p>
+<blockquote class="warning">
+<p>From the CI web interface you can add <a href="http://readme.drone.io/usage/secrets/">secrets</a>
 to store sensitive data (e.g. passwords).</p>
+</blockquote>
 <h2 id="default-module-template" class="a_section" data-magellan-target="default-module-template">Default module template<a class="a_hlink" href="#default-module-template"></a></h2>
-<p>The <a href="https://github.com/scalaplatform">default module template</a> showcases the use of the Platform infrastructure.</p>
+<p>The <a href="https://github.com/scalaplatform">default module template</a> showcases the use of the Platform infrastructure.
+Check the commit history to get a feeling of the changes required to make it work.</p>
 <h2 id="sbt-release-plugin" class="a_section" data-magellan-target="sbt-release-plugin">SBT release plugin<a class="a_hlink" href="#sbt-release-plugin"></a></h2>
-<p>Releasing <em>reproducible</em> versions often is important. Developers and companies that
-need to migrate their code want to test your changes as soon as possible, and prepare
-for its future adoption.</p>
+<p>Our release process encourages &quot;release early, release often&quot; practices.
+Developers and companies using older versions want to migrate and test their code as soon
+as possible, and reproducible versions make it easier for them to adopt a new version.</p>
 <p>The <code class="hljs">platform-release</code> sbt plugin provides a default release pipeline that automates
 <em>MiMa</em> checks, tags management, GitHub release creation, jar upload. This default
 pipeline is key for the release of <em>NIGHTLY</em>s and <em>BETA</em>s.</p>
 <h2 id="release-bot" class="a_section" data-magellan-target="release-bot">Release bot<a class="a_hlink" href="#release-bot"></a></h2>
 <p>Once you have set up the CI and the sbt release plugin, the release bot builds, tests and
 releases your module every night, following <a href="policies.html#release">the release model explained in the process</a>.</p>
+<p>Remember that the release bot takes the latest changes in the <code class="hljs">plaform-release</code> branch and
+publishes them. Instead of using latest master, we prefer module maintainers manually push to
+<code class="hljs">platform-release</code> when they feel comfortable enough with the changes.
+Manual intervention is deliberate, it prevents breaking compatibility and allows maintainers to
+to handle versioning as they prefer.</p>
 
               </main>
               
