@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="no-js" lang="eng" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform policies</title>
+    <link rel="stylesheet" href="_theme/css/foundation.min.css">
+    <link rel="stylesheet" href="_theme/css/app.css">
+    <link rel="stylesheet" href="_theme/css/custom.css">
+     <link rel="stylesheet" href="_theme/css/highlight.js/styles/github-gist.css">
+  </head>
+  <body>
+    <div class="expanded row">
+      <div class="small-12 medium-12 large-12 columns align-self-top">
+        <div class="row">
+          
+          <header class="large-12 columns align-self-top a_header">
+            <div class="row">
+              <div class="large-12 columns a_limited top-bar">
+                <div class="top-bar-left">
+                  <p>The Scala Platform</p>
+
+                </div>
+                <div class="top-bar-right align-right row">
+                  
+                  
+                    <form action="site-search.html" method="get" class="align-right a_search">
+                      <input name="q" type="search"  placeholder="Search
+" >
+                      <button><img alt="&#1F50D;" src="_theme/images/images/search.svg" /></button>
+                    </form>
+                  
+                </div>
+              </div>
+            </div>
+          </header>
+          
+          <div class="small-12 medium-12 large-12 columns align-self-top a_limited a_main">
+            <div class="row">
+              
+              <main class="columns large-order-2 sections" id="_sections">
+                <h1 id="platform-policies" class="a_section" data-magellan-target="platform-policies">Platform policies<a class="a_hlink" href="#platform-policies"></a></h1>
+<p>The Platform process establishes some policies to deal with the organization
+of the modules.</p>
+<p>These policies have a major goal: they enable companies and industrial
+users to contribute back to the modules, and help into its maintenance.
+In exchange, the Platform provides serious stability guarantees to users and
+basic building blocks to evolve friendly communities around the modules.</p>
+<p>These building blocks consist of a predictable development workflow and
+clear processes to maintain and contribute to the modules. Altogether, they
+help maintainers and contributors, and encourage users to depend on the Platform in
+production. The seamless interaction between these three parties is key for
+the success of the Scala Platform.</p>
+<h2 id="policies-on-release-and-stability" class="a_section" data-magellan-target="policies-on-release-and-stability">Policies on release and stability<a class="a_hlink" href="#policies-on-release-and-stability"></a></h2>
+<p><a name="release"></a></p>
+<ol>
+<li>
+<p>The Platform is a published artifact of all the selected libraries that meet
+the compatibility criteria.</p>
+</li>
+<li>
+<p>The Platform follows a <strong>twelve-week</strong> (3 months) release train model.</p>
+<blockquote class="note">
+<p>A release train model consists in a regular pre-planned schedule of software
+releases. This release model was introduced by the browsers to achieve stability
+without stagnation. When merged changes hit master, nightly releases are published
+for developers. After six months, a beta release is published from the state of
+master, and it’s promoted to become the stable release.</p>
+</blockquote>
+<ol>
+<li>
+<p>The branch <code class="hljs">platform-release</code> is used to cut releases.</p>
+</li>
+<li>
+<p>Modules must use semantic versioning.</p>
+</li>
+<li>
+<p>Minor versions are released every 12 weeks.</p>
+</li>
+<li>
+<p>Modules can only break source and backwards compatibility in
+major releases, that happen: (a) every 18 months (1 year and 6 months),
+or (b) when new Scala versions are released.</p>
+</li>
+<li>
+<p>Unmaintained libraries are removed only in major releases.</p>
+</li>
+<li>
+<p>Nightly versions of the modules are released every night (if changes).</p>
+</li>
+<li>
+<p>Every twelve weeks, the latest nightly is promoted to the beta
+version and the latest beta to stable.</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-markdown">Latest nightly <span class="hljs-emphasis">*1.0.0-NIGHTLY-12-03-2016*</span> becomes <span class="hljs-emphasis">*1.0.0-b2*</span>.
+Latest beta <span class="hljs-emphasis">*1.0.0-b1*</span> becomes the stable <span class="hljs-emphasis">*1.0.0*</span>.
+</code></pre>
+</div>
+</li>
+<li>
+<p>If bugs are found in beta versions, maintainers can provide exceptional
+artifacts before that beta is promoted to stable.</p>
+</li>
+<li>
+<p>Modules with no changes in <code class="hljs">platform-release</code> are not
+released again. Previous versions are used.</p>
+</li>
+<li>
+<p>Exceptional patch releases may be cut if important bugs are
+found in stable versions.</p>
+</li>
+<li>
+<p>Bug fixes are accepted and released for the major Platform
+releases in the last 24 months.</p>
+</li>
+</ol>
+</li>
+<li>
+<p>The Platform must be cross-compiled with the latest two major
+Scala releases. <em>E.g.</em> If 2.12 is the current Scala version, 2.12
+and 2.11.</p>
+</li>
+<li>
+<p>Four different release pipelines:</p>
+<ul>
+<li><strong>Nightly</strong> releases are used for early adopters and developers.</li>
+<li><strong>Beta</strong> releases are used for potential users that want to test changes
+and behaviour.</li>
+<li><strong>Stable</strong> releases are ready for production use.</li>
+<li><strong>Bug fixes for stable versions</strong>. Necessary when critical bugs
+are found. Some fixes may break binary and
+source compatibility. The release of such fixes is up to
+modules’ maintainers.</li>
+</ul>
+</li>
+<li>
+<p>Public methods marked experimental belong to the Experimental API.
+They do not ensure backwards compatibility and may be removed
+without further notice.</p>
+</li>
+<li>
+<p><em>MiMa</em> ensures binary compatibility. Maintainers must take care that
+changes forwarded to the branch <em>platform-release</em> meet the
+compatibility criteria.</p>
+</li>
+</ol>
+<h2 id="policies-on-committers" class="a_section" data-magellan-target="policies-on-committers">Policies on committers<a class="a_hlink" href="#policies-on-committers"></a></h2>
+<ol>
+<li>Authors of Scala Platform proposals become committers.</li>
+<li>Committers are contributors with write-access to a module repository.</li>
+<li>Future committers are selected by current committers on a vote.</li>
+<li>Committers are contributors to a module and participate into the development
+of the module from time to time.</li>
+<li>Committers are charged with the short-term evolution of a module.</li>
+<li>All the committers need to abide by the <a href="https://docs.google.com/document/d/1B57XIj2zIh7xx1syKvS3qfC4L8usd0pI0yTSrJMfuew/edit#"><em>Scala Center Code of
+Conduct</em></a>
+and follow the release process.</li>
+</ol>
+<h2 id="policies-on-contributors" class="a_section" data-magellan-target="policies-on-contributors">Policies on contributors<a class="a_hlink" href="#policies-on-contributors"></a></h2>
+<ol>
+<li>The platform is maintained and developed by the community, therefore
+contributions from Scala developers are encouraged!</li>
+<li>Committers agree to review and, if appropriate, incorporate contributions in
+a timely fashion.</li>
+<li>Contributors are eligible to become committers (on a vote) after three
+months of work and involvement in the module.</li>
+</ol>
+
+              </main>
+              
+              
+                <div data-sticky-container class="small-12 medium-12 large-2 large-order-1 columns a_sitenav_container">
+                  <nav class="a_sitenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                    
+                  <ul>
+                     
+  <li >
+    
+      <a href="platform.html">The Process</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="proposal-submission.html">Submit a proposal</a>
+    
+    
+  </li>
+  
+  <li  class="a_thispage" >
+    
+      <a href="policies.html">Platform policies</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="joining-platform.html">Joining the Platform</a>
+    
+    
+  </li>
+ 
+                  </ul>
+                  </nav>
+                </div>
+              
+              
+              
+                <div class="small-12 medium-12 large-2 large-order-3 columns a_show-for-xlarge" data-sticky-container>
+                  <nav class="a_pagenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                     <header><p>On This Page</p>
+</header> 
+                    <ul class="vertical menu" data-magellan>
+                       
+  <li>
+    
+       <a href="#platform-policies">Platform policies</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#policies-on-release-and-stability">Policies on release and stability</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#policies-on-committers">Policies on committers</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#policies-on-contributors">Policies on contributors</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+ 
+                    </ul>
+                  </nav>
+                </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer class="small-12 medium-12 large-12 columns align-self-bottom a_footer">
+        <div class="row">
+          <div class="small-12 medium-12 large-12 columns top-bar">
+            <div class="top-bar-left">
+              <p>© Scala Center 2016</p>
+
+            </div>
+            <div class="top-bar-right">
+              <p>Generated with <a href="https://github.com/szeiger/ornate">Ornate</a>.</p>
+
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <script src="_theme/js/jquery.min.js"></script>
+    <script src="_theme/js/what-input.min.js"></script>
+    <script src="_theme/js/foundation.min.js"></script>
+    
+    <script src="_theme/js/app.js"></script>
+    
+  </body>
+</html>

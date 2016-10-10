@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="no-js" lang="eng" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Process</title>
+    <link rel="stylesheet" href="_theme/css/foundation.min.css">
+    <link rel="stylesheet" href="_theme/css/app.css">
+    <link rel="stylesheet" href="_theme/css/custom.css">
+
+  </head>
+  <body>
+    <div class="expanded row">
+      <div class="small-12 medium-12 large-12 columns align-self-top">
+        <div class="row">
+          
+          <header class="large-12 columns align-self-top a_header">
+            <div class="row">
+              <div class="large-12 columns a_limited top-bar">
+                <div class="top-bar-left">
+                  <p>The Scala Platform</p>
+
+                </div>
+                <div class="top-bar-right align-right row">
+                  
+                  
+                    <form action="site-search.html" method="get" class="align-right a_search">
+                      <input name="q" type="search"  placeholder="Search
+" >
+                      <button><img alt="&#1F50D;" src="_theme/images/images/search.svg" /></button>
+                    </form>
+                  
+                </div>
+              </div>
+            </div>
+          </header>
+          
+          <div class="small-12 medium-12 large-12 columns align-self-top a_limited a_main">
+            <div class="row">
+              
+              <main class="columns large-order-2 sections" id="_sections">
+                <h1 id="the-process" class="a_section" data-magellan-target="the-process">The Process<a class="a_hlink" href="#the-process"></a></h1>
+<blockquote class="note">
+<p>The following document is a draft and it's open for discussion. For
+more information, check the <a href="https://internals.scala-lang.org/t/early-release-of-the-scala-platform-process/95">public announcement of its pre-release</a>.</p>
+</blockquote>
+<p>The Scala Platform Process provides organizational support for a broad
+range of open source software projects. The mission of the process is to
+provide high-quality software for the good of the Scala community.
+Through a collaborative and meritocratic development process, the
+Platform delivers a <strong>stable</strong> collection of libraries with widespread
+use and a low barrier entry for beginners and intermediate users, ready
+for serious production use.</p>
+<p>The following specification is inspired by the
+<a href="http://incubator.apache.org/index.html">Apache process</a> and the
+<a href="https://blog.rust-lang.org/2014/12/12/1.0-Timeline.html">Rust release model</a>.
+Other initiatives like the <a href="https://www.haskell.org/platform/">Haskell Platform</a> and the
+<a href="http://www.boost.org/">Boost library</a> are also prominent inspiration sources. The resulting
+document has been drafted by the Scala Center and improved by the Platform
+Committee members, that have helped shape the essence of the process
+with their curated feedback and suggestions.</p>
+<h2 id="the-scala-platform" class="a_section" data-magellan-target="the-scala-platform">The Scala Platform<a class="a_hlink" href="#the-scala-platform"></a></h2>
+<p>The Scala Platform is a stable collection of libraries with widespread
+use and a low barrier entry for beginners and intermediate users. Its
+goal is providing a smooth and productive programming experience right
+from the start, while ensuring every module’s stability and production
+readiness.</p>
+<p>The Platform consists of several independent modules that solve specific
+problems. Committers and developers of each module work together to
+develop and maintain them. Committers also review contributions from any
+Scala developer. For encouraging more contributions from companies and
+industrial users, modules have clear development workflows, that are
+both predictable and easy to follow. Both together, the Scala community
+and industrial users, set the overall direction of the Platform.</p>
+<h3 id="expectations" class="a_section" data-magellan-target="expectations">Expectations<a class="a_hlink" href="#expectations"></a></h3>
+<p>The Scala Platform process sets concrete expectations for the stability
+and compatibility of the selected modules. Although the specified
+policies have strict compatibility requirements, it is impossible to
+guarantee that no future change will break any program.</p>
+<p>The Scala Platform process provides concrete policies regarding:</p>
+<ol>
+<li><strong>Security</strong>. A security issue in the specification or
+implementation may come to light whose resolution requires
+breaking compatibility. Modules maintainers’ reserve the right to
+address such security issues.</li>
+<li><strong>Experimental behavior</strong>. There are some aspects of the modules
+that may be undefined or experimental. Programs that depend on
+such unspecified behavior may break in future releases.</li>
+<li><strong>Specification errors</strong>. If it becomes necessary to address an
+inconsistency or incompleteness in the specification, resolving
+the issue could affect the meaning of existing programs. Modules
+maintainers’ reserve the right to address such issues, including
+updating the implementations. Except for security issues, no
+incompatible changes to the specification would be made.</li>
+<li><strong>Bugs</strong>. If a compiler or library has a bug that violates the
+specification, a program that depends on the buggy behavior may
+break if the bug is fixed. Modules maintainers’ reserve the right
+to fix such bugs.</li>
+</ol>
+<p>Needless to say that modules maintainers’ will update specification and
+libraries to avoid affecting existing code, whenever it’s possible.
+These same considerations apply to successive point releases and are
+later explained in the release and stability policies. Aside from
+compatibility, no guarantee can be made about the performance of a given
+program between different Platform releases.</p>
+<h2 id="committee-members" class="a_section" data-magellan-target="committee-members">Committee Members<a class="a_hlink" href="#committee-members"></a></h2>
+<p>The Scala Platform Committee is exclusively composed of members of the Scala community.
+Through a democratic process, they set the direction of the Platform, review
+proposals from the community, and decide on the modules that join the Platform.</p>
+<p>The members of the Committee are dedicated developers with a long record of
+contributions to the Scala ecosystem, the development of the language and major
+open-source projects.</p>
+<p>The Committee members are:</p>
+<ul>
+<li>Dale Wijnand</li>
+<li>Aleksandar Prokopec</li>
+<li>Lars Hupel</li>
+<li>Marius Eriksen</li>
+<li>Bill Venners</li>
+<li>Konrad Malawski</li>
+<li>Pathikrit Bhowmick</li>
+<li>Alexander Podkhalyuzin</li>
+<li>Mathias Doenitz</li>
+<li>Rex Kerr</li>
+<li>David Hall</li>
+</ul>
+
+              </main>
+              
+              
+                <div data-sticky-container class="small-12 medium-12 large-2 large-order-1 columns a_sitenav_container">
+                  <nav class="a_sitenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                    
+                  <ul>
+                     
+  <li  class="a_thispage" >
+    
+      <a href="platform.html">The Process</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="proposal-submission.html">Submit a proposal</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="policies.html">Platform policies</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="joining-platform.html">Joining the Platform</a>
+    
+    
+  </li>
+ 
+                  </ul>
+                  </nav>
+                </div>
+              
+              
+              
+                <div class="small-12 medium-12 large-2 large-order-3 columns a_show-for-xlarge" data-sticky-container>
+                  <nav class="a_pagenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                     <header><p>On This Page</p>
+</header> 
+                    <ul class="vertical menu" data-magellan>
+                       
+  <li>
+    
+       <a href="#the-process">The Process</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#the-scala-platform">The Scala Platform</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#expectations">Expectations</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  
+  <li>
+    
+       <a href="#committee-members">Committee Members</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+ 
+                    </ul>
+                  </nav>
+                </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer class="small-12 medium-12 large-12 columns align-self-bottom a_footer">
+        <div class="row">
+          <div class="small-12 medium-12 large-12 columns top-bar">
+            <div class="top-bar-left">
+              <p>© Scala Center 2016</p>
+
+            </div>
+            <div class="top-bar-right">
+              <p>Generated with <a href="https://github.com/szeiger/ornate">Ornate</a>.</p>
+
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <script src="_theme/js/jquery.min.js"></script>
+    <script src="_theme/js/what-input.min.js"></script>
+    <script src="_theme/js/foundation.min.js"></script>
+    
+    <script src="_theme/js/app.js"></script>
+    
+  </body>
+</html>
