@@ -97,4 +97,4 @@ The Committee members are:
 
 Along with the Committee members, the SPP Process lead manages the process,
 schedules meetings and helps bootstrap the Platform. The current Process Lead
-is Jorge Vicente Cantero ([@jvican](https://github.com/jvican))
+is Jorge Vicente Cantero ([@jvican](https://github.com/jvican)).
