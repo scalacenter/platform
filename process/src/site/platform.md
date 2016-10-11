@@ -79,18 +79,22 @@ proposals from the community, and decide on the modules that join the Platform.
 
 The members of the Committee are dedicated developers with a long record of
 contributions to the Scala ecosystem, the development of the language and major
-open-source projects.
+open-source projects. The Committee is elected by the Scala Center.
 
 The Committee members are:
 
--   Dale Wijnand
--   Aleksandar Prokopec
--   Lars Hupel
--   Marius Eriksen
--   Bill Venners
--   Konrad Malawski
--   Pathikrit Bhowmick
--   Alexander Podkhalyuzin
--   Mathias Doenitz
--   Rex Kerr
--   David Hall
+-   Dale Wijnand ([@dwijnand](https://github.com/dwijnand))
+-   Aleksandar Prokopec ([@axel22](https://github.com/axel22))
+-   Lars Hupel ([@larsrh](https://github.com/larsrh))
+-   Marius Eriksen ([@mariusae](https://github.com/mariusae))
+-   Bill Venners ([@bvenners](https://github.com/bvenners))
+-   Konrad Malawski ([@ktoso](https://github.com/ktoso))
+-   Pathikrit Bhowmick ([@pathikrit](https://github.com/pathikrit))
+-   Alexander Podkhalyuzin ([@Alefas](https://github.com/Alefas))
+-   Mathias Doenitz ([@sirthias](https://github.com/sirthias))
+-   Rex Kerr ([@Ichoran](https://github.com/Ichoran))
+-   David Hall ([@dlwh](https://github.com/dlwh))
+
+Along with the Committee members, the SPP Process lead manages the process,
+schedules meetings and helps bootstrap the Platform. The current Process Lead
+is Jorge Vicente Cantero ([@jvican](https://github.com/jvican))
