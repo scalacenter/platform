@@ -37,42 +37,6 @@ If you want to submit a library proposal, follow these steps:
     the second highest-ranked project is incubated instead.
 8.  Modules are withdrawn from the Platform when they fall unmaintained.
 
-## Benefits of becoming a module
-
-Aside from better visibility in the community, library authors and
-maintainers benefit from an array of services provided by the Scala
-Center:
-
-1.  Powerful build machines. An alternative to Travis, with more memory
-    and CPU resources to ensure a fast development cycle.
-2.  Organizational help:
-
-    *  Code of Conduct;
-    *  Process to elect committers;
-    *  Process to evolve the modules of the platform;
-    *  Ticket management, PR & core reviews policies;
-    *  Scala documentation website (public scaladoc);
-    *  Good-looking website template and infrastructure to write and
-        update the docs;
-    *  Easy way to to showcase library's use via reproducible code snippets;
-        and,
-    *  CLA bots.
-3.  Automatic release of modules.
-
-    *  Maintainers of module have private access to a server.
-    *  The server contains all the infrastructure to cron jobs,
-        automate the release of their modules and release daily with
-        a bot.
-    *  Private access to maintainers’ GPG keys is ensured.
-    *  A bot checks binary compatibility with MiMa. Advanced binary
-        compatibility checks (added and removed methods) may come in
-        the future.
-    *  Support for source compatibility might be provided in
-        the future.
-
-The above services focus on improving the development experience and
-allowing contributors to focus on the remarkable parts of their task.
-
 ## What happens after?
 
 After getting the approval from the Committee and passing the incubation
