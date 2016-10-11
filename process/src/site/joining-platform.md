@@ -5,11 +5,11 @@
 > is a lot missing and its structure will change.
 
 When the Committee has incubated your project, the Process lead subscribes
-you to all the Platform services and you start benefiting from its tools
-and infrastructure right away.
+you to all the Platform services. You can then benefit from Scala Center's
+tools and infrastructure.
 
 The Scala Center strives to make this process as easy as possible,
-and let you focus on the truly hard tasks: building a community,
+and lets you focus on the truly hard tasks: building a community,
 tooling, growing your module, and fixing bugs. For that, we provide a
 simple step-by-step tutorial to help you migrate.
 
@@ -44,8 +44,10 @@ Developers and companies using older versions want to migrate and test their cod
 as possible, and reproducible versions make it easier for them to adopt a new version.
 
 The `platform-release` sbt plugin provides a default release pipeline that automates
-*MiMa* checks, tags management, GitHub release creation, jar upload. This default
-pipeline is key for the release of *NIGHTLY*s and *BETA*s.
+*MiMa* checks, tags management, GitHub release creation, jar and release notes upload,
+and synchronization with our documentation website. This default pipeline is key for the
+release of *NIGHTLY*s and *BETA*s and automates the common bits that every library
+release requires.
 
 ## Release bot
 

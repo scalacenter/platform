@@ -1,6 +1,6 @@
 # Platform policies
 
-The Platform process establishes some policies to deal with the government and
+The Platform process establishes some policies to deal with the governance and
 organization of the modules.
 
 These policies have a major goal: they enable companies and industrial

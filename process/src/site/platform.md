@@ -34,8 +34,8 @@ problems. Committers and developers of each module work together to
 develop and maintain them. Committers also review contributions from any
 Scala developer. For encouraging more contributions from companies and
 industrial users, modules have clear development workflows, that are
-both predictable and easy to follow. Both together, the Scala community
-and industrial users, set the overall direction of the Platform.
+both predictable and easy to follow. The Scala community sets the overall
+direction of the Platform.
 
 ### Expectations
 

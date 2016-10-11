@@ -7,7 +7,6 @@
     <title>Joining the Platform [WIP]</title>
     <link rel="stylesheet" href="_theme/css/foundation.min.css">
     <link rel="stylesheet" href="_theme/css/app.css">
-    <link rel="stylesheet" href="_theme/css/custom.css">
      <link rel="stylesheet" href="_theme/css/highlight.js/styles/github-gist.css"> 
   </head>
   <body>
@@ -46,10 +45,10 @@
 is a lot missing and its structure will change.</p>
 </blockquote>
 <p>When the Committee has incubated your project, the Process lead subscribes
-you to all the Platform services and you start benefiting from its tools
-and infrastructure right away.</p>
+you to all the Platform services. You can then benefit from Scala Center's
+tools and infrastructure.</p>
 <p>The Scala Center strives to make this process as easy as possible,
-and let you focus on the truly hard tasks: building a community,
+and lets you focus on the truly hard tasks: building a community,
 tooling, growing your module, and fixing bugs. For that, we provide a
 simple step-by-step tutorial to help you migrate.</p>
 <h2 id="continuous-integration-servers" class="a_section" data-magellan-target="continuous-integration-servers">Continuous Integration servers<a class="a_hlink" href="#continuous-integration-servers"></a></h2>
@@ -76,8 +75,10 @@ Check the commit history to get a feeling of the changes required to make it wor
 Developers and companies using older versions want to migrate and test their code as soon
 as possible, and reproducible versions make it easier for them to adopt a new version.</p>
 <p>The <code class="hljs">platform-release</code> sbt plugin provides a default release pipeline that automates
-<em>MiMa</em> checks, tags management, GitHub release creation, jar upload. This default
-pipeline is key for the release of <em>NIGHTLY</em>s and <em>BETA</em>s.</p>
+<em>MiMa</em> checks, tags management, GitHub release creation, jar and release notes upload,
+and synchronization with our documentation website. This default pipeline is key for the
+release of <em>NIGHTLY</em>s and <em>BETA</em>s and automates the common bits that every library
+release requires.</p>
 <h2 id="release-bot" class="a_section" data-magellan-target="release-bot">Release bot<a class="a_hlink" href="#release-bot"></a></h2>
 <p>Once you have set up the CI and the sbt release plugin, the release bot builds, tests and
 releases your module every night, following <a href="policies.html#release">the release model explained in the process</a>.</p>

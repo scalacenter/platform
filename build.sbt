@@ -72,15 +72,25 @@ lazy val platform = project
   .in(file("."))
   .settings(allSettings)
   .settings(noPublish)
-  .aggregate(platformProcessSpec)
-  .dependsOn(platformProcessSpec)
+  .aggregate(platformProcess)
+  .dependsOn(platformProcess)
 
-val circeVersion = "0.5.1"
-lazy val platformProcessSpec = project
+lazy val platformProcess: Project = project
   .in(file("process"))
-  .settings(allSettings)
   .enablePlugins(OrnatePlugin)
+  .settings(allSettings)
   .settings(
     name := "platform-process",
     ornateTargetDir := Some(file("docs/"))
   )
+
+lazy val customOrnate = taskKey[Unit]("customOrnate")
+customOrnate in platformProcess := {
+  (ornate in platformProcess).value
+  // Work around Ornate limitation to add custom CSS to default theme
+  val targetDir = (ornateTargetDir in platformProcess).value.get
+  val cssFolder = targetDir / "_theme" / "css"
+  val customCss = cssFolder / "custom.css"
+  val mainCss = cssFolder / "app.css"
+  IO.append(mainCss, IO.read(customCss))
+}
