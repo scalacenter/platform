@@ -1,8 +1,7 @@
-# Joining the Platform [WIP]
+# Joining the Platform
 
 > {.note}
-> The following page is not complete and should not be reviewed. There
-> is a lot missing and its structure will change.
+> The following page is not complete yet.
 
 When the Committee has incubated your project, the Process lead subscribes
 you to all the Platform services. You can then benefit from Scala Center's
