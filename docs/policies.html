@@ -41,17 +41,16 @@
               
               <main class="columns large-order-2 sections" id="_sections">
                 <h1 id="platform-policies" class="a_section" data-magellan-target="platform-policies">Platform policies<a class="a_hlink" href="#platform-policies"></a></h1>
-<p>The Platform process establishes some policies to deal with the organization
-of the modules.</p>
+<p>The Platform process establishes some policies to deal with the government and
+organization of the modules.</p>
 <p>These policies have a major goal: they enable companies and industrial
 users to contribute back to the modules, and help into its maintenance.
 In exchange, the Platform provides serious stability guarantees to users and
-basic building blocks to evolve friendly communities around the modules.</p>
-<p>These building blocks consist of a predictable development workflow and
-clear processes to maintain and contribute to the modules. Altogether, they
-help maintainers and contributors, and encourage users to depend on the Platform in
-production. The seamless interaction between these three parties is key for
-the success of the Scala Platform.</p>
+basic building blocks to evolve friendly communities in the Scala ecosystem.</p>
+<p>These building blocks are two: a predictable development workflow and a
+clear contract to maintain and contribute to the modules. Altogether, they
+help maintainers and contributors, and encourage users to depend on the Platform
+in production systems.</p>
 <h2 id="policies-on-release-and-stability" class="a_section" data-magellan-target="policies-on-release-and-stability">Policies on release and stability<a class="a_hlink" href="#policies-on-release-and-stability"></a></h2>
 <p><a name="release"></a></p>
 <ol>
@@ -140,32 +139,138 @@ They do not ensure backwards compatibility and may be removed
 without further notice.</p>
 </li>
 <li>
-<p><em>MiMa</em> ensures binary compatibility. Maintainers must take care that
-changes forwarded to the branch <em>platform-release</em> meet the
+<p><em>MiMa</em> ensures binary compatibility. However, maintainers shall take
+care that changes forwarded to the branch <em>platform-release</em> meet the
 compatibility criteria.</p>
 </li>
 </ol>
-<h2 id="policies-on-committers" class="a_section" data-magellan-target="policies-on-committers">Policies on committers<a class="a_hlink" href="#policies-on-committers"></a></h2>
+<h2 id="policies-on-committers-and-contributors" class="a_section" data-magellan-target="policies-on-committers-and-contributors">Policies on committers and contributors<a class="a_hlink" href="#policies-on-committers-and-contributors"></a></h2>
+<p>The Platform process uses a modified version of C4, a contract designed for
+open-source projects and communities by <a href="https://en.wikipedia.org/wiki/Pieter_Hintjens">Pieter Hintjens</a>.
+The modifications affect licensing and adds specific Scala Platform requirements.</p>
+<p>Being used at successful communities like ZeroMQ, C4 has proven its value
+when building thriving open-source communities capable of producing high-quality
+software. In the best spirit of the Scala Platform process, the following contract
+hopes to reproduce their success in the Scala community.</p>
+<blockquote>
+<p>The Collective Code Construction Contract (C4) is an evolution of the github.com <a href="https://help.github.com/articles/about-pull-requests/">Fork + Pull Model</a>, aimed at providing an optimal collaboration model for open-source software projects. This is revision 3 of the C4 specification, tailored specifically for the Scala Platform process.</p>
+<h3 id="license" class="a_section" data-magellan-target="license">License<a class="a_hlink" href="#license"></a></h3>
+<p>Copyright (c) 2016-2017 Jorge Vicente Cantero.</p>
+<p>Copyright (c) 2009-2016 Pieter Hintjens.</p>
+<p>This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.</p>
+<p>This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
+<p>You should have received a copy of the GNU General Public License along with this program; if not, see <a href="http://www.gnu.org/licenses">http://www.gnu.org/licenses</a>.</p>
+<h3 id="abstract" class="a_section" data-magellan-target="abstract">Abstract<a class="a_hlink" href="#abstract"></a></h3>
+<p>C4 provides a standard process for contributing, evaluating and discussing improvements on software projects. It defines specific technical requirements for projects like a style guide, unit tests, <code class="hljs">git</code> and similar platforms. It also establishes different personas for projects, with clear and distinct duties. C4 specifies a process for documenting and discussing issues including seeking consensus and clear descriptions, use of &quot;pull requests&quot; and systematic reviews.</p>
+<h3 id="language" class="a_section" data-magellan-target="language">Language<a class="a_hlink" href="#language"></a></h3>
+<p>The key words &quot;MUST&quot;, &quot;MUST NOT&quot;, &quot;REQUIRED&quot;, &quot;SHALL&quot;, &quot;SHALL NOT&quot;, &quot;SHOULD&quot;, &quot;SHOULD NOT&quot;, &quot;RECOMMENDED&quot;, &quot;MAY&quot;, and &quot;OPTIONAL&quot; in this document are to be interpreted as described in <a href="http://tools.ietf.org/html/rfc2119">RFC 2119</a>.</p>
+<h3 id="goals" class="a_section" data-magellan-target="goals">1. Goals<a class="a_hlink" href="#goals"></a></h3>
+<p>C4 is meant to provide a reusable optimal collaboration model for open source software projects. It has these specific goals:</p>
 <ol>
-<li>Authors of Scala Platform proposals become committers.</li>
-<li>Committers are contributors with write-access to a module repository.</li>
-<li>Future committers are selected by current committers on a vote.</li>
-<li>Committers are contributors to a module and participate into the development
-of the module from time to time.</li>
-<li>Committers are charged with the short-term evolution of a module.</li>
-<li>All the committers need to abide by the <a href="https://docs.google.com/document/d/1B57XIj2zIh7xx1syKvS3qfC4L8usd0pI0yTSrJMfuew/edit#"><em>Scala Center Code of
-Conduct</em></a>
-and follow the release process.</li>
+<li>To maximize the scale and diversity of the community around a project, by reducing the friction for new Contributors and creating a scaled participation model with strong positive feedbacks;</li>
+<li>To relieve dependencies on key individuals by separating different skill sets so that there is a larger pool of competence in any required domain;</li>
+<li>To allow the project to develop faster and more accurately, by increasing the diversity of the decision making process;</li>
+<li>To support the natural life cycle of project versions from experimental through to stable, by allowing safe experimentation, rapid failure, and isolation of stable code;</li>
+<li>To reduce the internal complexity of project repositories, thus making it easier for Contributors to participate and reducing the scope for error;</li>
+<li>To enforce collective ownership of the project, which increases economic incentive to Contributors and reduces the risk of hijack by hostile entities.</li>
 </ol>
-<h2 id="policies-on-contributors" class="a_section" data-magellan-target="policies-on-contributors">Policies on contributors<a class="a_hlink" href="#policies-on-contributors"></a></h2>
+<h3 id="design" class="a_section" data-magellan-target="design">2. Design<a class="a_hlink" href="#design"></a></h3>
+<h4 id="preliminaries" class="a_section" data-magellan-target="preliminaries">2.1. Preliminaries<a class="a_hlink" href="#preliminaries"></a></h4>
 <ol>
-<li>The platform is maintained and developed by the community, therefore
-contributions from Scala developers are encouraged!</li>
-<li>Committers agree to review and, if appropriate, incorporate contributions in
-a timely fashion.</li>
-<li>Contributors are eligible to become committers (on a vote) after three
-months of work and involvement in the module.</li>
+<li>The project SHALL use the git distributed revision control system.</li>
+<li>The project SHALL be hosted on github.com or equivalent, herein called the &quot;Platform Host&quot;.</li>
+<li>The project SHALL use the Platform Host issue tracker.</li>
+<li>The project SHOULD have clearly documented guidelines for code style.</li>
+<li>A &quot;Contributor&quot; is a person who wishes to provide a patch, being a set of commits that solve some clearly identified problem.</li>
+<li>A &quot;Maintainer&quot; is a person who merges patches to the project. Maintainers are not developers; their job is to enforce process.</li>
+<li>Contributors SHALL NOT have commit access to the repository unless they are also Maintainers.</li>
+<li>Maintainers SHALL have commit access to the repository.</li>
+<li>Everyone, without distinction or discrimination, SHALL have an equal right to become a Contributor under the terms of this contract.</li>
 </ol>
+<h4 id="licensing-and-ownership" class="a_section" data-magellan-target="licensing-and-ownership">2.2. Licensing and Ownership<a class="a_hlink" href="#licensing-and-ownership"></a></h4>
+<ol>
+<li>A project that joins the Scala Platform SHOULD choose a license. Share-alike licenses such as the MPLv2 or LGPL are RECOMMENDED.</li>
+<li>All contributions to the project source code (&quot;patches&quot;) SHALL use the same license as the project.</li>
+<li>All patches are owned by their authors. There SHALL NOT be any copyright assignment process.</li>
+<li>Each Contributor SHALL be responsible for identifying themselves in the project Contributor list.</li>
+</ol>
+<h4 id="patch-requirements" class="a_section" data-magellan-target="patch-requirements">2.3. Patch Requirements<a class="a_hlink" href="#patch-requirements"></a></h4>
+<ol>
+<li>Maintainers and Contributors MUST have a Platform Host account and SHOULD use their real names or a well-known alias.</li>
+<li>A patch SHOULD be a minimal and accurate answer to exactly one identified and agreed problem.</li>
+<li>A patch MUST adhere to the code style guidelines of the project if these are defined.</li>
+<li>A patch MUST adhere to the &quot;Evolution of Public Contracts&quot; guidelines defined below.</li>
+<li>A patch SHALL NOT include non-trivial code from other projects unless the Contributor is the original author of that code.</li>
+<li>A patch MUST compile cleanly and pass project self-tests on at least the principle target platform.</li>
+<li>A patch commit message MUST contain information about the problem that is solving and how.</li>
+<li>A &quot;Correct Patch&quot; is one that satisfies the above requirements.</li>
+</ol>
+<h4 id="development-process" class="a_section" data-magellan-target="development-process">2.4. Development Process<a class="a_hlink" href="#development-process"></a></h4>
+<ol>
+<li>Developers involved in the evolution of the project MUST abide by the <a href="https://docs.google.com/document/d/1B57XIj2zIh7xx1syKvS3qfC4L8usd0pI0yTSrJMfuew/edit#"><em>Scala Center Code of Conduct</em></a>.</li>
+<li>Change on the project SHALL be governed by the pattern of accurately identifying problems and applying minimal, accurate solutions to these problems.</li>
+<li>To request changes, a user SHOULD log an issue on the project Platform Host issue tracker.</li>
+<li>The user or Contributor SHOULD write the issue by describing the problem they face or observe.</li>
+<li>The user or Contributor SHOULD seek consensus on the accuracy of their observation, and the value of solving the problem.</li>
+<li>Users SHALL NOT log feature requests, ideas, suggestions, or any solutions to problems that are not explicitly documented and provable.</li>
+<li>Thus, the release history of the project SHALL be a list of meaningful issues logged and solved.</li>
+<li>To work on an issue, a Contributor SHALL fork the project repository and then work on their forked repository.</li>
+<li>To submit a patch, a Contributor SHALL create a Platform Host pull request back to the project.</li>
+<li>A Contributor SHALL NOT commit changes directly to the project.</li>
+<li>If the Platform Host implements pull requests as issues, a Contributor MAY directly send a pull request without logging a separate issue.</li>
+<li>To discuss a patch, people MAY comment on the Platform Host pull request, on the commit, or elsewhere.</li>
+<li>To accept or reject a patch, a Maintainer SHALL use the Platform Host interface.</li>
+<li>Maintainers SHOULD NOT merge their own patches except in exceptional cases, such as non-responsiveness from other Maintainers for an extended period (more than 1-2 days).</li>
+<li>Maintainers SHALL NOT make value judgments on correct patches.</li>
+<li>Maintainers SHALL merge correct patches from other Contributors rapidly.</li>
+<li>Maintainers MAY merge incorrect patches from other Contributors with the goals of (a) ending fruitless discussions, (b) capturing toxic patches in the historical record, (c) engaging with the Contributor on improving their patch quality.</li>
+<li>The user who created an issue SHOULD close the issue after checking the patch is successful.</li>
+<li>Any Contributor who has value judgments on a patch SHOULD express these via their own patches.</li>
+<li>Maintainers SHOULD close user issues that are left open without action for an uncomfortable period of time.</li>
+<li>Any official release of the project must abide by the <a href="policies.html#release">Scala Platform release process</a>.</li>
+</ol>
+<h4 id="branches-and-releases" class="a_section" data-magellan-target="branches-and-releases">2.5. Branches and Releases<a class="a_hlink" href="#branches-and-releases"></a></h4>
+<ol>
+<li>The project SHALL have one branch (&quot;master&quot;) that always holds the latest in-progress version and SHOULD always build.</li>
+<li>The project SHALL NOT use topic branches for any reason. Personal forks MAY use topic branches.</li>
+<li>To make a stable release a Maintainer shall tag the repository. Stable releases SHALL always be released from the repository master.</li>
+</ol>
+<h4 id="evolution-of-public-contracts" class="a_section" data-magellan-target="evolution-of-public-contracts">2.6. Evolution of Public Contracts<a class="a_hlink" href="#evolution-of-public-contracts"></a></h4>
+<ol>
+<li>All Public Contracts (APIs or protocols) SHALL be documented.</li>
+<li>All Public Contracts SHOULD have space for extensibility and experimentation.</li>
+<li>A patch that modifies a stable Public Contract SHOULD not break existing applications unless there is overriding consensus on the value of doing this.</li>
+<li>A patch that introduces new features SHOULD do so using new names (a new contract).</li>
+<li>New contracts SHOULD be marked as &quot;draft&quot; until they are stable and used by real users.</li>
+<li>Old contracts SHOULD be deprecated in a systematic fashion by marking them as &quot;deprecated&quot; and replacing them with new contracts as needed.</li>
+<li>When sufficient time has passed, old deprecated contracts SHOULD be removed.</li>
+<li>Old names SHALL NOT be reused by new contracts.</li>
+</ol>
+<h4 id="project-administration" class="a_section" data-magellan-target="project-administration">2.7. Project Administration<a class="a_hlink" href="#project-administration"></a></h4>
+<ol>
+<li>The project founders SHALL act as Administrators to manage the set of project Maintainers.</li>
+<li>The Administrators SHALL ensure their own succession over time by promoting the most effective Maintainers.</li>
+<li>A new Contributor who makes correct patches, who clearly understands the project goals, and the process SHOULD be invited to become a Maintainer.</li>
+<li>Administrators SHOULD remove Maintainers who are inactive for an extended period of time, or who repeatedly fail to apply this process accurately.</li>
+<li>Administrators SHOULD block or ban &quot;bad actors&quot; who cause stress and pain to others in the project. This should be done after public discussion, with a chance for all parties to speak. A bad actor is someone who repeatedly ignores the rules and culture of the project, who is needlessly argumentative or hostile, or who is offensive, and who is unable to self-correct their behavior when asked to do so by others.</li>
+</ol>
+<h3 id="further-reading" class="a_section" data-magellan-target="further-reading">Further Reading<a class="a_hlink" href="#further-reading"></a></h3>
+<ul>
+<li>
+<p><a href="http://en.wikipedia.org/wiki/Chris_Argyris">Argyris' Models 1 and 2</a> - the goals of C4 are consistent with Argyris' Model 2.</p>
+</li>
+<li>
+<p><a href="http://en.wikipedia.org/wiki/Toyota_Kata">Toyota Kata</a> - covering the Improvement Kata (fixing problems one at a time) and the Coaching Kata (helping others to learn the Improvement Kata).</p>
+</li>
+</ul>
+<h3 id="implementations" class="a_section" data-magellan-target="implementations">Implementations<a class="a_hlink" href="#implementations"></a></h3>
+<ul>
+<li>The Scala Platform process uses the C4 process for all the modules of the Scala Platform.</li>
+<li>The <a href="http://zeromq.org">ZeroMQ community</a> uses the C4 process for many projects.</li>
+<li><a href="http://www.ossec.net/">OSSEC</a> <a href="https://ossec-docs.readthedocs.org/en/latest/development/oRFC/orfc-1.html">uses the C4 process</a>.</li>
+<li>The <a href="http://www.machinekit.io/">Machinekit</a> community <a href="http://www.machinekit.io/about/">uses the C4 process</a>.</li>
+</ul>
+</blockquote>
 
               </main>
               
@@ -178,6 +283,13 @@ months of work and involvement in the module.</li>
   <li >
     
       <a href="platform.html">The Process</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="benefits-becoming-module.html">Why become a module?</a>
     
     
   </li>
@@ -198,7 +310,7 @@ months of work and involvement in the module.</li>
   
   <li >
     
-      <a href="joining-platform.html">Joining the Platform</a>
+      <a href="joining-platform.html">Joining the Platform [WIP]</a>
     
     
   </li>
@@ -230,15 +342,110 @@ months of work and involvement in the module.</li>
   
   <li>
     
-       <a href="#policies-on-committers">Policies on committers</a> 
+       <a href="#policies-on-committers-and-contributors">Policies on committers and contributors</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#license">License</a> 
     
     
   </li>
   
   <li>
     
-       <a href="#policies-on-contributors">Policies on contributors</a> 
+       <a href="#abstract">Abstract</a> 
     
+    
+  </li>
+  
+  <li>
+    
+       <a href="#language">Language</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#goals">1. Goals</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#design">2. Design</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#preliminaries">2.1. Preliminaries</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#licensing-and-ownership">2.2. Licensing and Ownership</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#patch-requirements">2.3. Patch Requirements</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#development-process">2.4. Development Process</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#branches-and-releases">2.5. Branches and Releases</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#evolution-of-public-contracts">2.6. Evolution of Public Contracts</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#project-administration">2.7. Project Administration</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  
+  <li>
+    
+       <a href="#further-reading">Further Reading</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#implementations">Implementations</a> 
+    
+    
+  </li>
+  </ul>
     
   </li>
   </ul>
@@ -258,11 +465,10 @@ months of work and involvement in the module.</li>
         <div class="row">
           <div class="small-12 medium-12 large-12 columns top-bar">
             <div class="top-bar-left">
-              <p>© Scala Center 2016</p>
-
+              
             </div>
             <div class="top-bar-right">
-              <p>Generated with <a href="https://github.com/szeiger/ornate">Ornate</a>.</p>
+              <p>© Scala Center 2016</p>
 
             </div>
           </div>

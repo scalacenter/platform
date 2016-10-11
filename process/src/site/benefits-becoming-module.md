@@ -11,7 +11,7 @@ life.
     
 2.  Organizational help.
 
-    *  [Code of Conduct](asdf);
+    *  [Scala Center Code of Conduct](https://docs.google.com/document/d/1B57XIj2zIh7xx1syKvS3qfC4L8usd0pI0yTSrJMfuew/edit#);
     *  Process to elect maintainers, committers and evolve the modules;
     *  Policies on ticket management, PR & core reviews policies;
     *  Scala documentation website (public scaladoc);
