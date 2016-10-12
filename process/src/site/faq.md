@@ -1,6 +1,32 @@
 # FAQ (Frequent Asked Questions)
 
-If you have a question that it's not here, [send a PR](https://github.com/scalaplatform) or ask it in [Gitter](https://gitter.im).
+If you have a question that it's not here, [send a PR](https://github.com/scalaplatform) or ask in [Gitter](https://gitter.im).
+
+## About the process and the Platform
+
+#### How can I get involved?
+
+Here is what you can do:
+
+* Create a Scala Platform proposal;
+* Discuss and give feedback on current proposals in [Scala Internals](https://internals.scala-lang.org);
+* Contribute to any Platform module by:
+  * Adding features;
+  * Fixing bugs; or
+  * Improving documentation.
+  
+Choose one or more and help us improve the Scala ecosystem!
+
+#### Who can submit a Scala Platform proposal?
+
+*Anyone*. It doesn't matter if you are a Committee member, a library author or an open-source Scala developer.
+Just [follow the process](proposal-submission.md).
+
+#### I don't like bureaucracy, is the Scala Platform process easy to follow?
+
+The Scala Platform process has been designed to be simple and lightweight, even more than
+the [Scala Improvement Process](http://docs.scala-lang.org/sips/sip-submission.html). Quick
+turnaround times ensure that proposals are reviewed as soon as possible.
 
 ## Infrastructure
 
@@ -56,8 +82,9 @@ for broad and public use. It's about encouraging companies to contribute back to
 the software they use in production, and making the process easier for any party involved
 in its development.
 
-You should join the Platform if you believe in our ideas and want to see your project
-evolving over time. After all, collaborative effort is what moves humanity forward.
+You should join the Platform if you believe in these ideas and want to see your open-source
+project evolving over time, regardless of the help that the Scala Center provides. We all
+benefit from collaborative projects.
 
 ## Code of Conduct (CoC)
 
