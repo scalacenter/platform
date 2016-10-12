@@ -31,6 +31,11 @@ the most straightforward way to translate the configuration logic.
 > From the CI web interface you can add [secrets](http://readme.drone.io/usage/secrets/)
 > to store sensitive data (e.g. passwords).
 
+> {.note}
+> You don't like navigating UIs and testing your drone setup remotely? Install `drone-cli`
+> and test your build logic locally with faster turnaround times. Check the [official
+> guide](http://readme.drone.io/devs/cli/).
+
 ## Default module template
 
 The [default module template](https://github.com/scalaplatform) showcases the use of the Platform infrastructure.
