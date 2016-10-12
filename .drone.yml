@@ -2,3 +2,7 @@ build:
   image: 1science/sbt
   commands:
     - sbt buildProcess
+
+cache:
+  mount:
+    - $HOME/.ivy2
