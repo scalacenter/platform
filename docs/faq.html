@@ -63,6 +63,28 @@ bugs if they know that next week they can depend on the new version.</p>
 <p>Yes, you can keep it so long as you fulfill the same purposes. The important thing is
 not what infrastructure or CI you use, but the fact that you use it. Setting up
 our CI may give you some performance benefits, though it's up to you if you need them or not.</p>
+<h4 id="is-the-release-bot-using-platforms-sonatype-organization-for-releasing" class="a_section" data-magellan-target="is-the-release-bot-using-platforms-sonatype-organization-for-releasing">Is the release bot using Platform's Sonatype organization for releasing?<a class="a_hlink" href="#is-the-release-bot-using-platforms-sonatype-organization-for-releasing"></a></h4>
+<p>The release bot only publishes NIGHTLYs and BETAs with the Scala Platform sonatype
+credentials. For stable releases, we want to give credit to the original authors or
+community that contributed to the Platform. For that, we allow module maintainers to
+manually release stable releases under their own Sonatype namespace. The release bot
+will notify all the module maintainers one week ago before the release has to be cut.
+The platform JAR and artifact will depend on those versions.</p>
+<blockquote class="note">
+<p>If you prefer that we release stable releases, you can provide your Sonatype user
+and password as secrets in the CI, and the release bot will take care of the rest.</p>
+</blockquote>
+<h4 id="i-want-to-use-bintray-what-can-i-do" class="a_section" data-magellan-target="i-want-to-use-bintray-what-can-i-do">I want to use Bintray, what can I do?<a class="a_hlink" href="#i-want-to-use-bintray-what-can-i-do"></a></h4>
+<p>At this moment there's not support for Bintray. If several module maintainers ask for it,
+we can consider releasing to Bintray instead of Sonatype, but this features is not a first priority.</p>
+<h4 id="i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform" class="a_section" data-magellan-target="i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform">I have my own infrastructure and community, what's the point of joining the Scala Platform?<a class="a_hlink" href="#i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform"></a></h4>
+<p>Joining the Scala Platform is a declaration of intention. It's about creating a bigger
+community that ensures the long-term maintainance of high-quality Scala libraries
+for broad and public use. It's about encouraging companies to contribute back to
+the software they use in production, and making the process easier for any party involved
+in its development.</p>
+<p>You should join the Platform if you believe in our ideas and want to see your project
+evolving over time. After all, collaborative effort is what moves humanity forward.</p>
 <h2 id="code-of-conduct-coc" class="a_section" data-magellan-target="code-of-conduct-coc">Code of Conduct (CoC)<a class="a_hlink" href="#code-of-conduct-coc"></a></h2>
 <h4 id="why-shall-i-conform-to-scala-centers-coc" class="a_section" data-magellan-target="why-shall-i-conform-to-scala-centers-coc">Why shall I conform to Scala Center's CoC?<a class="a_hlink" href="#why-shall-i-conform-to-scala-centers-coc"></a></h4>
 <p>Contributing to the Platform should be a nice experience for any person. Online
@@ -171,6 +193,27 @@ any Scala Platform Committee member or module maintainers you want.</p>
   <li>
     
        <a href="#my-module-has-its-own-ci-can-i-keep-it">My module has its own CI, can I keep it?</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#is-the-release-bot-using-platforms-sonatype-organization-for-releasing">Is the release bot using Platform&#x27;s Sonatype organization for releasing?</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#i-want-to-use-bintray-what-can-i-do">I want to use Bintray, what can I do?</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform">I have my own infrastructure and community, what&#x27;s the point of joining the Scala Platform?</a> 
     
     
   </li>

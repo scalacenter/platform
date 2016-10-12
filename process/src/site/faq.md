@@ -30,6 +30,35 @@ Yes, you can keep it so long as you fulfill the same purposes. The important thi
 not what infrastructure or CI you use, but the fact that you use it. Setting up
 our CI may give you some performance benefits, though it's up to you if you need them or not.
 
+#### Is the release bot using Platform's Sonatype organization for releasing?
+
+The release bot only publishes NIGHTLYs and BETAs with the Scala Platform sonatype
+credentials. For stable releases, we want to give credit to the original authors or
+community that contributed to the Platform. For that, we allow module maintainers to
+manually release stable releases under their own Sonatype namespace. The release bot
+will notify all the module maintainers one week ago before the release has to be cut.
+The platform JAR and artifact will depend on those versions.
+
+> {.note}
+> If you prefer that we release stable releases, you can provide your Sonatype user
+> and password as secrets in the CI, and the release bot will take care of the rest.
+
+#### I want to use Bintray, what can I do?
+
+At this moment there's not support for Bintray. If several module maintainers ask for it,
+we can consider releasing to Bintray instead of Sonatype, but this features is not a first priority.
+
+#### I have my own infrastructure and community, what's the point of joining the Scala Platform?
+
+Joining the Scala Platform is a declaration of intention. It's about creating a bigger
+community that ensures the long-term maintainance of high-quality Scala libraries
+for broad and public use. It's about encouraging companies to contribute back to
+the software they use in production, and making the process easier for any party involved
+in its development.
+
+You should join the Platform if you believe in our ideas and want to see your project
+evolving over time. After all, collaborative effort is what moves humanity forward.
+
 ## Code of Conduct (CoC)
 
 #### Why shall I conform to Scala Center's CoC?

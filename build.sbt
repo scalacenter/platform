@@ -84,7 +84,7 @@ lazy val platformProcess: Project = project
     ornateTargetDir := Some(file("docs/"))
   )
 
-lazy val customOrnate = taskKey[Unit]("customOrnate")
+lazy val customOrnate = taskKey[Unit]("ornate")
 customOrnate in platformProcess := {
   (ornate in platformProcess).value
   // Work around Ornate limitation to add custom CSS to default theme
