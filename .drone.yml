@@ -1,0 +1,4 @@
+build:
+  image: 1science/sbt
+  commands:
+    - sbt buildProcess
