@@ -37,7 +37,7 @@ credentials. For stable releases, we want to give credit to the original authors
 community that contributed to the Platform. For that, we allow module maintainers to
 manually release stable releases under their own Sonatype namespace. The release bot
 will notify all the module maintainers one week ago before the release has to be cut.
-The platform JAR and artifact will depend on those versions.
+The platform JAR and artifact will depend on those versions, so you must release on time.
 
 > {.note}
 > If you prefer that we release stable releases, you can provide your Sonatype user
@@ -76,7 +76,7 @@ You can keep it, but you also must abide by the Scala Center Code of Conduct.
 In case of conflict, the managers of the Platform will enforce the official
 Code of Conduct, and then apply yours. However, having two code of conducts is
 often pointless. If your code of conduct ensures extra policies, you are
-encouraged to proposed the inclusion of those policies in the official Code of
+encouraged to propose the inclusion of those policies in the official Code of
 Conduct. We all should define what civic behaviour is.
 
 #### I want to report the violation of the CoC, what shall I do?
