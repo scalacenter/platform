@@ -5,4 +5,5 @@ build:
 
 cache:
   mount:
-    - $HOME/.ivy2
+    - .ivy2
+    - .git
