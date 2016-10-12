@@ -1,7 +1,9 @@
 lazy val buildSettings = Seq(
   organization := "ch.epfl.scala",
+  resolvers += Resolver.jcenterRepo,
   updateOptions := updateOptions.value.withCachedResolution(true)
 )
+
 
 lazy val compilerOptions = Seq(
   "-deprecation",
