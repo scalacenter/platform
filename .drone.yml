@@ -1,5 +1,5 @@
 build:
-  image: 1science/sbt
+  image: joshdev/alpine-sbt
   commands:
     - sbt buildProcess
 
