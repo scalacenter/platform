@@ -10,7 +10,7 @@ import scala.util.Either.RightProjection
 import scala.util.control.NonFatal
 import scala.util.Try
 
-class ReleasePipeline(module: Module) {
+class ReleaseManager(module: Module) {
 
   case class Error(msg: String, throwable: Option[Throwable] = None)
 

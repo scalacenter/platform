@@ -6,8 +6,8 @@ import org.scalatest.junit.JUnitSuite
 class ReleasePipelineSuite extends JUnitSuite {
   val fake = Module("fake", "https://github.com/scalacent/fake")
   val scaladex = Module("scaladex", "https://github.com/scalacenter/scaladex")
-  val fakePipeline = new ReleasePipeline(fake)
-  val scaladexPipeline = new ReleasePipeline(scaladex)
+  val fakePipeline = new ReleaseManager(fake)
+  val scaladexPipeline = new ReleaseManager(scaladex)
 
   @Test def cloneToCorrectRepo(): Unit = assert(scaladexPipeline.repo.isRight)
   @Test def cloneToIncorrectRepo(): Unit = assert(fakePipeline.repo.isLeft)

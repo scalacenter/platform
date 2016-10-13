@@ -1,12 +1,15 @@
 build:
   image: joshdev/alpine-sbt
   commands:
-    - cp -R /drone/.sbt $HOME/.sbt
+    - mv /drone/.sbt $HOME/.sbt
+    - mv /drone/.coursier $HOME/.coursier
     - sbt clean test sbt-utils/clean sbt-utils/test -Dsbt.ivy.home=/drone/.ivy2
-    - cp -R $HOME/.sbt /drone/.sbt  
+    - mv $HOME/.coursier /drone/.coursier
+    - mv $HOME/.sbt /drone/.sbt
 
 cache:
   mount:
     - .git
     - /drone/.ivy2
+    - /drone/.coursier
     - /drone/.sbt
