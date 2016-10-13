@@ -2,14 +2,13 @@ build:
   image: joshdev/alpine-sbt
   commands:
     - mv /drone/.sbt $HOME/.sbt
-    - mv /drone/.coursier $HOME/.coursier
+    - export COURSIER_CACHE="/drone/.coursier-cache"
     - sbt clean test sbt-utils/clean sbt-utils/test -Dsbt.ivy.home=/drone/.ivy2
-    - mv $HOME/.coursier /drone/.coursier
     - mv $HOME/.sbt /drone/.sbt
 
 cache:
   mount:
     - .git
     - /drone/.ivy2
-    - /drone/.coursier
+    - /drone/.coursier-cache
     - /drone/.sbt
