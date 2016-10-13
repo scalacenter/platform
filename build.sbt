@@ -98,25 +98,6 @@ buildProcess in process := {
   IO.append(mainCss, IO.read(customCss))
 }
 
-import ReleaseTransformations._
-lazy val pluginReleaseSettings = Seq(
-  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-  releaseProcess := Seq[ReleaseStep](
-    checkSnapshotDependencies,
-    inquireVersions,
-    runClean,
-    runTest,
-    setReleaseVersion,
-    commitReleaseVersion,
-    tagRelease,
-    publishArtifacts,
-    releaseStepTask(SbtPgp.autoImport.PgpKeys.publishSigned),
-    releaseStepCommand(Sonatype.SonatypeCommand.sonatypeRelease),
-    setNextVersion,
-    commitNextVersion,
-    pushChanges
-  )
-)
 
 val circeVersion = "0.5.1"
 lazy val utilsSbt = project
