@@ -174,7 +174,8 @@ hopes to reproduce their success in the Scala community.
 >  #### 2.5. Branches and Releases
 >  
 >  1. The project SHALL have one branch ("master") that always holds the latest in-progress version and SHOULD always build.
->  1. The project SHALL NOT use topic branches for any reason. Personal forks MAY use topic branches.
+>  1. The project SHALL have one branch ("platform-release") that always holds the latest compatible in-progress changes and SHOULD always build.
+>  1. Topic branches are not ENCOURAGED. Personal forks MAY use topic branches.
 >  1. To make a stable release a Maintainer shall tag the repository. Stable releases SHALL always be released from the repository master.
 >  
 >  #### 2.6. Evolution of Public Contracts
