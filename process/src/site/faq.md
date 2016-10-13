@@ -22,7 +22,7 @@ Choose one or more and help us improve the Scala ecosystem!
 *Anyone*. It doesn't matter if you are a Committee member, a library author or an open-source Scala developer.
 Just [follow the process](proposal-submission.md).
 
-#### I don't want to waste time, is submitting a Scala Platform proposal easy?
+#### I don't like wasting my time, is submitting a Scala Platform proposal easy?
 
 The Scala Platform process is designed to be simple and lightweight, even more than
 the [Scala Improvement Process](http://docs.scala-lang.org/sips/sip-submission.html).
