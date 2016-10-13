@@ -1,5 +1,3 @@
-resolvers += Resolver.jcenterRepo
-
 lazy val buildSettings = Seq(
   organization := "ch.epfl.scala",
   resolvers += Resolver.jcenterRepo,
@@ -26,7 +24,8 @@ lazy val commonSettings = Seq(
   triggeredMessage in ThisBuild := Watched.clearWhenTriggered,
   watchSources += baseDirectory.value / "resources",
   scalacOptions in (Compile, console) := compilerOptions,
-  testOptions in Test += Tests.Argument("-oD")
+  testOptions in Test += Tests.Argument("-oD"),
+  scalaVersion := "2.11.8"
 )
 
 lazy val publishSettings = Seq(
@@ -75,8 +74,8 @@ lazy val platform = project
   .in(file("."))
   .settings(allSettings)
   .settings(noPublish)
-  .aggregate(process, `sbt-utils`, `release-manager`)
-  .dependsOn(process, `sbt-utils`, `release-manager`)
+  .aggregate(process, `release-manager`)
+  .dependsOn(process, `release-manager`)
 
 lazy val process: Project = project
   .in(file("process"))
@@ -84,25 +83,26 @@ lazy val process: Project = project
   .settings(allSettings)
   .settings(
     name := "platform-process",
-    ornateTargetDir := Some(file("docs/"))
+    ornateTargetDir := Some(file("docs/")),
+    compile in Compile := Def.taskDyn {
+      val analysis = (compile in Compile).value
+      Def.task {
+        (ornate in process).value
+        // Work around Ornate limitation to add custom CSS
+        val targetDir = (ornateTargetDir in process).value.get
+        val cssFolder = targetDir / "_theme" / "css"
+        val customCss = cssFolder / "custom.css"
+        val mainCss = cssFolder / "app.css"
+        IO.append(mainCss, IO.read(customCss))
+        analysis
+      }
+    }.value
   )
-
-lazy val publishProcess = taskKey[Unit]("buildProcess")
-publishProcess in process := {
-  (ornate in process).value
-  // Work around Ornate limitation to add custom CSS to default theme
-  val targetDir = (ornateTargetDir in process).value.get
-  val cssFolder = targetDir / "_theme" / "css"
-  val customCss = cssFolder / "custom.css"
-  val mainCss = cssFolder / "app.css"
-  IO.append(mainCss, IO.read(customCss))
-}
 
 lazy val `release-manager` = project
   .in(file("release-manager"))
   .settings(allSettings)
   .settings(
-    scalaVersion := "2.11.8",
     libraryDependencies ++= Seq(
       "org.eclipse.jgit" % "org.eclipse.jgit" % "4.5.0.201609210915-r",
       "com.github.jvican" %% "stoml" % "0.1",
