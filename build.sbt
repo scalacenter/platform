@@ -74,8 +74,8 @@ lazy val platform = project
   .in(file("."))
   .settings(allSettings)
   .settings(noPublish)
-  .aggregate(platformProcess)
-  .dependsOn(platformProcess)
+  .aggregate(platformProcess, platformUtils)
+  .dependsOn(platformProcess, platformUtils)
 
 lazy val platformProcess: Project = project
   .in(file("process"))
@@ -96,3 +96,42 @@ buildProcess in platformProcess := {
   val mainCss = cssFolder / "app.css"
   IO.append(mainCss, IO.read(customCss))
 }
+
+import ReleaseTransformations._
+lazy val pluginReleaseSettings = Seq(
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+  releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    runClean,
+    runTest,
+    setReleaseVersion,
+    commitReleaseVersion,
+    tagRelease,
+    publishArtifacts,
+    releaseStepTask(SbtPgp.autoImport.PgpKeys.publishSigned),
+    releaseStepCommand(Sonatype.SonatypeCommand.sonatypeRelease),
+    setNextVersion,
+    commitNextVersion,
+    pushChanges
+  )
+)
+
+val circeVersion = "0.5.1"
+lazy val platformUtils = project
+  .in(file("platform-utils"))
+  .settings(allSettings)
+  .settings(
+    name := "platform-u" +
+      "tils",
+    libraryDependencies ++= Seq(
+      "com.eed3si9n" %% "gigahorse-core" % "0.1.1",
+      "com.lihaoyi" %% "sourcecode" % "0.1.2",
+      "io.circe" %% "circe-core" % circeVersion,
+      "io.circe" %% "circe-generic" % circeVersion,
+      "io.circe" %% "circe-parser" % circeVersion
+    ),
+    addCompilerPlugin(
+      "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full
+    )
+  )
