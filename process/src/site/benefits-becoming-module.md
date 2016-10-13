@@ -36,3 +36,4 @@ The above services focus on improving the development experience,
 removing the overhead of getting the contribution rules and the infrastructure
 right.
 
+If you have any question, check the [FAQ](faq.md).
