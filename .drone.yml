@@ -1,7 +1,7 @@
 build:
   image: joshdev/alpine-sbt
   commands:
-    - sbt buildProcess -Dsbt.ivy.home=/drone/.ivy
+    - sbt buildProcess -Dsbt.ivy.home=/drone/.ivy2
 
 cache:
   mount:
