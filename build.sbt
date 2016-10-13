@@ -75,8 +75,8 @@ lazy val platform = project
   .in(file("."))
   .settings(allSettings)
   .settings(noPublish)
-  .aggregate(process, utilsSbt)
-  .dependsOn(process, utilsSbt)
+  .aggregate(process, `sbt-utils`, `release-manager`)
+  .dependsOn(process, `sbt-utils`, `release-manager`)
 
 lazy val process: Project = project
   .in(file("process"))
@@ -87,8 +87,8 @@ lazy val process: Project = project
     ornateTargetDir := Some(file("docs/"))
   )
 
-lazy val buildProcess = taskKey[Unit]("buildProcess")
-buildProcess in process := {
+lazy val publishProcess = taskKey[Unit]("buildProcess")
+publishProcess in process := {
   (ornate in process).value
   // Work around Ornate limitation to add custom CSS to default theme
   val targetDir = (ornateTargetDir in process).value.get
@@ -98,9 +98,21 @@ buildProcess in process := {
   IO.append(mainCss, IO.read(customCss))
 }
 
+lazy val `release-manager` = project
+  .in(file("release-manager"))
+  .settings(allSettings)
+  .settings(
+    scalaVersion := "2.11.8",
+    libraryDependencies ++= Seq(
+      "org.eclipse.jgit" % "org.eclipse.jgit" % "4.5.0.201609210915-r",
+      "com.github.jvican" %% "stoml" % "0.1",
+      "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+      "junit" % "junit" % "4.12" % "test"
+    )
+  )
 
 val circeVersion = "0.5.1"
-lazy val utilsSbt = project
+lazy val `sbt-utils` = project
   .in(file("utils"))
   .settings(allSettings)
   .settings(ScriptedPlugin.scriptedSettings)

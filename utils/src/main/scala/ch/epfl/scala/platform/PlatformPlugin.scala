@@ -2,9 +2,7 @@ package ch.epfl.scala.platform
 
 import com.typesafe.sbt.SbtPgp
 import com.typesafe.sbt.pgp.PgpKeys
-import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
 import xerial.sbt.Sonatype
-import sbt._
 
 object PlatformPlugin extends sbt.AutoPlugin {
 
