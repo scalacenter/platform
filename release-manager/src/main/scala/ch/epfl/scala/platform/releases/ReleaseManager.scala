@@ -2,16 +2,33 @@ package ch.epfl.scala.platform.releases
 
 import ch.epfl.scala.platform.releases.git._
 import ch.epfl.scala.platform.releases.utils._
-import org.eclipse.jgit.lib.Ref
+
+import scala.util.Try
+
+trait ReleasePipeline
+case object Nightly extends ReleasePipeline
+case object Beta extends ReleasePipeline
+case object Stable extends ReleasePipeline
 
 case class ReleaseManager(module: Module, branch: String = "platform-release") {
   lazy val repo = git.clone(module).checkout(branch)
-  def release: ReleaseResult[String] = {
+
+  def releaseCmdTemplate(cmd: String): Seq[String] = s"sbt $cmd".split(" ")
+  val nightlyReleaseCmd = releaseCmdTemplate("releaseNightly")
+  val betaReleaseCmd = releaseCmdTemplate("releaseBeta")
+  val stableReleaseCmd = releaseCmdTemplate("releaseStable")
+  def release(pipeline: ReleasePipeline = Nightly): ReleaseResult[String] = {
     import sys.process._
-    repo.right.map { t =>
+    val releaseCmd = pipeline match {
+      case Nightly => nightlyReleaseCmd
+      case Beta => betaReleaseCmd
+      case Stable => stableReleaseCmd
+    }
+    repo.right.flatMap { t =>
       val (_, g) = t
-      val dir = g.getRepository.getDirectory
-      Process(Seq("sbt", "test"), dir).!!
+      val dir = g.getRepository.getDirectory.getParentFile
+      Try(Process(releaseCmd, dir).!!)
+        .toReleaseResult(Feedback.UnexpectedSbtReleaseError)
     }
   }
 }

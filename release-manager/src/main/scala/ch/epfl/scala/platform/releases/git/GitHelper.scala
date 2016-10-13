@@ -16,9 +16,8 @@ trait GitHelper {
 
   private[platform] val clonedFolder = "release-manager"
   val targetDir: ReleaseResult[Path] = {
-    Try(Files.createTempDirectory(clonedFolder)).map(Right.apply).recover {
-      case NonFatal(t) => Left(Error(Feedback.FailedTargetDirCreation, Some(t)))
-    }.get
+    Try(Files.createTempDirectory(clonedFolder))
+      .toReleaseResult(Feedback.FailedTargetDirCreation)
   }
 
   def clone(module: Module): ReleaseResult[Git] = {
@@ -37,12 +36,10 @@ trait GitHelper {
 
   implicit class GitWrapper(repo: GitRepo) {
     def checkout(branch: String = "master"): ReleaseResult[(Ref, Git)] = {
-      val done = Try(
-        repo.right.map(r => r.checkout().setName(branch).call() -> r))
-      done.recover {
-        case ge: GitAPIException =>
-          Left(Error(Feedback.InvalidBranchCheckout, Some(ge)))
-      }.get
+      repo.right.flatMap { r =>
+        Try(r.checkout().setName(branch).call() -> r)
+          .toReleaseResult(Feedback.InvalidBranchCheckout)
+      }
     }
   }
 }
