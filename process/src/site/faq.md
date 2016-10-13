@@ -22,11 +22,25 @@ Choose one or more and help us improve the Scala ecosystem!
 *Anyone*. It doesn't matter if you are a Committee member, a library author or an open-source Scala developer.
 Just [follow the process](proposal-submission.md).
 
-#### I don't like bureaucracy, is the Scala Platform process easy to follow?
+#### I don't want to waste time, is submitting a Scala Platform proposal easy?
 
-The Scala Platform process has been designed to be simple and lightweight, even more than
-the [Scala Improvement Process](http://docs.scala-lang.org/sips/sip-submission.html). Quick
-turnaround times ensure that proposals are reviewed as soon as possible.
+The Scala Platform process is designed to be simple and lightweight, even more than
+the [Scala Improvement Process](http://docs.scala-lang.org/sips/sip-submission.html).
+The Scala Platform Committee quickly reviews proposals and gives feedback to authors,
+and turnaround times are tweaked to make progress in a short period of time. If you
+wish to know more, check [the submission steps](proposal-submission.md).
+
+#### Why is it called the **Scala** Platform?
+
+The Scala Platform process is designed by [the Scala Center](https://scala.epfl.ch/), an EPFL
+non-profit organization that works for the good of the Scala programming language and its community.
+
+As an official initiative by EPFL, the university that holds the trademark of Scala, the Platform
+has been baptised as the *Scala Platform* because it aims at:
+
+* Helping developers learn and become successful with the language;
+* Providing stable libraries that industrial users can depend on; and,
+* Increasing the impact of Scala and its community.
 
 ## Infrastructure
 
@@ -43,12 +57,10 @@ and industrial users. Concretely:
 When those conditions are not met, contributors are discouraged from participating
 in the development of a project.
 
-The Scala Platform process ensures reasonable rules
-to keep both maintainers and contributors happy, and having a default release process
-gives predictability to the contribution process and encourages companies to assign
-resources and engineers. Remember how motivated you may feel to know that tomorrow
-your changes will be live, or how easy is for companies to assign an engineer to fix
-bugs if they know that next week they can depend on the new version.
+The Scala Platform process ensures reasonable rules to keep both maintainers and contributors happy.
+Having a default release process gives predictability to the contribution process and encourages
+companies to assign resources and engineers. Remember how motivated we are when our patches get
+merged, or how easy is for companies to assign an engineer to fix bugs if you guarantee they can depend on a new release tomorrow.
 
 #### My module has its own CI, can I keep it?
 
