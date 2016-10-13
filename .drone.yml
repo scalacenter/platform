@@ -2,9 +2,9 @@ build:
   image: joshdev/alpine-sbt
   commands:
     - sbt buildProcess
-    - ls -al $HOME
-    - ls -al 
 
 cache:
   mount:
     - .git
+    - $HOME/.ivy2  
+    - $HOME/.sbt  
