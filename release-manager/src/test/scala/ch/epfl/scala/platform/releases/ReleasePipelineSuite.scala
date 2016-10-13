@@ -2,21 +2,24 @@ package ch.epfl.scala.platform.releases
 
 import org.junit.Test
 import org.scalatest.junit.JUnitSuite
+import ch.epfl.scala.platform.releases.git._
 
 class ReleasePipelineSuite extends JUnitSuite {
   val fake = Module("fake", "https://github.com/scalacent/fake")
-  val scaladex = Module("scaladex", "https://github.com/scalacenter/scaladex")
-  val fakePipeline = new ReleaseManager(fake)
-  val scaladexPipeline = new ReleaseManager(scaladex)
+  val dummy = Module("dummy", "https://github.com/scalaplatform/dummy")
+  lazy val dummyRepo = git.clone(dummy)
+  lazy val dummyManager = ReleaseManager(dummy, "HEAD")
 
-  @Test def cloneToCorrectRepo(): Unit = assert(scaladexPipeline.repo.isRight)
-  @Test def cloneToIncorrectRepo(): Unit = assert(fakePipeline.repo.isLeft)
+  @Test def cloneToCorrectRepo(): Unit =
+    assert(dummyRepo.isRight)
+  @Test def cloneToIncorrectRepo(): Unit =
+    assert(git.clone(fake).isLeft)
 
   @Test def checkoutCorrectBranch(): Unit =
-    assert(scaladexPipeline.checkout("HEAD").isRight)
+    assert(dummyRepo.checkout("HEAD").isRight)
   @Test def checkoutIncorrectBranch(): Unit =
-    assert(scaladexPipeline.checkout("unexisting").isLeft)
+    assert(dummyRepo.checkout("unexisting").isLeft)
 
   @Test def release(): Unit =
-    assert(scaladexPipeline.release.isRight)
+    assert(dummyManager.release.isRight)
 }
