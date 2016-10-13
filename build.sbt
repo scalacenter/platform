@@ -1,9 +1,10 @@
+resolvers += Resolver.jcenterRepo
+
 lazy val buildSettings = Seq(
   organization := "ch.epfl.scala",
   resolvers += Resolver.jcenterRepo,
   updateOptions := updateOptions.value.withCachedResolution(true)
 )
-
 
 lazy val compilerOptions = Seq(
   "-deprecation",
@@ -74,10 +75,10 @@ lazy val platform = project
   .in(file("."))
   .settings(allSettings)
   .settings(noPublish)
-  .aggregate(platformProcess, platformUtils)
-  .dependsOn(platformProcess, platformUtils)
+  .aggregate(process, utilsSbt)
+  .dependsOn(process, utilsSbt)
 
-lazy val platformProcess: Project = project
+lazy val process: Project = project
   .in(file("process"))
   .enablePlugins(OrnatePlugin)
   .settings(allSettings)
@@ -87,10 +88,10 @@ lazy val platformProcess: Project = project
   )
 
 lazy val buildProcess = taskKey[Unit]("buildProcess")
-buildProcess in platformProcess := {
-  (ornate in platformProcess).value
+buildProcess in process := {
+  (ornate in process).value
   // Work around Ornate limitation to add custom CSS to default theme
-  val targetDir = (ornateTargetDir in platformProcess).value.get
+  val targetDir = (ornateTargetDir in process).value.get
   val cssFolder = targetDir / "_theme" / "css"
   val customCss = cssFolder / "custom.css"
   val mainCss = cssFolder / "app.css"
@@ -118,12 +119,13 @@ lazy val pluginReleaseSettings = Seq(
 )
 
 val circeVersion = "0.5.1"
-lazy val platformUtils = project
-  .in(file("platform-utils"))
+lazy val utilsSbt = project
+  .in(file("utils"))
   .settings(allSettings)
+  .settings(ScriptedPlugin.scriptedSettings)
   .settings(
-    name := "platform-u" +
-      "tils",
+    sbtPlugin := true,
+    scalaVersion := "2.10.5",
     libraryDependencies ++= Seq(
       "com.eed3si9n" %% "gigahorse-core" % "0.1.1",
       "com.lihaoyi" %% "sourcecode" % "0.1.2",
@@ -131,6 +133,15 @@ lazy val platformUtils = project
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion
     ),
+    scriptedLaunchOpts := Seq(
+      "-Dplugin.version=" + version.value,
+      // .jvmopts is ignored, simulate here
+      "-XX:MaxPermSize=256m",
+      "-Xmx2g",
+      "-Xss2m"
+    ),
+    scriptedBufferLog := false,
+    addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.3"),
     addCompilerPlugin(
       "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full
     )

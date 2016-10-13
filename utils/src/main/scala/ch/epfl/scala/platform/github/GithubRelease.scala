@@ -1,8 +1,8 @@
 package ch.epfl.scala.platform.github
 
-import ch.epfl.scala.platform.Version
-import ch.epfl.scala.platform.platform.logger
 import gigahorse._
+import sbtrelease.Version
+import ch.epfl.scala.platform.platform.logger
 
 object GithubRelease extends GithubDataTypes with GithubResources {
 
