@@ -35,8 +35,8 @@ wish to know more, check [the submission steps](proposal-submission.md).
 The Scala Platform process is designed by [the Scala Center](https://scala.epfl.ch/), an EPFL
 non-profit organization that works for the good of the Scala programming language and its community.
 
-As an official initiative by EPFL, the university that holds the trademark of Scala, the Platform
-has been baptised as the *Scala Platform* because it aims at:
+As an official initiative by EPFL, the university that gave birth and holds the trademark of Scala,
+the Platform has been baptised as the *Scala Platform* because it aims at:
 
 * Helping developers learn and become successful with the language;
 * Providing stable libraries that industrial users can depend on; and,
