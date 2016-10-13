@@ -15,8 +15,8 @@ simple step-by-step tutorial to help you migrate.
 ## Continuous Integration servers
 
 Our Drone servers provide quick development experience to module maintainers.
-With 48 cores and 64 gigabytes of memory, we ensure that PRs are built fast and that the
-turnaround is short.
+With a powerful baseline server and dynamic scaling, we ensure concurrent and
+fast build times with short turnaround.
 
 Here are the steps for setting up the CI:
 
