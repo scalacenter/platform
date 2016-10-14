@@ -105,7 +105,7 @@ lazy val `release-manager` = project
   .settings(
     libraryDependencies ++= Seq(
       "org.eclipse.jgit" % "org.eclipse.jgit" % "4.5.0.201609210915-r",
-      "com.github.jvican" %% "stoml" % "0.1",
+      "me.vican.jorge" %% "stoml" % "0.2",
       "org.scalatest" %% "scalatest" % "3.0.0" % "test",
       "junit" % "junit" % "4.12" % "test"
     )
