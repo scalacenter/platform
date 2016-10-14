@@ -1,6 +1,7 @@
 lazy val buildSettings = Seq(
   organization := "ch.epfl.scala",
   resolvers += Resolver.jcenterRepo,
+  resolvers += Resolver.bintrayRepo("jvican", "releases"),
   updateOptions := updateOptions.value.withCachedResolution(true)
 )
 
@@ -107,6 +108,7 @@ lazy val `release-manager` = project
       "org.eclipse.jgit" % "org.eclipse.jgit" % "4.5.0.201609210915-r",
       "me.vican.jorge" %% "stoml" % "0.2",
       "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+      "org.typelevel" %% "cats" % "0.7.2",
       "junit" % "junit" % "4.12" % "test"
     )
   )

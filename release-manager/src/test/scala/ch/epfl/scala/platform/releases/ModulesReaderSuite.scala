@@ -8,11 +8,11 @@ import stoml.TomlParserApi._
 
 class ModulesReaderSuite extends JUnitSuite {
   val filepath = "/MODULES.toml"
-  val resourceFile = new File(getClass.getResource(filepath).toURI)
+  val resourceFilepath = new File(getClass.getResource(filepath).toURI).getAbsolutePath
 
   @Test def readModulesFile(): Unit = {
-    val tomlContent = parseToml(resourceFile).get.value
-    assert(tomlContent.lookup(Vector("modules", "module1")).isDefined)
-    assert(tomlContent.lookup(Vector("modules", "module2")).isDefined)
+    val modules = ModulesReader.read(resourceFilepath)
+    assert(modules.isRight)
+    assert(modules.right.exists(_.length == 2))
   }
 }

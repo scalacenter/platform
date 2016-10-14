@@ -1,7 +1,7 @@
-[modules.module1]
+[modules.scalafmt]
 id = "scalafmt"
 repo = "https://github.com/olafurpg/scalafmt"
 
-[modules.module2]
+[modules.scaladex]
 id = "scaladex"
 repo = "https://github.com/scalacenter/scaladex"
