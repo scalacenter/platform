@@ -10,6 +10,8 @@ object Feedback {
   val InvalidBranchCheckout = "Checkout to the branch failed."
   val UnexpectedSbtReleaseError = "Execution of the sbt release failed."
 
+  def foundUnexpectedElement(found: Toml.Elem, expected: String) =
+    s"Invalid element $found, expected $expected."
   def missingModuleAttribute(attribute: String): String =
     s"A module requires an attribute $attribute."
   def unexpectedAttribute(attribute: String,

@@ -57,7 +57,9 @@ object ModulesReader {
             idValue <- id.right
             repoValue <- repo.right
           } yield Module(moduleName, repoValue)
-        case x => Left(Error(""))
+        case x =>
+          val msg = Feedback.foundUnexpectedElement(x, "Toml.Table")
+          Left(Error(msg))
       }.sequenceU
     }
   }
