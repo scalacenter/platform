@@ -1,4 +1,4 @@
-# The Process
+# What is the Process
 
 > {.note}
 > The following document is a draft and it's open for discussion. For
