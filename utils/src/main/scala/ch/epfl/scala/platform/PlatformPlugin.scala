@@ -26,18 +26,34 @@ object PlatformPlugin extends sbt.AutoPlugin {
 }
 
 trait DroneSettings {
+  import scala.util.Try
+  def getEnvVariable(key: String): Try[String] = Try(sys.env(key))
+  def toBoolean(presumedBoolean: String) = Try(presumedBoolean.toBoolean)
+  def toInt(presumedInt: String) = Try(presumedInt.toInt)
+
   // Drone-defined environment variables
   val insideCi = settingKey[Boolean]("Checks if CI is executing the build.")
+  insideCi := getEnvVariable("CI").flatMap(toBoolean).getOrElse(false)
   val ciName = settingKey[Option[String]]("Get the name of the CI server.")
+  ciName := getEnvVariable("CI_NAME").toOption
   val ciRepo = settingKey[Option[String]]("Get the repository run by the CI.")
+  ciRepo := getEnvVariable("CI_REPO").toOption
   val ciBranch = settingKey[Option[String]]("Get the current git branch.")
+  ciBranch := getEnvVariable("CI_BRANCH").toOption
   val ciCommit = settingKey[Option[String]]("Get the current git commit.")
+  ciCommit := getEnvVariable("CI_COMMIT").toOption
   val ciBuildDir = settingKey[Option[String]]("Get the CI build directory.")
+  ciBuildDir := getEnvVariable("CI_BUILD_DIR").toOption
   val ciBuildUrl = settingKey[Option[String]]("Get the CI build URL.")
+  ciBuildUrl := getEnvVariable("CI_BUILD_URL").toOption
   val ciBuildNumber = settingKey[Option[Int]]("Get the CI build number.")
+  ciBuildNumber := getEnvVariable("CI_BUILD_NUMBER").flatMap(toInt).toOption
   val ciPullRequest = settingKey[Option[String]]("Get the pull request id.")
+  ciPullRequest := getEnvVariable("CI_PULL_REQUEST").toOption
   val ciJobNumber = settingKey[Option[Int]]("Get the CI job number.")
+  ciJobNumber := getEnvVariable("CI_JOB_NUMBER").flatMap(toInt).toOption
   val ciTag = settingKey[Option[String]]("Get the git tag.")
+  ciTag := getEnvVariable("CI_TAG").toOption
 
   // Custom environment variables
   val sonatypeUsername = settingKey[Option[String]]("Get sonatype username.")
