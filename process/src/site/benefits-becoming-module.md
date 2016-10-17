@@ -31,9 +31,10 @@ life.
        > {.warning}
        > Advanced binary (added and removed methods) and source-compatible
        > checks may be provided in the future.
+       
+> {.note}
+> Any question so far? check the [FAQ](faq.md).
 
 The above services focus on improving the development experience,
 removing the overhead of getting the contribution rules and the infrastructure
 right.
-
-If you have any question, check the [FAQ](faq.md).
