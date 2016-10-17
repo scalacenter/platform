@@ -57,9 +57,13 @@ trait DroneSettings {
 
   // Custom environment variables
   val sonatypeUsername = settingKey[Option[String]]("Get sonatype username.")
+  sonatypeUsername := getEnvVariable("SONATYPE_USERNAME").toOption
   val sonatypePassword = settingKey[Option[String]]("Get sonatype password.")
+  sonatypePassword := getEnvVariable("SONATYPE_PASSWORD").toOption
   val bintrayUsername = settingKey[Option[String]]("Get bintray username.")
+  bintrayUsername := getEnvVariable("BINTRAY_USERNAME").toOption
   val bintrayPassword = settingKey[Option[String]]("Get bintray password.")
+  bintrayPassword := getEnvVariable("BINTRAY_PASSWORD").toOption
 }
 
 object PlatformSettings {
