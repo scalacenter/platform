@@ -10,6 +10,7 @@ case object Nightly extends ReleasePipeline
 case object Beta extends ReleasePipeline
 case object Stable extends ReleasePipeline
 
+/** Manage the release of a module relying on the sbt-release plugin. */
 case class ReleaseManager(module: Module, branch: String = "platform-release") {
   lazy val repo = git.clone(module).checkout(branch)
 
@@ -30,5 +31,13 @@ case class ReleaseManager(module: Module, branch: String = "platform-release") {
       Try(Process(releaseCmd, dir).!!)
         .toReleaseResult(Feedback.UnexpectedSbtReleaseError)
     }
+  }
+
+  def releaseEverything: ReleaseResult[String] = {
+    for {
+      releasedNightly <- release(Nightly).right
+      releasedBeta <- release(Beta).right
+      releasedStable <- release(Stable).right
+    } yield s"$releasedNightly\n\n$releasedBeta\n\n$releasedStable"
   }
 }

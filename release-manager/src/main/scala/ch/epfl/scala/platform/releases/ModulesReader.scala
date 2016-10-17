@@ -10,7 +10,6 @@ import stoml.Toml
 import scala.collection.JavaConverters._
 import scala.util.Try
 
-import cats._
 import cats.instances.all._
 import cats.syntax.traverse._
 
@@ -30,7 +29,8 @@ object ModulesReader {
       }
   }
 
-  def read(presumedFile: String): ReleaseResult[Seq[Module]] = {
+  /** Parse a TOML file with the specification of every module. */
+  def read(presumedFile: String): ReleaseResult[List[Module]] = {
     val readContent = Try {
       val allLines = Files.readAllLines(Paths.get(presumedFile))
       allLines.asScala.mkString("\n")
