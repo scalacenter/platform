@@ -6,8 +6,8 @@ open-source rules that optimize the experience of contributors and
 maintainers, and provides infrastructure that makes easier developers'
 life.
 
-1.  Powerful build machines, with large memory and powerful CPU resources,
-    that ensure a fast development cycle.
+1.  High-quality build machines, with large memory and powerful CPU resources,
+    that ensure a fast and responsive development cycle.
     
 2.  Organizational help.
 
@@ -25,6 +25,8 @@ life.
     *  A bot automatically releases modules every day, except for
        stable releases (module maintainers must release with their
        private organization credentials).
+    *  Modules maintainers that want to release changes on every merge are
+       encouraged to do so, and our infrastructure accommodates this use case.
     *  The automatic release process checks binary compatibility in every
        release, and warns module maintainers when releases break our [stability
        guarantees](policies.md#release).
