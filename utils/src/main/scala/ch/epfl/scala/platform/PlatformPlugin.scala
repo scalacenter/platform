@@ -14,7 +14,6 @@ object PlatformPlugin extends sbt.AutoPlugin {
   override def projectSettings = PlatformSettings.settings
   object autoImport extends DroneSettings {
     // FORMAT: OFF
-    val platformModuleRepository = settingKey[Option[String]]("Git module repository.")
     val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
     platformReleaseOnMerge := false // By default, disabled
     val platformModuleTags = settingKey[Seq[String]]("Tags for the bintray module package.")
@@ -26,44 +25,43 @@ object PlatformPlugin extends sbt.AutoPlugin {
 }
 
 trait DroneSettings {
-  import scala.util.Try
-  def getEnvVariable(key: String): Try[String] = Try(sys.env(key))
-  def toBoolean(presumedBoolean: String) = Try(presumedBoolean.toBoolean)
-  def toInt(presumedInt: String) = Try(presumedInt.toInt)
+  def getEnvVariable(key: String): Option[String] = sys.env.get(key)
+  def toBoolean(presumedBoolean: String) = presumedBoolean.toBoolean
+  def toInt(presumedInt: String) = presumedInt.toInt
 
   // Drone-defined environment variables
   val insideCi = settingKey[Boolean]("Checks if CI is executing the build.")
-  insideCi := getEnvVariable("CI").flatMap(toBoolean).getOrElse(false)
+  insideCi := getEnvVariable("CI").exists(toBoolean)
   val ciName = settingKey[Option[String]]("Get the name of the CI server.")
-  ciName := getEnvVariable("CI_NAME").toOption
+  ciName := getEnvVariable("CI_NAME")
   val ciRepo = settingKey[Option[String]]("Get the repository run by the CI.")
-  ciRepo := getEnvVariable("CI_REPO").toOption
+  ciRepo := getEnvVariable("CI_REPO")
   val ciBranch = settingKey[Option[String]]("Get the current git branch.")
-  ciBranch := getEnvVariable("CI_BRANCH").toOption
+  ciBranch := getEnvVariable("CI_BRANCH")
   val ciCommit = settingKey[Option[String]]("Get the current git commit.")
-  ciCommit := getEnvVariable("CI_COMMIT").toOption
+  ciCommit := getEnvVariable("CI_COMMIT")
   val ciBuildDir = settingKey[Option[String]]("Get the CI build directory.")
-  ciBuildDir := getEnvVariable("CI_BUILD_DIR").toOption
+  ciBuildDir := getEnvVariable("CI_BUILD_DIR")
   val ciBuildUrl = settingKey[Option[String]]("Get the CI build URL.")
-  ciBuildUrl := getEnvVariable("CI_BUILD_URL").toOption
+  ciBuildUrl := getEnvVariable("CI_BUILD_URL")
   val ciBuildNumber = settingKey[Option[Int]]("Get the CI build number.")
-  ciBuildNumber := getEnvVariable("CI_BUILD_NUMBER").flatMap(toInt).toOption
+  ciBuildNumber := getEnvVariable("CI_BUILD_NUMBER").map(toInt)
   val ciPullRequest = settingKey[Option[String]]("Get the pull request id.")
-  ciPullRequest := getEnvVariable("CI_PULL_REQUEST").toOption
+  ciPullRequest := getEnvVariable("CI_PULL_REQUEST")
   val ciJobNumber = settingKey[Option[Int]]("Get the CI job number.")
-  ciJobNumber := getEnvVariable("CI_JOB_NUMBER").flatMap(toInt).toOption
+  ciJobNumber := getEnvVariable("CI_JOB_NUMBER").map(toInt)
   val ciTag = settingKey[Option[String]]("Get the git tag.")
-  ciTag := getEnvVariable("CI_TAG").toOption
+  ciTag := getEnvVariable("CI_TAG")
 
   // Custom environment variables
   val sonatypeUsername = settingKey[Option[String]]("Get sonatype username.")
-  sonatypeUsername := getEnvVariable("SONATYPE_USERNAME").toOption
+  sonatypeUsername := getEnvVariable("SONATYPE_USERNAME")
   val sonatypePassword = settingKey[Option[String]]("Get sonatype password.")
-  sonatypePassword := getEnvVariable("SONATYPE_PASSWORD").toOption
+  sonatypePassword := getEnvVariable("SONATYPE_PASSWORD")
   val bintrayUsername = settingKey[Option[String]]("Get bintray username.")
-  bintrayUsername := getEnvVariable("BINTRAY_USERNAME").toOption
+  bintrayUsername := getEnvVariable("BINTRAY_USERNAME")
   val bintrayPassword = settingKey[Option[String]]("Get bintray password.")
-  bintrayPassword := getEnvVariable("BINTRAY_PASSWORD").toOption
+  bintrayPassword := getEnvVariable("BINTRAY_PASSWORD")
 }
 
 object PlatformSettings {
@@ -95,11 +93,16 @@ object PlatformSettings {
 
   lazy val bintraySettings = Seq(
     bintrayOrganization := Some("scalaplatform"),
-    bintrayVcsUrl := platformModuleRepository.value,
+    bintrayVcsUrl := {
+      val currentDir = baseDirectory.value
+      val getRemoteOrigin = Seq("git", "config", "--get", "remote.origin.url")
+      scala.util.Try(Process(getRemoteOrigin, currentDir).!!).toOption
+    },
     publishTo := (publishTo in bintray).value,
     // Necessary for synchronization with Maven Central
     publishMavenStyle := true,
-    bintrayReleaseOnPublish in ThisBuild := false
+    bintrayReleaseOnPublish in ThisBuild := false,
+    releaseCrossBuild := true
   )
 
   /** Define custom release steps and add them to the default pipeline. */

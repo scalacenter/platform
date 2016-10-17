@@ -1,6 +1,7 @@
 build:
   image: joshdev/alpine-sbt
   commands:
+    - echo $CI_BUILD_URL
     - test -e "/drone/.sbt" && mv /drone/.sbt $HOME/.sbt
     - export COURSIER_CACHE="/drone/.coursier-cache"
     - sbt clean test sbt-utils/clean sbt-utils/test -Dsbt.ivy.home=/drone/.ivy2
