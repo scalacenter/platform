@@ -79,7 +79,9 @@ proposals from the community, and decide on the modules that join the Platform.
 
 The members of the Committee are dedicated developers with a long record of
 contributions to the Scala ecosystem, the development of the language and major
-open-source projects. The Committee is elected by the Scala Center.
+open-source projects. They have been elected by the Scala Center to represent and
+serve with their experience the broad interest of the Scala community, not their
+personal or employers' viewpoints.
 
 The Committee members are:
 
