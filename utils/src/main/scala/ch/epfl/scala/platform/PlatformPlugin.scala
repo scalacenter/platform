@@ -62,6 +62,12 @@ trait DroneSettings {
   bintrayUsername := getEnvVariable("BINTRAY_USERNAME")
   val bintrayPassword = settingKey[Option[String]]("Get bintray password.")
   bintrayPassword := getEnvVariable("BINTRAY_PASSWORD")
+  val moduleRepository = settingKey[Option[String]]("Get git repository url.")
+  moduleRepository := {
+    val currentDir = Keys.baseDirectory.value
+    val getRemoteOrigin = Seq("git", "config", "--get", "remote.origin.url")
+    scala.util.Try(Process(getRemoteOrigin, currentDir).!!).toOption
+  }
 }
 
 object PlatformSettings {
@@ -93,11 +99,7 @@ object PlatformSettings {
 
   lazy val bintraySettings = Seq(
     bintrayOrganization := Some("scalaplatform"),
-    bintrayVcsUrl := {
-      val currentDir = baseDirectory.value
-      val getRemoteOrigin = Seq("git", "config", "--get", "remote.origin.url")
-      scala.util.Try(Process(getRemoteOrigin, currentDir).!!).toOption
-    },
+    bintrayVcsUrl := moduleRepository.value,
     publishTo := (publishTo in bintray).value,
     // Necessary for synchronization with Maven Central
     publishMavenStyle := true,
@@ -128,5 +130,4 @@ object PlatformSettings {
       )
     )
   }
-
 }
