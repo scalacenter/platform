@@ -1,5 +1,5 @@
 # Automatic release manager
-[![Build Status](http://stats.lassie.io:8001/api/badges/jvican/platform-staging/status.svg)](http://stats.lassie.io:8001/jvican/platform-staging)
+[![Build Status](http://stats.lassie.io:8001/api/badges/scalacenter/platform-staging/status.svg)](http://stats.lassie.io:8001/scalacenter/platform-staging)
 
 The release manager takes care of reading a file of modules, cloning them,
 checking out the `platform-release` branches (configurable) and executing

@@ -1,5 +1,5 @@
 # The Scala Platform
-[![Build Status](http://stats.lassie.io:8001/api/badges/jvican/platform-staging/status.svg)](http://stats.lassie.io:8001/jvican/platform-staging)
+[![Build Status](http://stats.lassie.io:8001/api/badges/scalacenter/platform-staging/status.svg)](http://stats.lassie.io:8001/scalacenter/platform-staging)
 
 Read the [Scala Platform process](https://jvican.github.io/platform-staging).
 
