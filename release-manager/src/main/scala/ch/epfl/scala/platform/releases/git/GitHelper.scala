@@ -35,7 +35,7 @@ trait GitHelper {
   }
 
   implicit class GitWrapper(repo: GitRepo) {
-    def checkout(branch: String = "master"): ReleaseResult[(Ref, Git)] = {
+    def checkout(branch: String): ReleaseResult[(Ref, Git)] = {
       repo.right.flatMap { r =>
         Try(r.checkout().setName(branch).call() -> r)
           .toReleaseResult(Feedback.InvalidBranchCheckout)

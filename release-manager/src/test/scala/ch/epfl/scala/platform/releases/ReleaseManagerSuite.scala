@@ -17,6 +17,8 @@ class ReleaseManagerSuite extends JUnitSuite {
 
   @Test def checkoutCorrectBranch(): Unit =
     assert(dummyRepo.checkout("HEAD").isRight)
+  @Test def checkoutPlatformReleaseBranch(): Unit =
+    assert(dummyRepo.checkout("origin/platform-release").isRight)
   @Test def checkoutIncorrectBranch(): Unit =
     assert(dummyRepo.checkout("unexisting").isLeft)
 

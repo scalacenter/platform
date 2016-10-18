@@ -11,7 +11,7 @@ case object Beta extends ReleasePipeline
 case object Stable extends ReleasePipeline
 
 /** Manage the release of a module relying on the sbt-release plugin. */
-case class ReleaseManager(module: Module, branch: String = "platform-release") {
+case class ReleaseManager(module: Module, branch: String = "origin/platform-release") {
   lazy val repo = git.clone(module).checkout(branch)
 
   def releaseCmdTemplate(cmd: String): Seq[String] = s"sbt $cmd".split(" ")
