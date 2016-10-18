@@ -135,7 +135,8 @@ lazy val `sbt-platform` = project
       // .jvmopts is ignored, simulate here
       "-XX:MaxPermSize=256m",
       "-Xmx2g",
-      "-Xss2m"
+      "-Xss2m",
+      "-Dsbt.ivy.home=/drone/.ivy2"
     ),
     scriptedBufferLog := false,
     addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.3"),
