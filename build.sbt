@@ -31,14 +31,11 @@ lazy val commonSettings = Seq(
 
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
-  publishArtifact := true,
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value)
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    else
-      Some("releases" at nexus + "service/local/staging/deploy/maven2")
-  },
+  bintrayOrganization := Some("scalaplatform"),
+  bintrayRepository := "tools",
+  bintraySyncMavenCentral := "true",
+  bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
+  publishTo := (publishTo in bintray).value,
   publishArtifact in Test := false,
   licenses := Seq(
     // Scala Center license...
