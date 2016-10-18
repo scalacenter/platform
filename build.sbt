@@ -33,13 +33,12 @@ lazy val publishSettings = Seq(
   publishMavenStyle := true,
   bintrayOrganization := Some("scalaplatform"),
   bintrayRepository := "tools",
-  bintraySyncMavenCentral := "true",
   bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
   publishTo := (publishTo in bintray).value,
   publishArtifact in Test := false,
   licenses := Seq(
-    // Scala Center license...
-    "BSD 3-Clause License" -> url(
+    // Scala Center license... BSD 3-clause
+    "BSD" -> url(
       "http://opensource.org/licenses/BSD-3-Clause")
   ),
   homepage := Some(url("https://github.com/scalaplatform/platform")),
