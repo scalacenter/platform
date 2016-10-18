@@ -1,3 +1,5 @@
+$ git config --global user.email "jorge@vican.me"
+$ git config --global user.name "Jorge Vicente Cantero"
 $ exec git init .
 $ exec git add .
 $ exec git commit -m init
