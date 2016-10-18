@@ -1,3 +1,49 @@
+import CustomReleaseSteps._
+import com.typesafe.sbt.pgp.PgpKeys
+import sbtrelease.ReleaseStateTransformations._
+
+lazy val publishSettings = Seq(
+  publishMavenStyle := false,
+  bintrayOrganization := Some("scalaplatform"),
+  bintrayRepository := "tools",
+  bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
+  publishTo := (publishTo in bintray).value,
+  publishArtifact in Test := false,
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+  licenses := Seq(
+    // Scala Center license... BSD 3-clause
+    "BSD" -> url("http://opensource.org/licenses/BSD-3-Clause")
+  ),
+  homepage := Some(url("https://github.com/scalaplatform/platform")),
+  autoAPIMappings := true,
+  apiURL := Some(url("https://scalaplatform.github.io/platform")),
+  scmInfo := Some(
+    ScmInfo(
+      url("https://github.com/scalaplatform/platform"),
+      "scm:git:git@github.com:scalaplatform/platform.git"
+    )
+  ),
+  releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    runTest,
+    setReleaseVersion,
+    commitReleaseVersion,
+    tagRelease,
+    publishArtifacts,
+    setNextVersion,
+    commitNextVersion,
+    pushChanges
+  ),
+  pomExtra :=
+    <developers>
+      <developer>
+        <id>jvican</id>
+        <name>Jorge Vicente Cantero</name>
+        <url></url>
+      </developer>
+    </developers>
+)
 lazy val buildSettings = Seq(
   organization := "ch.epfl.scala",
   resolvers += Resolver.jcenterRepo,
@@ -27,37 +73,6 @@ lazy val commonSettings = Seq(
   scalacOptions in (Compile, console) := compilerOptions,
   testOptions in Test += Tests.Argument("-oD"),
   scalaVersion := "2.11.8"
-)
-
-lazy val publishSettings = Seq(
-  publishMavenStyle := true,
-  bintrayOrganization := Some("scalaplatform"),
-  bintrayRepository := "tools",
-  bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
-  publishTo := (publishTo in bintray).value,
-  publishArtifact in Test := false,
-  licenses := Seq(
-    // Scala Center license... BSD 3-clause
-    "BSD" -> url(
-      "http://opensource.org/licenses/BSD-3-Clause")
-  ),
-  homepage := Some(url("https://github.com/scalaplatform/platform")),
-  autoAPIMappings := true,
-  apiURL := Some(url("https://scalaplatform.github.io/platform")),
-  scmInfo := Some(
-    ScmInfo(
-      url("https://github.com/scalaplatform/platform"),
-      "scm:git:git@github.com:scalaplatform/platform.git"
-    )
-  ),
-  pomExtra :=
-    <developers>
-      <developer>
-        <id>jvican</id>
-        <name>Jorge Vicente Cantero</name>
-        <url></url>
-      </developer>
-    </developers>
 )
 
 lazy val noPublish = Seq(
