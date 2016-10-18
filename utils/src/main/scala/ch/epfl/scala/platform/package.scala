@@ -1,4 +1,4 @@
-package ch.epfl.scala.platform
+package ch.epfl.scala
 
 import scala.util.Properties
 

@@ -3,7 +3,7 @@ build:
   commands:
     - test -e "/drone/.sbt" && mv /drone/.sbt $HOME/.sbt
     - export COURSIER_CACHE="/drone/.coursier-cache"
-    - sbt clean test sbt-utils/clean sbt-utils/test -Dsbt.ivy.home=/drone/.ivy2
+    - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/scripted -Dsbt.ivy.home=/drone/.ivy2
     - mv $HOME/.sbt /drone/.sbt
 
 cache:

@@ -114,7 +114,7 @@ lazy val `release-manager` = project
   )
 
 val circeVersion = "0.5.1"
-lazy val `sbt-utils` = project
+lazy val `sbt-platform` = project
   .in(file("utils"))
   .settings(allSettings)
   .settings(ScriptedPlugin.scriptedSettings)
@@ -126,7 +126,9 @@ lazy val `sbt-utils` = project
       "com.lihaoyi" %% "sourcecode" % "0.1.2",
       "io.circe" %% "circe-core" % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion,
-      "io.circe" %% "circe-parser" % circeVersion
+      "io.circe" %% "circe-parser" % circeVersion,
+      // Must be added because bintry depends on it, sigh
+      "net.databinder.dispatch" %% "dispatch-json4s-native" % "0.11.3"
     ),
     scriptedLaunchOpts := Seq(
       "-Dplugin.version=" + version.value,
