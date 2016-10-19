@@ -108,7 +108,6 @@ object PlatformSettings {
       releaseProcess := Seq[ReleaseStep](
         checkSnapshotDependencies,
         inquireVersions,
-        runClean,
         runTest,
         setReleaseVersion,
         commitReleaseVersion,
