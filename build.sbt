@@ -132,6 +132,7 @@ lazy val `sbt-platform` = project
   .settings(ScriptedPlugin.scriptedSettings)
   .settings(
     sbtPlugin := true,
+    publishMavenStyle := false,
     scalaVersion := "2.10.5",
     libraryDependencies ++= Seq(
       "com.eed3si9n" %% "gigahorse-core" % "0.1.1",
