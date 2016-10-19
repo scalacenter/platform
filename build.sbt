@@ -146,7 +146,7 @@ lazy val `sbt-platform` = project
     ivyScriptedCachePath := {
       if (sys.env.get("CI").exists(_.toBoolean))
         "-Dsbt.ivy.home=/drone/.ivy2"
-      else ""
+      else s"-Dsbt.ivy.home=${ivyPaths.value.ivyHome.get}"
     },
     scriptedLaunchOpts := Seq(
       "-Dplugin.version=" + version.value,
