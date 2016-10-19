@@ -125,6 +125,7 @@ lazy val `release-manager` = project
   )
 
 val circeVersion = "0.5.1"
+val ivyScriptedCachePath = settingKey[String]("Ivy scripted cache path.")
 lazy val `sbt-platform` = project
   .in(file("utils"))
   .settings(allSettings)
@@ -141,13 +142,18 @@ lazy val `sbt-platform` = project
       // Must be added because bintry depends on it, sigh
       "net.databinder.dispatch" %% "dispatch-json4s-native" % "0.11.3"
     ),
+    ivyScriptedCachePath := {
+      if (sys.env.get("CI").exists(_.toBoolean))
+        "-Dsbt.ivy.home=/drone/.ivy2"
+      else ""
+    },
     scriptedLaunchOpts := Seq(
       "-Dplugin.version=" + version.value,
       // .jvmopts is ignored, simulate here
       "-XX:MaxPermSize=256m",
       "-Xmx2g",
       "-Xss2m",
-      "-Dsbt.ivy.home=/drone/.ivy2"
+      ivyScriptedCachePath.value
     ),
     scriptedBufferLog := false,
     addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.3"),
