@@ -3,7 +3,7 @@ import com.typesafe.sbt.pgp.PgpKeys
 import sbtrelease.ReleaseStateTransformations._
 
 lazy val publishSettings = Seq(
-  publishMavenStyle := false,
+  publishMavenStyle := true,
   bintrayOrganization := Some("scalaplatform"),
   bintrayRepository := "tools",
   bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
