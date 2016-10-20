@@ -18,13 +18,8 @@ checkVariablesContent := {
     assert(ciBuildUrl.value.get != "")
     assert(ciBuildNumber.value != None)
     assert(ciBuildNumber.value.get >= 0)
-    // CI_PULL_REQUEST may not be defined
-    println(ciJobNumber.value)
     assert(ciJobNumber.value != None)
     assert(ciJobNumber.value.get >= 0)
-
-    println(ciTag.value)
-    assert(ciTag.value != None)
-    assert(ciTag.value.get != "")
+    // CI_PULL_REQUEST and CI_TAG may not be defined
   }
 }
