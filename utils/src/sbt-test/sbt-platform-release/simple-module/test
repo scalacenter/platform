@@ -6,4 +6,20 @@ $ exec git commit -m init
 
 > compile
 > run
+> inspect insideCi
+> inspect insideCi
+> inspect ciName
+> inspect ciRepo
+> inspect ciBranch
+> inspect ciCommit
+> inspect ciBuildDir
+> inspect ciBuildUrl
+> inspect ciBuildNumber
+> inspect ciPullRequest
+> inspect ciJobNumber
+> inspect ciTag
+> inspect sonatypeUsername
+> inspect sonatypePassword
+> inspect bintrayUsername
+> inspect bintrayPassword
 $ exists target/scala-2.11

@@ -5,6 +5,7 @@ import com.typesafe.sbt.pgp.PgpKeys
 import sbt._
 
 object PlatformPlugin extends sbt.AutoPlugin {
+  object autoImport extends PlatformSettings
   override def trigger = allRequirements
   override def requires =
     bintray.BintrayPlugin &&
@@ -12,66 +13,47 @@ object PlatformPlugin extends sbt.AutoPlugin {
       SbtPgp
 
   override def projectSettings = PlatformSettings.settings
-  object autoImport extends DroneSettings {
-    // FORMAT: OFF
-    val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
-    platformReleaseOnMerge := false // By default, disabled
-    val platformModuleTags = settingKey[Seq[String]]("Tags for the bintray module package.")
-    platformModuleTags := Seq.empty[String]
-    val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
-    platformTargetBranch := "platform-release"
-    // FORMAT: ON
-  }
-  import autoImport._
 }
 
-trait DroneSettings {
+trait PlatformSettings {
   def getEnvVariable(key: String): Option[String] = sys.env.get(key)
   def toBoolean(presumedBoolean: String) = presumedBoolean.toBoolean
   def toInt(presumedInt: String) = presumedInt.toInt
 
   // Drone-defined environment variables
   val insideCi = settingKey[Boolean]("Checks if CI is executing the build.")
-  insideCi := getEnvVariable("CI").exists(toBoolean)
   val ciName = settingKey[Option[String]]("Get the name of the CI server.")
-  ciName := getEnvVariable("CI_NAME")
   val ciRepo = settingKey[Option[String]]("Get the repository run by the CI.")
-  ciRepo := getEnvVariable("CI_REPO")
   val ciBranch = settingKey[Option[String]]("Get the current git branch.")
-  ciBranch := getEnvVariable("CI_BRANCH")
   val ciCommit = settingKey[Option[String]]("Get the current git commit.")
-  ciCommit := getEnvVariable("CI_COMMIT")
   val ciBuildDir = settingKey[Option[String]]("Get the CI build directory.")
-  ciBuildDir := getEnvVariable("CI_BUILD_DIR")
   val ciBuildUrl = settingKey[Option[String]]("Get the CI build URL.")
-  ciBuildUrl := getEnvVariable("CI_BUILD_URL")
   val ciBuildNumber = settingKey[Option[Int]]("Get the CI build number.")
-  ciBuildNumber := getEnvVariable("CI_BUILD_NUMBER").map(toInt)
   val ciPullRequest = settingKey[Option[String]]("Get the pull request id.")
-  ciPullRequest := getEnvVariable("CI_PULL_REQUEST")
   val ciJobNumber = settingKey[Option[Int]]("Get the CI job number.")
-  ciJobNumber := getEnvVariable("CI_JOB_NUMBER").map(toInt)
   val ciTag = settingKey[Option[String]]("Get the git tag.")
-  ciTag := getEnvVariable("CI_TAG")
 
   // Custom environment variables
   val sonatypeUsername = settingKey[Option[String]]("Get sonatype username.")
-  sonatypeUsername := getEnvVariable("SONATYPE_USERNAME")
   val sonatypePassword = settingKey[Option[String]]("Get sonatype password.")
-  sonatypePassword := getEnvVariable("SONATYPE_PASSWORD")
   val bintrayUsername = settingKey[Option[String]]("Get bintray username.")
-  bintrayUsername := getEnvVariable("BINTRAY_USERNAME")
   val bintrayPassword = settingKey[Option[String]]("Get bintray password.")
-  bintrayPassword := getEnvVariable("BINTRAY_PASSWORD")
+
+  // FORMAT: OFF
+  val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
+  val platformModuleTags = settingKey[Seq[String]]("Tags for the bintray module package.")
+  val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
+  // FORMAT: ON
 }
 
 object PlatformSettings {
 
+  import PlatformPlugin.autoImport._
+
   def settings: Seq[Setting[_]] =
-    resolverSettings ++ compilationSettings ++ bintraySettings
+    resolverSettings ++ compilationSettings ++ bintraySettings ++ platformSettings
 
   import sbt._, Keys._
-  import PlatformPlugin.autoImport._
   import sbtrelease.ReleasePlugin.autoImport._
   import ReleaseTransformations._
   import bintray.BintrayPlugin.autoImport._
@@ -87,18 +69,39 @@ object PlatformSettings {
   private val defaultCompilationFlags =
     Seq("-deprecation", "-encoding", "UTF-8", "-unchecked")
   private val twoLastScalaVersions = Seq("2.10.6", "2.11.8")
-  lazy val compilationSettings = Seq(
+  lazy val compilationSettings: Seq[Setting[_]] = Seq(
     scalacOptions in Compile ++= defaultCompilationFlags,
     crossScalaVersions in Compile := twoLastScalaVersions
   )
 
-  lazy val bintraySettings = Seq(
+  lazy val bintraySettings: Seq[Setting[_]] = Seq(
     bintrayOrganization := Some("scalaplatform"),
     publishTo := (publishTo in bintray).value,
     // Necessary for synchronization with Maven Central
     publishMavenStyle := true,
     bintrayReleaseOnPublish in ThisBuild := false,
     releaseCrossBuild := true
+  )
+
+  lazy val platformSettings: Seq[Setting[_]] = Seq(
+    insideCi := getEnvVariable("CI").exists(toBoolean),
+    ciName := getEnvVariable("CI_NAME"),
+    ciRepo := getEnvVariable("CI_REPO"),
+    ciBranch := getEnvVariable("CI_BRANCH"),
+    ciCommit := getEnvVariable("CI_COMMIT"),
+    ciBuildDir := getEnvVariable("CI_BUILD_DIR"),
+    ciBuildUrl := getEnvVariable("CI_BUILD_URL"),
+    ciBuildNumber := getEnvVariable("CI_BUILD_NUMBER").map(toInt),
+    ciPullRequest := getEnvVariable("CI_PULL_REQUEST"),
+    ciJobNumber := getEnvVariable("CI_JOB_NUMBER").map(toInt),
+    ciTag := getEnvVariable("CI_TAG"),
+    sonatypeUsername := getEnvVariable("SONATYPE_USERNAME"),
+    sonatypePassword := getEnvVariable("SONATYPE_PASSWORD"),
+    bintrayUsername := getEnvVariable("BINTRAY_USERNAME"),
+    bintrayPassword := getEnvVariable("BINTRAY_PASSWORD"),
+    platformReleaseOnMerge := false, // By default, disabled
+    platformModuleTags := Seq.empty[String],
+    platformTargetBranch := "platform-release"
   )
 
   /** Define custom release steps and add them to the default pipeline. */
