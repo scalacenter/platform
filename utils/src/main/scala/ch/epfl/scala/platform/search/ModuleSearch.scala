@@ -1,14 +1,22 @@
 package ch.epfl.scala.platform.search
 
+import cats.data.Xor
+import coursier.core.Version
+import coursier.core.Version.Literal
 import gigahorse._
+import sbt.ModuleID
+
+import scala.language.implicitConversions
 
 trait BintrayApi {
-  val baseUrl = "https://api.bintray.com"
-  def search: Request
+  val baseUrl = "https://bintray.com/api/v1"
+  def resolve: Request
 }
 
 /** Represent a simple Scala module. */
-case class ScalaModule(orgId: String, artifactId: String, scalaBinVersion: String)
+case class ScalaModule(orgId: String,
+                       artifactId: String,
+                       scalaBinVersion: String)
 
 /** Represent a resolved module by the Bintray API endpoint. */
 case class ResolvedModule(name: String,
@@ -17,10 +25,15 @@ case class ResolvedModule(name: String,
                           desc: Option[String],
                           system_ids: List[String],
                           versions: List[String],
-                          latestVersion: String)
+                          latest_version: String)
 
-case class MavenSearch(info: ScalaModule) extends BintrayApi {
-  override def search: Request = {
+object ResolvedModule {
+  implicit def toSbtModuleID(module: ResolvedModule): ModuleID =
+    ModuleID(module.owner, module.name, module.latest_version)
+}
+
+case class Resolution(info: ScalaModule) extends BintrayApi {
+  override def resolve: Request = {
     Gigahorse
       .url(s"$baseUrl/search/packages/maven")
       .addHeader(HeaderNames.ACCEPT -> MimeTypes.JSON)
@@ -29,26 +42,35 @@ case class MavenSearch(info: ScalaModule) extends BintrayApi {
   }
 }
 
+/** Search the bintray repositories for all the releases of a concrete
+  * module. Rolling our own because coursier does not have support for
+  * this, and `latest.release` is not yet implemented. */
 object ModuleSearch {
   import io.circe._
   import generic.auto._
   import parser._
 
-  def searchInMaven(module: ScalaModule): List[ResolvedModule] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
+  type Response[T] = Xor[io.circe.Error, T]
+
+  private[platform] def compareAndGetLatest(ms: Seq[ResolvedModule]) = {
+
+    ms.map(m => m -> Version(m.latest_version))
+      .filterNot(t => t._2.items.contains(Literal("nightly")))
+    ms.maxBy(m => Version(m.latest_version))
+  }
+
+  def searchLatest(module: ScalaModule): Response[ResolvedModule] =
+    searchInMaven(module).map(compareAndGetLatest(_))
+
+  def searchInMaven(module: ScalaModule): Response[List[ResolvedModule]] = {
     import scala.concurrent._
     import scala.concurrent.duration._
-    Gigahorse
-      .withHttp(Gigahorse.config) { http =>
-        // Stacks are only be published to jcenter
-        val librarySearchResults =
-          http
-            .run(MavenSearch(module).search,
-                 Gigahorse.asString andThen (s => {println(s); s}) andThen decode[List[ResolvedModule]])
-            .map(_.map(_.filter(_.repo == "jcenter")))
-        Await.result(librarySearchResults, 90.seconds)
-      }
-      .toOption
-      .get
+    Gigahorse.withHttp(Gigahorse.config) { http =>
+      // Stacks are only be published to jcenter
+      val librarySearchResults =
+        http.run(Resolution(module).resolve,
+                 Gigahorse.asString andThen decode[List[ResolvedModule]])
+      Await.result(librarySearchResults, 90.seconds)
+    }
   }
 }

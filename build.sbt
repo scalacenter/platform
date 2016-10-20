@@ -69,6 +69,11 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.8"
 )
 
+lazy val testDependencies = Seq(
+"org.scalatest" %% "scalatest" % "3.0.0" % "test",
+  "junit" % "junit" % "4.12" % "test"
+)
+
 lazy val noPublish = Seq(
   publish := {},
   publishLocal := {}
@@ -112,10 +117,8 @@ lazy val `release-manager` = project
     libraryDependencies ++= Seq(
       "org.eclipse.jgit" % "org.eclipse.jgit" % "4.5.0.201609210915-r",
       "me.vican.jorge" %% "stoml" % "0.2",
-      "org.scalatest" %% "scalatest" % "3.0.0" % "test",
-      "org.typelevel" %% "cats" % "0.7.2",
-      "junit" % "junit" % "4.12" % "test"
-    )
+      "org.typelevel" %% "cats" % "0.7.2"
+    ) ++ testDependencies
   )
 
 val circeVersion = "0.5.1"
@@ -136,8 +139,9 @@ lazy val `sbt-platform` = project
       "io.circe" %% "circe-parser" % circeVersion,
       // Must be added because bintry depends on it, sigh
       "net.databinder.dispatch" %% "dispatch-json4s-native" % "0.11.3",
+      "io.get-coursier" %% "coursier" % "1.0.0-M14",
       "com.eed3si9n" %% "gigahorse-core" % "0.1.1"
-    ),
+    ) ++ testDependencies,
     ivyScriptedCachePath := {
       if (sys.env.get("CI").exists(_.toBoolean))
         "-Dsbt.ivy.home=/drone/.ivy2"

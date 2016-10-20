@@ -36,3 +36,4 @@ $ exists target/scala-2.11
 > inspect platformTargetBranch
 > checkVariablesContent
 > platformValidatePomData
+> checkPreviousArtifact

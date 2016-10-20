@@ -1,8 +1,8 @@
 package ch.epfl.scala.platform
 
-import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
 import sbt._
-import com.typesafe.sbt.pgp.PgpKeys
+
+import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
 
 object PlatformPlugin extends sbt.AutoPlugin {
   object autoImport extends PlatformSettings
@@ -45,7 +45,7 @@ trait PlatformSettings {
   val platformModuleTags = settingKey[Seq[String]]("Tags for the bintray module package.")
   val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
   val platformValidatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
-  val platformFetchPreviousArtifact = taskKey[Unit]("Fetch latest previous published artifact for MiMa checks.")
+  val platformFetchPreviousArtifact = settingKey[Set[ModuleID]]("Fetch latest previous published artifact for MiMa checks.")
 
   // Release process hooks -- useful for easily extending the default release process
   val beforePublishReleaseHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
@@ -64,6 +64,7 @@ object PlatformSettings {
   import sbtrelease.ReleasePlugin.autoImport._
   import ReleaseTransformations._
   import bintray.BintrayPlugin.autoImport._
+  import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport._
 
   private val PlatformReleases =
     Resolver.bintrayRepo("scalaplatform", "modules-releases")
@@ -91,6 +92,7 @@ object PlatformSettings {
     ) ++ defaultReleaseSettings
 
   /** Define custom release steps and add them to the default pipeline. */
+  import com.typesafe.sbt.pgp.PgpKeys
   lazy val defaultReleaseSettings = Seq(
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     // Use the nightly release process by default...
@@ -118,11 +120,9 @@ object PlatformSettings {
     platformTargetBranch := "platform-release",
     platformValidatePomData := {
       if (bintrayVcsUrl.value.isEmpty)
-        throw new NoSuchElementException(
-          "Set the setting `scmInfo` manually for the POM file generation.")
+        throw new NoSuchElementException(Feedback.forceDefinitionOfScmInfo)
       if (licenses.value.isEmpty)
-        throw new NoSuchElementException(
-          "Maven Central requires your POM files to define a valid license.")
+        throw new NoSuchElementException(Feedback.forceValidLicense)
       bintrayEnsureLicenses.value
     },
     platformFetchPreviousArtifact := {
@@ -130,10 +130,14 @@ object PlatformSettings {
       val artifact = moduleName.value
       val version = scalaBinaryVersion.value
       val targetModule = ScalaModule(org, artifact, version)
-      println(targetModule)
-      val publishedModules = ModuleSearch.searchInMaven(targetModule)
-      println(publishedModules)
-    }
+      val response = ModuleSearch.searchLatest(targetModule)
+      val previousArtifacts =
+        response.map(Set[ModuleID](_)).getOrElse(Set.empty[ModuleID])
+      if (previousArtifacts.isEmpty)
+        sys.error(Feedback.forceDefinitionOfPreviousArtifacts)
+      previousArtifacts
+    },
+    mimaPreviousArtifacts := platformFetchPreviousArtifact.value
   )
 
   object SbtReleaseSettings {
