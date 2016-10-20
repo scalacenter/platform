@@ -135,7 +135,8 @@ lazy val `sbt-platform` = project
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser" % circeVersion,
       // Must be added because bintry depends on it, sigh
-      "net.databinder.dispatch" %% "dispatch-json4s-native" % "0.11.3"
+      "net.databinder.dispatch" %% "dispatch-json4s-native" % "0.11.3",
+      "com.eed3si9n" %% "gigahorse-core" % "0.1.1"
     ),
     ivyScriptedCachePath := {
       if (sys.env.get("CI").exists(_.toBoolean))
@@ -154,6 +155,7 @@ lazy val `sbt-platform` = project
     addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.3"),
     addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0"),
     addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0"),
+    addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.11"),
     addCompilerPlugin(
       "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full
     )

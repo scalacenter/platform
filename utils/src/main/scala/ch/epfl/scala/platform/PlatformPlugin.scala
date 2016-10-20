@@ -1,8 +1,8 @@
 package ch.epfl.scala.platform
 
-import com.typesafe.sbt.SbtPgp
-import com.typesafe.sbt.pgp.PgpKeys
+import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
 import sbt._
+import com.typesafe.sbt.pgp.PgpKeys
 
 object PlatformPlugin extends sbt.AutoPlugin {
   object autoImport extends PlatformSettings
@@ -10,7 +10,8 @@ object PlatformPlugin extends sbt.AutoPlugin {
   override def requires =
     bintray.BintrayPlugin &&
       sbtrelease.ReleasePlugin &&
-      SbtPgp
+      com.typesafe.sbt.SbtPgp &&
+      com.typesafe.tools.mima.plugin.MimaPlugin
 
   override def projectSettings = PlatformSettings.settings
 }
@@ -43,7 +44,8 @@ trait PlatformSettings {
   val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
   val platformModuleTags = settingKey[Seq[String]]("Tags for the bintray module package.")
   val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
-  val validatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
+  val platformValidatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
+  val platformFetchPreviousArtifact = taskKey[Unit]("Fetch latest previous published artifact for MiMa checks.")
 
   // Release process hooks -- useful for easily extending the default release process
   val beforePublishReleaseHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
@@ -114,7 +116,7 @@ object PlatformSettings {
     platformReleaseOnMerge := false, // By default, disabled
     platformModuleTags := Seq.empty[String],
     platformTargetBranch := "platform-release",
-    validatePomData := {
+    platformValidatePomData := {
       if (bintrayVcsUrl.value.isEmpty)
         throw new NoSuchElementException(
           "Set the setting `scmInfo` manually for the POM file generation.")
@@ -122,6 +124,15 @@ object PlatformSettings {
         throw new NoSuchElementException(
           "Maven Central requires your POM files to define a valid license.")
       bintrayEnsureLicenses.value
+    },
+    platformFetchPreviousArtifact := {
+      val org = organization.value
+      val artifact = moduleName.value
+      val version = scalaBinaryVersion.value
+      val targetModule = ScalaModule(org, artifact, version)
+      println(targetModule)
+      val publishedModules = ModuleSearch.searchInMaven(targetModule)
+      println(publishedModules)
     }
   )
 
@@ -129,13 +140,13 @@ object PlatformSettings {
     object Nightly {
       val releaseProcess = {
         Seq[ReleaseStep](
+          checkSnapshotDependencies,
           inquireVersions,
-          releaseStepTask(validatePomData),
+          releaseStepTask(platformValidatePomData),
           runTest,
           setReleaseVersion,
           commitReleaseVersion,
           tagRelease,
-          releaseStepTask(bintrayEnsureLicenses),
           releaseStepTask(beforePublishReleaseHook),
           publishArtifacts,
           releaseStepTask(afterPublishReleaseHook),

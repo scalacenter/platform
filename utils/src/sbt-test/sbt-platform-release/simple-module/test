@@ -35,4 +35,4 @@ $ exists target/scala-2.11
 > inspect platformModuleTags
 > inspect platformTargetBranch
 > checkVariablesContent
-> validatePomData
+> platformValidatePomData
