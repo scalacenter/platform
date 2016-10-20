@@ -1,6 +1,9 @@
 scalaVersion in Global := "2.11.8"
 
-lazy val checkVariablesContent = taskKey[Unit]("Check the content of variables")
+licenses := Seq("MPL-2.0" -> url("http://opensource.org/licenses/MPL-2.0"))
+
+lazy val checkVariablesContent =
+  taskKey[Unit]("Check the content of variables")
 checkVariablesContent := {
   if (insideCi.value) {
     // Check the CI environment

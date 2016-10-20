@@ -1,6 +1,7 @@
 $ exec git init .
 $ exec git config user.email "jorge@vican.me"
 $ exec git config user.name "Jorge Vicente Cantero"
+$ exec git remote add origin https://github.com/scalacenter/repo
 $ exec git add .
 $ exec git commit -m init
 
@@ -34,3 +35,4 @@ $ exists target/scala-2.11
 > inspect platformModuleTags
 > inspect platformTargetBranch
 > checkVariablesContent
+> validatePomData

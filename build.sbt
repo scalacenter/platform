@@ -17,12 +17,6 @@ lazy val publishSettings = Seq(
   homepage := Some(url("https://github.com/scalaplatform/platform")),
   autoAPIMappings := true,
   apiURL := Some(url("https://scalaplatform.github.io/platform")),
-  scmInfo := Some(
-    ScmInfo(
-      url("https://github.com/scalaplatform/platform"),
-      "scm:git:git@github.com:scalaplatform/platform.git"
-    )
-  ),
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
     inquireVersions,

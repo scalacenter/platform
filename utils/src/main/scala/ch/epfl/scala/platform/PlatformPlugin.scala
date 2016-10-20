@@ -43,6 +43,11 @@ trait PlatformSettings {
   val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
   val platformModuleTags = settingKey[Seq[String]]("Tags for the bintray module package.")
   val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
+  val validatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
+
+  // Release process hooks -- useful for easily extending the default release process
+  val beforePublishReleaseHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
+  val afterPublishReleaseHook = taskKey[Unit]("A release hook to customize the end of the release process.")
   // FORMAT: ON
 }
 
@@ -81,27 +86,13 @@ object PlatformSettings {
       publishMavenStyle := true,
       bintrayReleaseOnPublish in ThisBuild := false,
       releaseCrossBuild := true
-    ) ++ pluginReleaseSettings
+    ) ++ defaultReleaseSettings
 
   /** Define custom release steps and add them to the default pipeline. */
-  lazy val pluginReleaseSettings = Seq(
+  lazy val defaultReleaseSettings = Seq(
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-    releaseProcess := Seq[ReleaseStep](
-      checkSnapshotDependencies,
-      inquireVersions,
-      runTest,
-      setReleaseVersion,
-      commitReleaseVersion,
-      tagRelease,
-      publishArtifacts,
-      // TODO(jvican): Add task that checks correct Maven POM
-      // releaseStepTask(bintrayEnsurePOM),
-      releaseStepTask(bintrayEnsureLicenses),
-      releaseStepTask(bintrayRelease),
-      setNextVersion,
-      commitNextVersion,
-      pushChanges
-    )
+    // Use the nightly release process by default...
+    releaseProcess := SbtReleaseSettings.Nightly.releaseProcess
   )
 
   lazy val platformSettings: Seq[Setting[_]] = Seq(
@@ -122,7 +113,37 @@ object PlatformSettings {
     bintrayPassword := getEnvVariable("BINTRAY_PASSWORD"),
     platformReleaseOnMerge := false, // By default, disabled
     platformModuleTags := Seq.empty[String],
-    platformTargetBranch := "platform-release"
+    platformTargetBranch := "platform-release",
+    validatePomData := {
+      if (bintrayVcsUrl.value.isEmpty)
+        throw new NoSuchElementException(
+          "Set the setting `scmInfo` manually for the POM file generation.")
+      if (licenses.value.isEmpty)
+        throw new NoSuchElementException(
+          "Maven Central requires your POM files to define a valid license.")
+      bintrayEnsureLicenses.value
+    }
   )
 
+  object SbtReleaseSettings {
+    object Nightly {
+      val releaseProcess = {
+        Seq[ReleaseStep](
+          inquireVersions,
+          releaseStepTask(validatePomData),
+          runTest,
+          setReleaseVersion,
+          commitReleaseVersion,
+          tagRelease,
+          releaseStepTask(bintrayEnsureLicenses),
+          releaseStepTask(beforePublishReleaseHook),
+          publishArtifacts,
+          releaseStepTask(afterPublishReleaseHook),
+          setNextVersion,
+          commitNextVersion,
+          pushChanges
+        )
+      }
+    }
+  }
 }
