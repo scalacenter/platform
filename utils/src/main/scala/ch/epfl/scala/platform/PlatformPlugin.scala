@@ -145,9 +145,10 @@ object PlatformSettings {
       val releaseProcess = {
         Seq[ReleaseStep](
           checkSnapshotDependencies,
-          inquireVersions,
           releaseStepTask(platformValidatePomData),
           runTest,
+          releaseStepTask(mimaReportBinaryIssues),
+          inquireVersions,
           setReleaseVersion,
           commitReleaseVersion,
           tagRelease,
