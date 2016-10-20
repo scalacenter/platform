@@ -48,8 +48,8 @@ trait PlatformSettings {
   val platformFetchPreviousArtifact = settingKey[Set[ModuleID]]("Fetch latest previous published artifact for MiMa checks.")
 
   // Release process hooks -- useful for easily extending the default release process
-  val beforePublishReleaseHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
-  val afterPublishReleaseHook = taskKey[Unit]("A release hook to customize the end of the release process.")
+  val platformBeforePublishHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
+  val platformAfterPublishHook = taskKey[Unit]("A release hook to customize the end of the release process.")
   // FORMAT: ON
 }
 
@@ -151,9 +151,9 @@ object PlatformSettings {
           setReleaseVersion,
           commitReleaseVersion,
           tagRelease,
-          releaseStepTask(beforePublishReleaseHook),
+          releaseStepTask(platformBeforePublishHook),
           publishArtifacts,
-          releaseStepTask(afterPublishReleaseHook),
+          releaseStepTask(platformAfterPublishHook),
           setNextVersion,
           commitNextVersion,
           pushChanges
