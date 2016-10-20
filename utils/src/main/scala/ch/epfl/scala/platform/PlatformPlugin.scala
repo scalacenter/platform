@@ -51,7 +51,7 @@ object PlatformSettings {
   import PlatformPlugin.autoImport._
 
   def settings: Seq[Setting[_]] =
-    resolverSettings ++ compilationSettings ++ bintraySettings ++ platformSettings
+    resolverSettings ++ compilationSettings ++ publishSettings ++ platformSettings
 
   import sbt._, Keys._
   import sbtrelease.ReleasePlugin.autoImport._
@@ -74,13 +74,34 @@ object PlatformSettings {
     crossScalaVersions in Compile := twoLastScalaVersions
   )
 
-  lazy val bintraySettings: Seq[Setting[_]] = Seq(
-    bintrayOrganization := Some("scalaplatform"),
-    publishTo := (publishTo in bintray).value,
-    // Necessary for synchronization with Maven Central
-    publishMavenStyle := true,
-    bintrayReleaseOnPublish in ThisBuild := false,
-    releaseCrossBuild := true
+  lazy val publishSettings: Seq[Setting[_]] = Seq(
+      bintrayOrganization := Some("scalaplatform"),
+      publishTo := (publishTo in bintray).value,
+      // Necessary for synchronization with Maven Central
+      publishMavenStyle := true,
+      bintrayReleaseOnPublish in ThisBuild := false,
+      releaseCrossBuild := true
+    ) ++ pluginReleaseSettings
+
+  /** Define custom release steps and add them to the default pipeline. */
+  lazy val pluginReleaseSettings = Seq(
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      publishArtifacts,
+      // TODO(jvican): Add task that checks correct Maven POM
+      // releaseStepTask(bintrayEnsurePOM),
+      releaseStepTask(bintrayEnsureLicenses),
+      releaseStepTask(bintrayRelease),
+      setNextVersion,
+      commitNextVersion,
+      pushChanges
+    )
   )
 
   lazy val platformSettings: Seq[Setting[_]] = Seq(
@@ -104,26 +125,4 @@ object PlatformSettings {
     platformTargetBranch := "platform-release"
   )
 
-  /** Define custom release steps and add them to the default pipeline. */
-  object PlatformSbtRelease {
-    lazy val pluginReleaseSettings = Seq(
-      releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-      releaseProcess := Seq[ReleaseStep](
-        checkSnapshotDependencies,
-        inquireVersions,
-        runTest,
-        setReleaseVersion,
-        commitReleaseVersion,
-        tagRelease,
-        publishArtifacts,
-        // TODO(jvican): Add task that checks correct Maven POM
-        // releaseStepTask(bintrayEnsurePOM),
-        releaseStepTask(bintrayEnsureLicenses),
-        releaseStepTask(bintrayRelease),
-        setNextVersion,
-        commitNextVersion,
-        pushChanges
-      )
-    )
-  }
 }
