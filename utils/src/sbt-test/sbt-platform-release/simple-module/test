@@ -6,6 +6,7 @@ $ exec git commit -m init
 
 > compile
 > run
+$ exists target/scala-2.11
 > inspect insideCi
 > inspect insideCi
 > inspect ciName
@@ -22,4 +23,7 @@ $ exec git commit -m init
 > inspect sonatypePassword
 > inspect bintrayUsername
 > inspect bintrayPassword
-$ exists target/scala-2.11
+> inspect platformReleaseOnMerge
+> inspect platformModuleTags
+> inspect platformTargetBranch
+> checkVariablesContent
