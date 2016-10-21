@@ -70,7 +70,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val testDependencies = Seq(
-"org.scalatest" %% "scalatest" % "3.0.0" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test",
   "junit" % "junit" % "4.12" % "test"
 )
 
@@ -162,5 +162,8 @@ lazy val `sbt-platform` = project
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.11"),
     addCompilerPlugin(
       "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full
-    )
+    ),
+    fork in Test := true,
+    javaOptions in Test ++= Seq("-Dplatform.debug=true",
+                                "-Dplatform.test=true")
   )

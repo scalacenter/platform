@@ -9,4 +9,6 @@ object Feedback {
     "Unexpected empty `mimaPreviousArtifacts`. Set it to perform MiMa checks"
   val undefinedVersion =
     "No versions are set! Was this release part executed before inquireVersions?"
+  def undefinedEnvironmentVariable(name: String) =
+    s"Your environment does not define $name. Set it before proceeding!"
 }

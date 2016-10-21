@@ -1,12 +1,7 @@
-package ch.epfl.scala.platform
+package ch.epfl.scala.platform.search
 
 import org.junit.Test
 import org.scalatest.junit.JUnitSuite
-import ch.epfl.scala.platform.search.{
-  ModuleSearch,
-  ResolvedModule,
-  ScalaModule
-}
 
 class ModuleSearchSpec extends JUnitSuite {
   @Test def search(): Unit = {

@@ -1,6 +1,6 @@
 package ch.epfl.scala.platform.github
 
-trait GithubDataTypes {
+trait GitHubDataTypes {
   case class ReleaseCreated(
       url: String,
       html_url: String,

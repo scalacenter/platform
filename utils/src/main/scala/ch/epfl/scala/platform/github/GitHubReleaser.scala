@@ -1,28 +1,27 @@
 package ch.epfl.scala.platform.github
 
 import gigahorse._
-import sbtrelease.Version
 import ch.epfl.scala.platform.logger
+import coursier.core.Version
 
-object GithubRelease extends GithubDataTypes with GithubResources {
-
+object GitHubReleaser extends GitHubDataTypes with GitHubResources {
   type CirceResult[T] = cats.data.Xor[io.circe.Error, T]
 
   trait GithubApi {
     val baseUrl = "https://api.github.com"
     val uploadsUrl = "https://uploads.github.com"
 
-    def pushRelease(release: GithubRelease): CirceResult[ReleaseCreated]
+    def pushRelease(release: GitHubRelease): CirceResult[ReleaseCreated]
     def pushResourceToRelease(resource: Resource, releaseId: Int): Boolean
   }
 
   val defaultPreRelease = (v: Version) => false
-  case class GithubRelease(version: Version,
+  case class GitHubRelease(version: Version,
                            branch: String = "master",
                            body: String,
                            preRelease: Version => Boolean = defaultPreRelease)
 
-  case class GithubEndpoint(owner: String, repo: String, authToken: String)
+  case class GitHubEndpoint(owner: String, repo: String, authToken: String)
       extends GithubApi {
     val defaultGithubHeaders = Seq(
       HeaderNames.ACCEPT -> "application/vnd.github.v3+json",
@@ -30,15 +29,16 @@ object GithubRelease extends GithubDataTypes with GithubResources {
       HeaderNames.AUTHORIZATION -> s"token $authToken"
     ).toMap.mapValues(List(_))
 
-    private def pushReleaseRequest(release: GithubRelease): Request = {
-      val versionNumber = s"v${release.version.string}"
+    val testing = System.getProperty("platform.test") == "true"
+    private def pushReleaseRequest(release: GitHubRelease): Request = {
+      val versionNumber = s"v${release.version.repr}"
       val payload = s"""
         |{
         |  "tag_name": "$versionNumber",
         |  "target_commitish": "${release.branch}",
         |  "name": "$versionNumber",
         |  "body": "${release.body}",
-        |  "draft": false,
+        |  "draft": $testing,
         |  "prerelease": ${release.preRelease(release.version)}
         |}
       """.stripMargin
@@ -67,16 +67,15 @@ object GithubRelease extends GithubDataTypes with GithubResources {
     import parser._
 
     private val DefaultTimeout = 60.seconds
-    def awaitResult[T](f: Awaitable[T]) = Await.result[T](f, DefaultTimeout)
+    private def awaitResult[T](f: Awaitable[T]) =
+      Await.result[T](f, DefaultTimeout)
 
     /** Submit a release to the Github interface, with artifacts and release notes. */
-    def pushRelease(release: GithubRelease): CirceResult[ReleaseCreated] = {
+    def pushRelease(release: GitHubRelease): CirceResult[ReleaseCreated] = {
       Gigahorse.withHttp(Gigahorse.config) { http =>
         awaitResult(
-          http.run(
-            pushReleaseRequest(release),
-            Gigahorse.asString andThen (r => { println(r); r }) andThen decode[
-              ReleaseCreated]))
+          http.run(pushReleaseRequest(release),
+                   Gigahorse.asString andThen decode[ReleaseCreated]))
       }
     }
 

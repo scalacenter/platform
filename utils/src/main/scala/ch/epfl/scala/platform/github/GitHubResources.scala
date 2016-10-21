@@ -2,7 +2,7 @@ package ch.epfl.scala.platform.github
 
 import java.io.File
 
-trait GithubResources {
+trait GitHubResources {
   trait Resource {
     val contentType: String
     val name: String

@@ -1,5 +1,5 @@
 build:
-  image: jvican/docker-alpine-sbt-git
+  image: jvican/scala-sbt-git
   commands:
     - test -e "/drone/.sbt" && mv /drone/.sbt $HOME/.sbt
     - export COURSIER_CACHE="/drone/.coursier-cache"
