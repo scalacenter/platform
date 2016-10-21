@@ -1,5 +1,6 @@
 build:
   image: jvican/docker-alpine-sbt-git
+  token: $$GITHUB_PLATFORM_TEST_TOKEN
   commands:
     - test -e "/drone/.sbt" && mv /drone/.sbt $HOME/.sbt
     - export COURSIER_CACHE="/drone/.coursier-cache"
