@@ -7,4 +7,6 @@ object Feedback {
     "Maven Central requires your POM files to define a valid license."
   val forceDefinitionOfPreviousArtifacts =
     "Unexpected empty `mimaPreviousArtifacts`. Set it to perform MiMa checks"
+  val undefinedVersion =
+    "No versions are set! Was this release part executed before inquireVersions?"
 }

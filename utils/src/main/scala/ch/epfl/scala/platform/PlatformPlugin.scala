@@ -141,6 +141,24 @@ object PlatformSettings {
   )
 
   object SbtReleaseSettings {
+    import ReleaseKeys._
+    import sbtrelease.Utilities._
+    import sbtrelease.ReleaseStateTransformations._
+
+    def autoSetNightlyVersion: ReleaseStep = { (st: State) =>
+      val vs = st.get(versions)
+      val selected = vs.getOrElse(sys.error(Feedback.undefinedVersion))._1
+      st.log.info("Setting version to '%s'." format selected)
+      val useGlobal = st.extract.get(releaseUseGlobalVersion)
+      val versionStr = (if (useGlobal) globalVersionString else versionString) format selected
+      val file = st.extract.get(releaseVersionFile)
+      IO.writeLines(file, Seq(versionStr))
+      val actualVersion =
+        if (useGlobal) version in ThisBuild := selected
+        else version := selected
+      reapply(Seq(actualVersion), st)
+    }
+
     object Nightly {
       val releaseProcess = {
         Seq[ReleaseStep](

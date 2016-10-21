@@ -25,7 +25,7 @@ class ModuleSearchSpec extends JUnitSuite {
       emptyResolvedModule("0.1.0"),
       emptyResolvedModule("0.2.1"),
       emptyResolvedModule("0.2.1-BETA"),
-      emptyResolvedModule("0.2.1-NIGHTLY"),
+      emptyResolvedModule("0.2.1-2010-08-10"),
       presumedWinner,
       emptyResolvedModule("0.2.2-beta"),
       emptyResolvedModule("0.2.2-alpha")
