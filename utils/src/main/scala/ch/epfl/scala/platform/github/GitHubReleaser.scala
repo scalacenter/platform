@@ -17,8 +17,8 @@ object GitHubReleaser extends GitHubDataTypes with GitHubResources {
 
   val defaultPreRelease = (v: Version) => false
   case class GitHubRelease(version: Version,
-                           branch: String = "master",
                            body: String,
+                           branch: String = "platform-release",
                            preRelease: Version => Boolean = defaultPreRelease)
 
   case class GitHubEndpoint(owner: String, repo: String, authToken: String)

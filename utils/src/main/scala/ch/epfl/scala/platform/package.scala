@@ -1,7 +1,6 @@
 package ch.epfl.scala
 
 package object platform {
-  type Version = coursier.core.Version
   object logger {
     def elem[T](es: sourcecode.Text[T]*)(implicit line: sourcecode.Line,
                                          file: sourcecode.File): Unit = {

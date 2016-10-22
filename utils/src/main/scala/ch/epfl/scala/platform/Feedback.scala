@@ -11,4 +11,6 @@ object Feedback {
     "No versions are set! Was this release part executed before inquireVersions?"
   def undefinedEnvironmentVariable(name: String) =
     s"Your environment does not define $name. Set it before proceeding!"
+  val incorrectGitHubUrl =
+    "The value of the setting `scmInfo` is not a GitHub url."
 }

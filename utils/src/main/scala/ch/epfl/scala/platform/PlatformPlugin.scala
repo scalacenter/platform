@@ -1,12 +1,16 @@
 package ch.epfl.scala.platform
 
+import ch.epfl.scala.platform.github.GitHubReleaser.{GitHubEndpoint, GitHubRelease}
 import sbt._
-
 import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
+import coursier.core.Version
 
 object PlatformPlugin extends sbt.AutoPlugin {
+
   object autoImport extends PlatformSettings
+
   override def trigger = allRequirements
+
   override def requires =
     bintray.BintrayPlugin &&
       sbtrelease.ReleasePlugin &&
@@ -18,7 +22,9 @@ object PlatformPlugin extends sbt.AutoPlugin {
 
 trait PlatformSettings {
   def getEnvVariable(key: String): Option[String] = sys.env.get(key)
+
   def toBoolean(presumedBoolean: String) = presumedBoolean.toBoolean
+
   def toInt(presumedInt: String) = presumedInt.toInt
 
   // Drone-defined environment variables
@@ -46,6 +52,8 @@ trait PlatformSettings {
   val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
   val platformValidatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
   val platformFetchPreviousArtifact = settingKey[Set[ModuleID]]("Fetch latest previous published artifact for MiMa checks.")
+  val platformGitHubToken = settingKey[String]("Token to publish releses to GitHub.")
+  val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
 
   // Release process hooks -- useful for easily extending the default release process
   val platformBeforePublishHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
@@ -62,7 +70,6 @@ object PlatformSettings {
 
   import sbt._, Keys._
   import sbtrelease.ReleasePlugin.autoImport._
-  import ReleaseTransformations._
   import bintray.BintrayPlugin.autoImport._
   import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport._
 
@@ -83,16 +90,18 @@ object PlatformSettings {
   )
 
   lazy val publishSettings: Seq[Setting[_]] = Seq(
-      bintrayOrganization := Some("scalaplatform"),
-      publishTo := (publishTo in bintray).value,
-      // Necessary for synchronization with Maven Central
-      publishMavenStyle := true,
-      bintrayReleaseOnPublish in ThisBuild := false,
-      releaseCrossBuild := true
-    ) ++ defaultReleaseSettings
+    bintrayOrganization := Some("scalaplatform"),
+    publishTo := (publishTo in bintray).value,
+    // Necessary for synchronization with Maven Central
+    publishMavenStyle := true,
+    bintrayReleaseOnPublish in ThisBuild := false,
+    releaseCrossBuild := true
+  ) ++ defaultReleaseSettings
 
   /** Define custom release steps and add them to the default pipeline. */
+
   import com.typesafe.sbt.pgp.PgpKeys
+
   lazy val defaultReleaseSettings = Seq(
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     // Use the nightly release process by default...
@@ -137,7 +146,28 @@ object PlatformSettings {
         sys.error(Feedback.forceDefinitionOfPreviousArtifacts)
       previousArtifacts
     },
-    mimaPreviousArtifacts := platformFetchPreviousArtifact.value
+    mimaPreviousArtifacts := platformFetchPreviousArtifact.value,
+    platformReleaseToGitHub := {
+      val GitHubUrl = """http[s?]://github.com/(\s+)/(\s+)[/?]""".r
+      // TODO(jvican): Change environment name in Drone
+      val tokenEnvName = "GITHUB_PLATFORM_TEST_TOKEN"
+      val githubToken = sys.env.get(tokenEnvName)
+      githubToken match {
+        case Some(token) =>
+          scmInfo.value match {
+            case GitHubUrl(org, repo) =>
+              val endpoint = GitHubEndpoint(org, repo, token)
+              val notes = "Make proper release notes."
+              val releaseVersion = Version(version.value)
+              val release = GitHubRelease(releaseVersion, notes)
+              endpoint.pushRelease(release)
+            case _ =>
+              sys.error(Feedback.incorrectGitHubUrl)
+          }
+        case None =>
+          sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName))
+      }
+    }
   )
 
   object SbtReleaseSettings {
@@ -173,6 +203,7 @@ object PlatformSettings {
           releaseStepTask(platformBeforePublishHook),
           publishArtifacts,
           releaseStepTask(platformAfterPublishHook),
+          releaseStepTask(platformReleaseToGitHub),
           setNextVersion,
           commitNextVersion,
           pushChanges

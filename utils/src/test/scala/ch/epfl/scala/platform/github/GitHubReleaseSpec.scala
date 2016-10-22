@@ -16,7 +16,7 @@ class GitHubReleaseSpec extends JUnitSuite {
     val api = GitHubEndpoint("scalaplatform", "dummy", authToken.get)
     val platformBranch = "master"
     val body = "Look ma', I'm releasing an artifact to GitHub!"
-    val release = GitHubRelease(Version("0.1.1.1"), platformBranch, body)
+    val release = GitHubRelease(Version("0.1.1.1"), body, platformBranch)
     api.pushRelease(release)
   }
 }
