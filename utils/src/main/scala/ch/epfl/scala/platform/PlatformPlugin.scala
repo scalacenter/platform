@@ -1,5 +1,6 @@
 package ch.epfl.scala.platform
 
+import ch.epfl.scala.platform.github.GitHubReleaser
 import ch.epfl.scala.platform.github.GitHubReleaser.{GitHubEndpoint, GitHubRelease}
 import sbt._
 import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
@@ -148,14 +149,13 @@ object PlatformSettings {
     },
     mimaPreviousArtifacts := platformFetchPreviousArtifact.value,
     platformReleaseToGitHub := {
-      val GitHubUrl = """http[s?]://github.com/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)[/?]""".r
       // TODO(jvican): Change environment name in Drone
       val tokenEnvName = "GITHUB_PLATFORM_TEST_TOKEN"
       val githubToken = sys.env.get(tokenEnvName)
       githubToken match {
         case Some(token) =>
           scmInfo.value match {
-            case GitHubUrl(org, repo) =>
+            case GitHubReleaser.GitHubUrl(org, repo) =>
               val endpoint = GitHubEndpoint(org, repo, token)
               val notes = "Make proper release notes."
               val releaseVersion = Version(version.value)

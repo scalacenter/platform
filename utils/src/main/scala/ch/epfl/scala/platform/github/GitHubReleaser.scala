@@ -6,6 +6,7 @@ import coursier.core.Version
 
 object GitHubReleaser extends GitHubDataTypes with GitHubResources {
   type CirceResult[T] = cats.data.Xor[io.circe.Error, T]
+  val GitHubUrl = """https?://(?:www\.)?github\.com/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)/?""".r
 
   trait GithubApi {
     val baseUrl = "https://api.github.com"
