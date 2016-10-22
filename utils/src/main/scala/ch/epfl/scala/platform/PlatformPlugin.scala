@@ -148,7 +148,7 @@ object PlatformSettings {
     },
     mimaPreviousArtifacts := platformFetchPreviousArtifact.value,
     platformReleaseToGitHub := {
-      val GitHubUrl = """http[s?]://github.com/(\s+)/(\s+)[/?]""".r
+      val GitHubUrl = """http[s?]://github.com/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)[/?]""".r
       // TODO(jvican): Change environment name in Drone
       val tokenEnvName = "GITHUB_PLATFORM_TEST_TOKEN"
       val githubToken = sys.env.get(tokenEnvName)
