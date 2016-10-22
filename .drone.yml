@@ -1,5 +1,5 @@
 build:
-  image: jvican/docker-alpine-sbt-git
+  image: jvican/scala-sbt-git
   environment:
     - GITHUB_PLATFORM_TEST_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
   commands:
