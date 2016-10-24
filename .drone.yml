@@ -4,6 +4,8 @@ build:
     - GITHUB_PLATFORM_TEST_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
   commands:
     - test -e "/drone/.sbt" && mv /drone/.sbt $HOME/.sbt
+    - git config --global user.email "lucky@luke.com"
+    - git config --global user.name "Lucky Luke, the Cowboy"
     - export COURSIER_CACHE="/drone/.coursier-cache"
     - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted -Dsbt.ivy.home=/drone/.ivy2
     - mv $HOME/.sbt /drone/.sbt 
