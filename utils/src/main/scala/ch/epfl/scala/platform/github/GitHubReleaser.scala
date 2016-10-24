@@ -7,9 +7,10 @@ import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
 
 object GitHubReleaser extends GitHubDataTypes with GitHubResources {
   type CirceResult[T] = cats.data.Xor[io.circe.Error, T]
-  // TODO(jvican): Support ssh GitHub urls
-  val GitHubUrl =
-  """https?://(?:www\.)?github\.com/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)/?""".r
+  val HttpsGitHubUrl =
+    """https?://(?:www\.)?github\.com/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)/?""".r
+  val SshGitHubUrl =
+    """git@github.com:([a-zA-Z0-9]+)/([a-zA-Z0-9]+)\.git""".r
 
   trait GithubApi {
     val baseUrl = "https://api.github.com"

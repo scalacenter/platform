@@ -48,7 +48,8 @@ trait PlatformSettings {
   val bintrayUsername = settingKey[Option[String]]("Get bintray username.")
   val bintrayPassword = settingKey[Option[String]]("Get bintray password.")
 
-  // FORMAT: OFF
+  // FORMAT: ON
+  val platformLogger = taskKey[Logger]("Return the sbt logger.")
   val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
   val platformModuleTags = settingKey[Seq[String]]("Tags for the bintray module package.")
   val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
@@ -63,7 +64,7 @@ trait PlatformSettings {
   // Release process hooks -- useful for easily extending the default release process
   val platformBeforePublishHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
   val platformAfterPublishHook = taskKey[Unit]("A release hook to customize the end of the release process.")
-  // FORMAT: ON
+  // FORMAT: OFF
 }
 
 object PlatformSettings {
@@ -130,6 +131,7 @@ object PlatformSettings {
     sonatypePassword := getEnvVariable("SONATYPE_PASSWORD"),
     bintrayUsername := getEnvVariable("BINTRAY_USERNAME"),
     bintrayPassword := getEnvVariable("BINTRAY_PASSWORD"),
+    platformLogger := streams.value.log,
     platformReleaseOnMerge := false, // By default, disabled
     platformModuleTags := Seq.empty[String],
     platformTargetBranch := "platform-release",
@@ -178,20 +180,25 @@ object PlatformSettings {
       }
     },
     platformReleaseToGitHub := {
+      def createReleaseInGitHub(org: String, repo: String, token: String) = {
+        val endpoint = GitHubEndpoint(org, repo, token)
+        val notes = platformGetReleaseNotes.value
+        val releaseVersion = Version(version.value)
+        platformLogger.value.info(s"Releasing $releaseVersion to GitHub($org, $repo, $token)")
+        val release = GitHubRelease(releaseVersion, notes)
+        endpoint.pushRelease(release)
+      }
+
       // TODO(jvican): Change environment name in Drone
       val tokenEnvName = "GITHUB_PLATFORM_TEST_TOKEN"
       val githubToken = sys.env.get(tokenEnvName)
-      val logger = streams.value.log
       githubToken match {
         case Some(token) =>
           platformVcsEndpoint.value.map(_.toString) match {
-            case Some(GitHubReleaser.GitHubUrl(org, repo)) =>
-              val endpoint = GitHubEndpoint(org, repo, token)
-              val notes = platformGetReleaseNotes.value
-              val releaseVersion = Version(version.value)
-              logger.info(s"Releasing $releaseVersion to GitHub($org, $repo, $token)")
-              val release = GitHubRelease(releaseVersion, notes)
-              endpoint.pushRelease(release)
+            case Some(GitHubReleaser.HttpsGitHubUrl(org, repo)) =>
+              createReleaseInGitHub(org, repo, token)
+            case Some(GitHubReleaser.SshGitHubUrl(org, repo)) =>
+              createReleaseInGitHub(org, repo, token)
             case Some(wrongUrl) =>
               sys.error(Feedback.incorrectGitHubUrl)
             case None =>
