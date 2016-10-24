@@ -172,6 +172,7 @@ object PlatformSettings {
         releaseVcs.value match {
           case Some(g: Git) =>
             // Fetch git endpoint automatically
+            if (g.trackingRemote.isEmpty) sys.error(Feedback.incorrectGitHubRepo)
             val p = g.cmd("config", "remote.%s.url" format g.trackingRemote)
             Some(url(p.!!.trim))
           case Some(vcs) => sys.error("Only git is supported for now.")
