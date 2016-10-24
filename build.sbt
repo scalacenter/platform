@@ -153,7 +153,9 @@ lazy val `sbt-platform` = project
       "-XX:MaxPermSize=256m",
       "-Xmx2g",
       "-Xss2m",
-      ivyScriptedCachePath.value
+      ivyScriptedCachePath.value,
+      "-Dplatform.debug=true",
+      "-Dplatform.test=true"
     ),
     scriptedBufferLog := false,
     addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.3"),

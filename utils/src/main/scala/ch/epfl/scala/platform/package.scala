@@ -8,7 +8,7 @@ package object platform {
       if (System.getProperty("platform.debug") == "true") {
         es.foreach { e =>
           val filename = file.value.replaceAll(".*/", "")
-          println(s"$filename:${line.value} [${e.source}] ${e.value}")
+          println(s"$filename:${line.value} ${e.value}")
         }
       }
     }

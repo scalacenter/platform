@@ -5,6 +5,7 @@ import ch.epfl.scala.platform.github.GitHubReleaser.{GitHubEndpoint, GitHubRelea
 import sbt._
 import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
 import coursier.core.Version
+import sbtrelease.Git
 
 object PlatformPlugin extends sbt.AutoPlugin {
 
@@ -54,7 +55,10 @@ trait PlatformSettings {
   val platformValidatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
   val platformFetchPreviousArtifact = settingKey[Set[ModuleID]]("Fetch latest previous published artifact for MiMa checks.")
   val platformGitHubToken = settingKey[String]("Token to publish releses to GitHub.")
+  val platformReleaseNotesDir = settingKey[File]("Directory with the markdown release notes.")
+  val platformGetReleaseNotes = taskKey[String]("Get the correct release notes for a release.")
   val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
+  val platformVcsEndpoint = settingKey[Option[URL]]("Get `scmInfo` from the git repository.")
 
   // Release process hooks -- useful for easily extending the default release process
   val platformBeforePublishHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
@@ -109,6 +113,7 @@ object PlatformSettings {
     releaseProcess := SbtReleaseSettings.Nightly.releaseProcess
   )
 
+  val emptyModules = Set.empty[ModuleID]
   lazy val platformSettings: Seq[Setting[_]] = Seq(
     insideCi := getEnvVariable("CI").exists(toBoolean),
     ciName := getEnvVariable("CI_NAME"),
@@ -136,33 +141,61 @@ object PlatformSettings {
       bintrayEnsureLicenses.value
     },
     platformFetchPreviousArtifact := {
+      /* This is a setting because modifies previousArtifacts, so we protect
+       * ourselves from errors if users don't have connection to Internet. */
       val org = organization.value
       val artifact = moduleName.value
       val version = scalaBinaryVersion.value
       val targetModule = ScalaModule(org, artifact, version)
       val response = ModuleSearch.searchLatest(targetModule)
-      val previousArtifacts =
-        response.map(Set[ModuleID](_)).getOrElse(Set.empty[ModuleID])
-      if (previousArtifacts.isEmpty)
-        sys.error(Feedback.forceDefinitionOfPreviousArtifacts)
-      previousArtifacts
+      response.map(_.map(Set[ModuleID](_)).getOrElse(emptyModules))
+        .getOrElse(emptyModules)
     },
-    mimaPreviousArtifacts := platformFetchPreviousArtifact.value,
+    mimaPreviousArtifacts <<= platformFetchPreviousArtifact,
+    mimaReportBinaryIssues := {
+      val firstVersions = Seq("0.1", "0.1.0")
+      if (firstVersions.contains(version.value) && mimaPreviousArtifacts.value.isEmpty)
+        sys.error(Feedback.forceDefinitionOfPreviousArtifacts)
+      mimaReportBinaryIssues.value
+    },
+    platformReleaseNotesDir := baseDirectory.value / "notes",
+    platformGetReleaseNotes := {
+      val notesFileName = s"${version.value}.md"
+      val notesFile = platformReleaseNotesDir.value / notesFileName
+      // TODO(jvican): Add proper error handling
+      IO.read(notesFile)
+    },
+    platformVcsEndpoint := {
+      homepage.value.orElse {
+        releaseVcs.value match {
+          case Some(g: Git) =>
+            // Fetch git endpoint automatically
+            val p = g.cmd("config", "remote.%s.url" format g.trackingRemote)
+            Some(url(p.!!.trim))
+          case Some(vcs) => sys.error("Only git is supported for now.")
+          case None => None
+        }
+      }
+    },
     platformReleaseToGitHub := {
       // TODO(jvican): Change environment name in Drone
       val tokenEnvName = "GITHUB_PLATFORM_TEST_TOKEN"
       val githubToken = sys.env.get(tokenEnvName)
+      val logger = streams.value.log
       githubToken match {
         case Some(token) =>
-          scmInfo.value match {
-            case GitHubReleaser.GitHubUrl(org, repo) =>
+          platformVcsEndpoint.value.map(_.toString) match {
+            case Some(GitHubReleaser.GitHubUrl(org, repo)) =>
               val endpoint = GitHubEndpoint(org, repo, token)
-              val notes = "Make proper release notes."
+              val notes = platformGetReleaseNotes.value
               val releaseVersion = Version(version.value)
+              logger.info(s"Releasing $releaseVersion to GitHub($org, $repo, $token)")
               val release = GitHubRelease(releaseVersion, notes)
               endpoint.pushRelease(release)
-            case _ =>
+            case Some(wrongUrl) =>
               sys.error(Feedback.incorrectGitHubUrl)
+            case None =>
+              sys.error(Feedback.expectedScmInfo)
           }
         case None =>
           sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName))
@@ -171,6 +204,7 @@ object PlatformSettings {
   )
 
   object SbtReleaseSettings {
+
     import ReleaseKeys._
     import sbtrelease.Utilities._
     import sbtrelease.ReleaseStateTransformations._
@@ -210,5 +244,7 @@ object PlatformSettings {
         )
       }
     }
+
   }
+
 }

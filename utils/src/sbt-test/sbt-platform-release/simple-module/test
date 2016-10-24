@@ -1,9 +1,10 @@
+# Doing this because sbt-platform needs a well-formed git repository
 $ exec git init .
-$ exec git config user.email "jorge@vican.me"
-$ exec git config user.name "Jorge Vicente Cantero"
-$ exec git remote add origin https://github.com/scalacenter/repo
+$ exec git remote add origin https://github.com/scalaplatform/dummy
+$ exec git fetch
+$ exec git checkout -t origin/empty
 $ exec git add .
-$ exec git commit -m init
+$ exec git commit -m "test"
 
 > compile
 > run

@@ -12,19 +12,21 @@ class ModuleSearchSpec extends JUnitSuite {
     assert(search.getOrElse(List()).size == 1)
   }
 
-  @Test def getCorrectLatestVersion(): Unit = {
+  @Test def fetchLatestCorrectVersion(): Unit = {
     def emptyResolvedModule(version: String) =
       ResolvedModule("", "", "", None, Nil, Nil, version)
-    val presumedWinner = emptyResolvedModule("0.2.2")
+    val winner = emptyResolvedModule("0.2.2")
     val targets = List(
       emptyResolvedModule("0.1.0"),
       emptyResolvedModule("0.2.1"),
       emptyResolvedModule("0.2.1-BETA"),
       emptyResolvedModule("0.2.1-2010-08-10"),
-      presumedWinner,
+      winner,
       emptyResolvedModule("0.2.2-beta"),
       emptyResolvedModule("0.2.2-alpha")
     )
-    assert(ModuleSearch.compareAndGetLatest(targets) == presumedWinner)
+    val presumedWinner = ModuleSearch.compareAndGetLatest(targets)
+    assert(presumedWinner.isDefined)
+    assert(presumedWinner.get == winner)
   }
 }

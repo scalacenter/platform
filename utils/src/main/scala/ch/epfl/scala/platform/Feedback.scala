@@ -13,4 +13,6 @@ object Feedback {
     s"Your environment does not define $name. Set it before proceeding!"
   val incorrectGitHubUrl =
     "The value of the setting `scmInfo` is not a GitHub url."
+  val expectedScmInfo =
+    "Set `scmInfo` before proceeding, it's required for a correct release process."
 }

@@ -10,6 +10,7 @@ import scala.language.implicitConversions
 
 trait BintrayApi {
   val baseUrl = "https://bintray.com/api/v1"
+
   def resolve: Request
 }
 
@@ -38,7 +39,7 @@ case class Resolution(info: ScalaModule) extends BintrayApi {
       .url(s"$baseUrl/search/packages/maven")
       .addHeader(HeaderNames.ACCEPT -> MimeTypes.JSON)
       .addQueryString(("g", info.orgId),
-                      ("a", s"${info.artifactId}_${info.scalaBinVersion}"))
+        ("a", s"${info.artifactId}_${info.scalaBinVersion}"))
   }
 }
 
@@ -46,6 +47,7 @@ case class Resolution(info: ScalaModule) extends BintrayApi {
   * module. Rolling our own because coursier does not have support for
   * this, and `latest.release` is not yet implemented. */
 object ModuleSearch {
+
   import io.circe._
   import generic.auto._
   import parser._
@@ -53,13 +55,15 @@ object ModuleSearch {
   type Response[T] = Xor[io.circe.Error, T]
 
   private[platform] def compareAndGetLatest(ms: Seq[ResolvedModule]) = {
-
-    ms.map(m => m -> Version(m.latest_version))
+    /* The **recommended** way of versioning a nightly is with ALPHA,
+     * this filtering is just done to avoid surprises when fetching artifacts. */
+    val nonNightlyVersions = ms.map(m => m -> Version(m.latest_version))
       .filterNot(t => t._2.items.contains(Literal("nightly")))
-    ms.maxBy(m => Version(m.latest_version))
+    if (nonNightlyVersions.isEmpty) None
+    else Some(nonNightlyVersions.maxBy(_._2)._1)
   }
 
-  def searchLatest(module: ScalaModule): Response[ResolvedModule] =
+  def searchLatest(module: ScalaModule): Response[Option[ResolvedModule]] =
     searchInMaven(module).map(compareAndGetLatest(_))
 
   def searchInMaven(module: ScalaModule): Response[List[ResolvedModule]] = {
@@ -69,7 +73,7 @@ object ModuleSearch {
       // Stacks are only be published to jcenter
       val librarySearchResults =
         http.run(Resolution(module).resolve,
-                 Gigahorse.asString andThen decode[List[ResolvedModule]])
+          Gigahorse.asString andThen decode[List[ResolvedModule]])
       Await.result(librarySearchResults, 90.seconds)
     }
   }
