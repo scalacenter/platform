@@ -59,18 +59,13 @@ object GitHubReleaser extends GitHubDataTypes with GitHubResources {
 
     private def pushResourceRequest(resource: Resource,
                                     releaseId: Int): Request = {
+      logger.elem(s"Pushing a resource to $releaseId in $owner/$repo: $resource.")
       Gigahorse
         .url(s"$uploadsUrl/repos/$owner/$repo/releases/$releaseId/assets")
         .addHeaders(defaultGithubHeaders)
         .addHeader(HeaderNames.CONTENT_TYPE -> resource.contentType)
         .addQueryString("name" -> resource.name, "label" -> resource.label)
         .post(resource.file)
-    }
-
-    private def renderMarkdownRequest(content: String): Request = {
-      Gigahorse.url(s"$baseUrl/markdown")
-        .addHeaders(defaultGithubHeaders)
-        .post(s"""{ "text": "$content" }""")
     }
 
     import scala.concurrent._
@@ -100,15 +95,6 @@ object GitHubReleaser extends GitHubDataTypes with GitHubResources {
         awaitResult(
           http.run(pushResourceRequest(resource, releaseId),
             r => r.status == Status.CREATED)
-        )
-      }
-    }
-
-    /** Render */
-    def renderMarkdown(mdContents: String): String = {
-      Gigahorse.withHttp(Gigahorse.config) { http =>
-        awaitResult(
-          http.run(renderMarkdownRequest(mdContents), Gigahorse.asString)
         )
       }
     }
