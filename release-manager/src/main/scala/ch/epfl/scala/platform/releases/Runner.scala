@@ -1,6 +1,6 @@
 package ch.epfl.scala.platform.releases
 
-import ch.epfl.scala.platform.releases.utils.{Error, ReleaseResult}
+import ch.epfl.scala.platform.releases.util.{Error, ReleaseResult}
 
 import cats.instances.all._
 import cats.syntax.traverse._

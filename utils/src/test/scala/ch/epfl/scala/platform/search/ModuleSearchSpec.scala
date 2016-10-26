@@ -8,7 +8,7 @@ class ModuleSearchSpec extends JUnitSuite {
     // Always works, organization id is not used anymore
     val module = ScalaModule("com.github.jvican", "stoml", "2.11")
     val search = ModuleSearch.searchInMaven(module)
-    search.leftMap(e => throw new Exception(e))
+    search.leftMap(e => throw e.throwable.get)
     assert(search.getOrElse(List()).size == 1)
   }
 

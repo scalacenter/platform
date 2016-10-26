@@ -1,7 +1,7 @@
 package ch.epfl.scala.platform.releases
 
 import ch.epfl.scala.platform.releases.git._
-import ch.epfl.scala.platform.releases.utils._
+import ch.epfl.scala.platform.releases.util._
 
 import scala.util.Try
 

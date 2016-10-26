@@ -1,10 +1,12 @@
 package ch.epfl.scala.platform.search
 
 import cats.data.Xor
+import ch.epfl.scala.platform.Feedback
 import coursier.core.Version
 import coursier.core.Version.Literal
 import gigahorse._
 import sbt.ModuleID
+import ch.epfl.scala.platform.util.Error
 
 import scala.language.implicitConversions
 
@@ -48,11 +50,16 @@ case class Resolution(info: ScalaModule) extends BintrayApi {
   * this, and `latest.release` is not yet implemented. */
 object ModuleSearch {
 
-  import io.circe._
+  import io.circe.{Error => _, _}
   import generic.auto._
   import parser._
 
-  type Response[T] = Xor[io.circe.Error, T]
+  type Response[T] = Xor[Error, T]
+
+  implicit class XtensionCirceXor[T](circe: Xor[io.circe.Error, T]) {
+    def toResponse: Response[T] = circe.leftMap(
+      e => Error(Feedback.parsingError, Some(e)))
+  }
 
   private[platform] def compareAndGetLatest(ms: Seq[ResolvedModule]) = {
     /* The **recommended** way of versioning a nightly is with ALPHA,
@@ -61,6 +68,14 @@ object ModuleSearch {
       .filterNot(t => t._2.items.contains(Literal("nightly")))
     if (nonNightlyVersions.isEmpty) None
     else Some(nonNightlyVersions.maxBy(_._2)._1)
+  }
+
+  def exists(module: ScalaModule, targetVersion: Version): Response[Boolean] = {
+    searchInMaven(module).map { results =>
+      val bintrayModules = results.filter(rm => rm.repo == "jcenter")
+      val targetModule = bintrayModules.head
+      targetModule.versions.contains(targetVersion.repr)
+    }
   }
 
   def searchLatest(module: ScalaModule): Response[Option[ResolvedModule]] =
@@ -73,7 +88,7 @@ object ModuleSearch {
       // Stacks are only be published to jcenter
       val librarySearchResults =
         http.run(Resolution(module).resolve,
-          Gigahorse.asString andThen decode[List[ResolvedModule]])
+          Gigahorse.asString andThen decode[List[ResolvedModule]] andThen (_.toResponse))
       Await.result(librarySearchResults, 90.seconds)
     }
   }

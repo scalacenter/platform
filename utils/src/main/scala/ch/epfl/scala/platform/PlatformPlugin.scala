@@ -1,11 +1,20 @@
 package ch.epfl.scala.platform
 
+import cats.data.Xor
 import ch.epfl.scala.platform.github.GitHubReleaser
 import ch.epfl.scala.platform.github.GitHubReleaser.{GitHubEndpoint, GitHubRelease}
-import sbt._
 import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
+import ch.epfl.scala.platform.util.Error
 import coursier.core.Version
-import sbtrelease.Git
+import coursier.core.Version.{Literal, Qualifier}
+import org.joda.time.DateTime
+import sbt._
+import sbt.complete.Parser
+import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
+import sbtrelease.{Git, ReleaseStateTransformations}
+import sbtrelease.Version.Bump
+
+import scala.util.Try
 
 object PlatformPlugin extends sbt.AutoPlugin {
 
@@ -19,7 +28,7 @@ object PlatformPlugin extends sbt.AutoPlugin {
       com.typesafe.sbt.SbtPgp &&
       com.typesafe.tools.mima.plugin.MimaPlugin
 
-  override def projectSettings = PlatformSettings.settings
+  override def projectSettings = PlatformKeys.settings
 }
 
 trait PlatformSettings {
@@ -54,20 +63,24 @@ trait PlatformSettings {
   val platformModuleTags = settingKey[Seq[String]]("Tags for the bintray module package.")
   val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
   val platformValidatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
-  val platformFetchPreviousArtifact = settingKey[Set[ModuleID]]("Fetch latest previous published artifact for MiMa checks.")
+  // TODO(jvican): Make sure every sbt subproject has an independent module
+  val platformScalaModule = settingKey[ScalaModule]("Create the ScalaModule from the basic assert info.")
+  val platformModuleBaseVersion = settingKey[Version]("Get the sbt-defined version of the current module.")
+  val platformFetchLatestPublishedVersion = taskKey[Version]("Fetch latest published stable version.")
+  val platformRunMiMa = taskKey[Unit]("Run MiMa and report results based on current version.")
   val platformGitHubToken = settingKey[String]("Token to publish releses to GitHub.")
   val platformReleaseNotesDir = settingKey[File]("Directory with the markdown release notes.")
   val platformGetReleaseNotes = taskKey[String]("Get the correct release notes for a release.")
   val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
   val platformVcsEndpoint = settingKey[Option[URL]]("Get `scmInfo` from the git repository.")
-
+  val platformNightlyReleaseProcess = settingKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
   // Release process hooks -- useful for easily extending the default release process
   val platformBeforePublishHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
   val platformAfterPublishHook = taskKey[Unit]("A release hook to customize the end of the release process.")
   // FORMAT: OFF
 }
 
-object PlatformSettings {
+object PlatformKeys {
 
   import PlatformPlugin.autoImport._
 
@@ -110,8 +123,9 @@ object PlatformSettings {
 
   lazy val defaultReleaseSettings = Seq(
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-    // Use the nightly release process by default...
-    releaseProcess := SbtReleaseSettings.Nightly.releaseProcess
+    // Empty the default release process to avoid errors
+    releaseProcess := Seq.empty[ReleaseStep],
+    platformNightlyReleaseProcess := PlatformReleaseProcess.Nightly.releaseProcess
   )
 
   val emptyModules = Set.empty[ModuleID]
@@ -142,19 +156,45 @@ object PlatformSettings {
         throw new NoSuchElementException(Feedback.forceValidLicense)
       bintrayEnsureLicenses.value
     },
-    platformFetchPreviousArtifact := {
-      /* This is a setting because modifies previousArtifacts, so we protect
-       * ourselves from errors if users don't have connection to Internet. */
+    platformModuleBaseVersion := {
+      if (version.value.isEmpty) sys.error(Feedback.unexpectedEmptyVersion)
+      val definedVersion = version.value
+      val validatedVersion = for {
+        version <- Try(Version(definedVersion)).toOption
+        if !version.items.exists(_.isInstanceOf[Literal])
+      } yield version
+      validatedVersion.getOrElse(
+        sys.error(Feedback.malformattedVersion(definedVersion)))
+    },
+    platformScalaModule := {
       val org = organization.value
       val artifact = moduleName.value
       val version = scalaBinaryVersion.value
-      val targetModule = ScalaModule(org, artifact, version)
-      val response = ModuleSearch.searchLatest(targetModule)
-      response.map(_.map(Set[ModuleID](_)).getOrElse(emptyModules))
-        .getOrElse(emptyModules)
+      ScalaModule(org, artifact, version)
     },
-    mimaPreviousArtifacts <<= platformFetchPreviousArtifact,
-    mimaReportBinaryIssues := {
+    mimaPreviousArtifacts := {
+      val highPriorityArtifacts = mimaPreviousArtifacts.value
+      if (highPriorityArtifacts.isEmpty) {
+        /* This is a setting because modifies previousArtifacts, so we protect
+         * ourselves from errors if users don't have connection to Internet. */
+        val targetModule = platformScalaModule.value
+        SettingsDefinition.getPublishedArtifacts(targetModule)
+      } else highPriorityArtifacts
+    },
+    platformFetchLatestPublishedVersion := {
+      val previousArtifacts = mimaPreviousArtifacts.value
+      // Retry in case where sbt boots up without Internet connection
+      val retryPreviousArtifacts =
+      if (previousArtifacts.nonEmpty) previousArtifacts
+      else SettingsDefinition.getPublishedArtifacts(platformScalaModule.value)
+      val moduleId = retryPreviousArtifacts.headOption.getOrElse(
+        sys.error(Feedback.forceDefinitionOfPreviousArtifacts))
+      Version(moduleId.revision)
+    },
+    platformRunMiMa := {
+      val currentVersion = platformModuleBaseVersion.value
+      val previousVersion = platformFetchLatestPublishedVersion.value
+      mimaFailOnProblem := currentVersion.items.head > previousVersion.items.head
       val firstVersions = Seq("0.1", "0.1.0")
       if (firstVersions.contains(version.value) && mimaPreviousArtifacts.value.isEmpty)
         sys.error(Feedback.forceDefinitionOfPreviousArtifacts)
@@ -208,37 +248,114 @@ object PlatformSettings {
         case None =>
           sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName))
       }
-    }
+    },
+    commands += PlatformReleaseProcess.Nightly.releaseCommand
   )
 
-  object SbtReleaseSettings {
+  object SettingsDefinition {
+    def getPublishedArtifacts(targetModule: ScalaModule): Set[ModuleID] = {
+      val response = ModuleSearch.searchLatest(targetModule)
+      response.map(_.map(Set[ModuleID](_)).getOrElse(emptyModules))
+        .getOrElse(emptyModules)
+    }
+  }
+
+  object PlatformReleaseProcess {
 
     import ReleaseKeys._
     import sbtrelease.Utilities._
     import sbtrelease.ReleaseStateTransformations._
 
-    def autoSetNightlyVersion: ReleaseStep = { (st: State) =>
-      val vs = st.get(versions)
-      val selected = vs.getOrElse(sys.error(Feedback.undefinedVersion))._1
-      st.log.info("Setting version to '%s'." format selected)
-      val useGlobal = st.extract.get(releaseUseGlobalVersion)
-      val versionStr = (if (useGlobal) globalVersionString else versionString) format selected
-      val file = st.extract.get(releaseVersionFile)
-      IO.writeLines(file, Seq(versionStr))
-      val actualVersion =
-        if (useGlobal) version in ThisBuild := selected
-        else version := selected
-      reapply(Seq(actualVersion), st)
+    val commandLineDefinedVersion = AttributeKey[Option[String]]("commandLineDefinedVersion")
+    val validReleaseVersion = AttributeKey[Version]("validatedReleaseVersions")
+
+    private def validateVersion(definedVersion: String): Version = {
+      val validatedVersion = for {
+        version <- Try(Version(definedVersion)).toOption
+        if !version.items.exists(
+          i => i.isInstanceOf[Literal] || i.isInstanceOf[Qualifier])
+      } yield version
+      validatedVersion.getOrElse(
+        sys.error(Feedback.malformattedVersion(definedVersion)))
+    }
+
+    val validateAndSetVersion: ReleaseStep = { (st: State) =>
+      val userDefinedVersion = st.get(commandLineDefinedVersion).flatten.map(
+        validateVersion)
+      val definedVersion = userDefinedVersion
+        .getOrElse(st.extract.get(platformModuleBaseVersion))
+      val sbtReleaseVersion = sbtrelease.Version(definedVersion.repr).get
+      val nextVersion = Bump.Major.bump.apply(sbtReleaseVersion).string
+      st.put(validReleaseVersion, definedVersion)
+        // Set the sbt-release expected versions to reuse functionality
+        .put(versions, (definedVersion.repr, nextVersion))
+    }
+
+    val checkVersionIsUnpublished: ReleaseStep = { (st: State) =>
+      val definedVersion = st.get(validReleaseVersion).getOrElse(
+        sys.error(Feedback.undefinedVersion))
+      val module = st.extract.get(platformScalaModule)
+      ModuleSearch.exists(module, definedVersion).flatMap { exists =>
+        if (!exists) Xor.right(st)
+        else Xor.left(Error(s"Version ${definedVersion.repr} is already published."))
+        // TODO(jvican): Improve error handling here
+      }.fold(e => sys.error(e.msg), identity)
     }
 
     object Nightly {
+      def tagAsNightly(targetVersion: Version): Version = {
+        val now = DateTime.now()
+        val month = now.dayOfMonth().get
+        val day = now.monthOfYear().get
+        val year = now.year().get
+        targetVersion.copy(s"$targetVersion-a1-$year-$month-$day")
+      }
+
+      import ReleaseKeys._
+
+      val releaseParser: Parser[Seq[ParseResult]] =
+        (ReleaseVersion | SkipTests | CrossBuild).*
+      val FailureCommand = "--failure--"
+
+      val releaseCommand: Command = Command("releaseNightly")(
+        _ => releaseParser) { (st, args) =>
+        val extracted = Project.extract(st)
+        val releaseParts = extracted.get(platformNightlyReleaseProcess)
+        val crossEnabled = extracted.get(releaseCrossBuild) ||
+          args.contains(ParseResult.CrossBuild)
+
+        val startState = st
+          .copy(onFailure = Some(FailureCommand))
+          .put(skipTests, args.contains(ParseResult.SkipTests))
+          .put(cross, crossEnabled)
+          .put(commandLineDefinedVersion,
+            args.collectFirst { case ParseResult.ReleaseVersion(value) => value })
+
+        val initialChecks = releaseParts.map(_.check)
+        val process = releaseParts.map { step =>
+          if (step.enableCrossBuild && crossEnabled) {
+            filterFailure(ReleaseStateTransformations.runCrossBuild(step.action)) _
+          } else filterFailure(step.action) _
+        }
+
+        val removeFailureCommand = { s: State =>
+          s.remainingCommands match {
+            case FailureCommand :: tail => s.copy(remainingCommands = tail)
+            case _ => s
+          }
+        }
+        initialChecks.foreach(_ (startState))
+        Function.chain(process :+ removeFailureCommand)(startState)
+      }
+
       val releaseProcess = {
         Seq[ReleaseStep](
-          checkSnapshotDependencies,
+          validateAndSetVersion,
+          checkVersionIsUnpublished,
           releaseStepTask(platformValidatePomData),
+          checkSnapshotDependencies,
           runTest,
-          releaseStepTask(mimaReportBinaryIssues),
-          inquireVersions,
+          releaseStepTask(platformRunMiMa),
           setReleaseVersion,
           commitReleaseVersion,
           tagRelease,

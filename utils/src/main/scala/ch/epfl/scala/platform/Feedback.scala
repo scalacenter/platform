@@ -1,6 +1,21 @@
 package ch.epfl.scala.platform
 
 object Feedback {
+  val VersioningTip = "Make sure your versioning scheme follows semantic versioning."
+
+  def versionIsAlreadyPublished(version: String) =
+    s"The version $version is already published. Try another one."
+
+  def undefinedEnvironmentVariable(name: String) =
+    s"Your environment does not define $name. Set it before proceeding!"
+
+  def malformattedVersion(version: String) = s"Version $version is incorrect. $VersioningTip."
+
+  def invalidOrNonExistingVersions(version: String, next: String) =
+    s"Version $version and $next are invalid or have not been defined. $VersioningTip."
+
+  val unexpectedEmptyVersion =
+    "The sbt-defined version is empty. Set a well-formatted version in `version.sbt`."
   val forceDefinitionOfScmInfo =
     "Set the setting `scmInfo` manually for the POM file generation."
   val forceValidLicense =
@@ -8,13 +23,12 @@ object Feedback {
   val forceDefinitionOfPreviousArtifacts =
     "Unexpected empty `mimaPreviousArtifacts`. Set it to perform MiMa checks"
   val undefinedVersion =
-    "No versions are set! Was this release part executed before inquireVersions?"
-  def undefinedEnvironmentVariable(name: String) =
-    s"Your environment does not define $name. Set it before proceeding!"
+    "No versions are set! Did you pass a release version to `releaseNightly` or set the sbt version setting?"
   val incorrectGitHubUrl =
     "The value of the setting `scmInfo` is not a GitHub url."
   val incorrectGitHubRepo =
     "Your git repo does not have a remote branch, set it before continuing."
   val expectedScmInfo =
     "Set `scmInfo` before proceeding, it's required for a correct release process."
+  val parsingError = "JSON response could not be parsed."
 }

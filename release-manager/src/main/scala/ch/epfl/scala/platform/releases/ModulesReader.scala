@@ -3,7 +3,7 @@ package ch.epfl.scala.platform.releases
 import java.nio.file.{Files, Paths}
 
 import stoml.TomlParserApi._
-import ch.epfl.scala.platform.releases.utils._
+import ch.epfl.scala.platform.releases.util._
 import fastparse.core.Parsed
 import stoml.Toml
 
