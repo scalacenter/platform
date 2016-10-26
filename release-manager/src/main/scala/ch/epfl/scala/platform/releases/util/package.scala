@@ -3,7 +3,7 @@ package ch.epfl.scala.platform.releases
 import scala.util.Try
 import scala.util.control.NonFatal
 
-package object utils {
+package object util {
   type ReleaseResult[T] = Either[Error, T]
 
   implicit class TryWrapper[T](t: Try[T]) {

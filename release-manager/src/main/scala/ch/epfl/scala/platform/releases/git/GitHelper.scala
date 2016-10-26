@@ -3,7 +3,7 @@ package ch.epfl.scala.platform.releases.git
 import java.nio.file.{Files, Path, Paths}
 
 import ch.epfl.scala.platform.releases.{Feedback, Module}
-import ch.epfl.scala.platform.releases.utils._
+import ch.epfl.scala.platform.releases.util._
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.lib.Ref

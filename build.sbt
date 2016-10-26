@@ -140,7 +140,8 @@ lazy val `sbt-platform` = project
       // Must be added because bintry depends on it, sigh
       "net.databinder.dispatch" %% "dispatch-json4s-native" % "0.11.3",
       "io.get-coursier" %% "coursier" % "1.0.0-M14",
-      "com.eed3si9n" %% "gigahorse-core" % "0.1.1"
+      "com.eed3si9n" %% "gigahorse-core" % "0.1.1",
+      "com.github.nscala-time" %% "nscala-time" % "2.14.0"
     ) ++ testDependencies,
     ivyScriptedCachePath := {
       if (sys.env.get("CI").exists(_.toBoolean))
@@ -158,7 +159,7 @@ lazy val `sbt-platform` = project
       "-Dplatform.test=true"
     ),
     scriptedBufferLog := false,
-    addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.3"),
+    addSbtPlugin("ch.epfl.scala" % "sbt-release" % "1.0.6"),
     addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0"),
     addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0"),
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.11"),
