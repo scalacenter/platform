@@ -312,7 +312,6 @@ object PlatformKeys {
       }
 
       import ReleaseKeys._
-
       val releaseParser: Parser[Seq[ParseResult]] =
         (ReleaseVersion | SkipTests | CrossBuild).*
       val FailureCommand = "--failure--"
