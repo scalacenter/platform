@@ -150,7 +150,7 @@ object PlatformKeys {
     platformModuleTags := Seq.empty[String],
     platformTargetBranch := "platform-release",
     platformValidatePomData := {
-      if (bintrayVcsUrl.value.isEmpty)
+      if (platformVcsEndpoint.value.isEmpty)
         throw new NoSuchElementException(Feedback.forceDefinitionOfScmInfo)
       if (licenses.value.isEmpty)
         throw new NoSuchElementException(Feedback.forceValidLicense)
@@ -208,6 +208,7 @@ object PlatformKeys {
       IO.read(notesFile)
     },
     platformVcsEndpoint := {
+      // Bintray does the same, but we want this to work for sonatype also
       homepage.value.orElse {
         releaseVcs.value match {
           case Some(g: Git) =>
@@ -279,16 +280,20 @@ object PlatformKeys {
         sys.error(Feedback.malformattedVersion(definedVersion)))
     }
 
-    val validateAndSetVersion: ReleaseStep = { (st: State) =>
+    val validateAndSetVersion: ReleaseStep = { (st0: State) =>
+      val (st, logger) = st0.extract.runTask(platformLogger, st0)
       val userDefinedVersion = st.get(commandLineDefinedVersion).flatten.map(
         validateVersion)
       val definedVersion = userDefinedVersion
         .getOrElse(st.extract.get(platformModuleBaseVersion))
       val sbtReleaseVersion = sbtrelease.Version(definedVersion.repr).get
       val nextVersion = Bump.Major.bump.apply(sbtReleaseVersion).string
-      st.put(validReleaseVersion, definedVersion)
-        // Set the sbt-release expected versions to reuse functionality
+      logger.info(s"Current version is $nextVersion.")
+      logger.info(s"Next version is set to $nextVersion.")
+      // Reuse sbtReleaseVersion and set versions for integration purposes
+      val updatedState = st.put(validReleaseVersion, definedVersion)
         .put(versions, (definedVersion.repr, nextVersion))
+      setReleaseVersion(updatedState)
     }
 
     val checkVersionIsUnpublished: ReleaseStep = { (st: State) =>
@@ -303,15 +308,22 @@ object PlatformKeys {
     }
 
     object Nightly {
-      def tagAsNightly(targetVersion: Version): Version = {
+      val tagAsNightly: ReleaseStep = { (st0: State) =>
+        val (st, logger) = st0.extract.runTask(platformLogger, st0)
+        val targetVersion = st.get(validReleaseVersion).getOrElse(sys.error(
+          "Unexpected `tagAsNightly`, have you run `validateAndSetVersion` before?"))
         val now = DateTime.now()
         val month = now.dayOfMonth().get
         val day = now.monthOfYear().get
         val year = now.year().get
-        targetVersion.copy(s"$targetVersion-a1-$year-$month-$day")
+        val nightlyVersion = s"${targetVersion.repr}-alpha-$year-$month-$day"
+        val generatedVersion = targetVersion.copy(nightlyVersion)
+        logger.info(s"Nightly version is set to ${generatedVersion.repr}.")
+        st.put(validReleaseVersion, generatedVersion)
       }
 
       import ReleaseKeys._
+
       val releaseParser: Parser[Seq[ParseResult]] =
         (ReleaseVersion | SkipTests | CrossBuild).*
       val FailureCommand = "--failure--"
@@ -351,20 +363,15 @@ object PlatformKeys {
         Seq[ReleaseStep](
           validateAndSetVersion,
           checkVersionIsUnpublished,
+          tagAsNightly,
           releaseStepTask(platformValidatePomData),
           checkSnapshotDependencies,
+          runClean,
           runTest,
           releaseStepTask(platformRunMiMa),
-          setReleaseVersion,
-          commitReleaseVersion,
-          tagRelease,
           releaseStepTask(platformBeforePublishHook),
           publishArtifacts,
-          releaseStepTask(platformAfterPublishHook),
-          releaseStepTask(platformReleaseToGitHub),
-          setNextVersion,
-          commitNextVersion,
-          pushChanges
+          releaseStepTask(platformAfterPublishHook)
         )
       }
     }
