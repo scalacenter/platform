@@ -348,7 +348,6 @@ object PlatformKeys {
       val nextVersion = Bump.Minor.bump.apply(sbtReleaseVersion).string
       logger.info(s"Current version is $definedVersion.")
       logger.info(s"Next version is set to $nextVersion.")
-      // Reuse sbtReleaseVersion and set versions for integration purposes
       st.put(validReleaseVersion, definedVersion)
         .put(versions, (definedVersion.repr, nextVersion))
     }
@@ -376,7 +375,11 @@ object PlatformKeys {
         val nightlyVersion = s"${targetVersion.repr}-alpha-$year-$month-$day"
         val generatedVersion = targetVersion.copy(nightlyVersion)
         logger.info(s"Nightly version is set to ${generatedVersion.repr}.")
+        val previousVersions = st.get(versions).getOrElse(
+          sys.error("Undefined versions, did you properly define the versions?"))
         val updatedState = st.put(validReleaseVersion, generatedVersion)
+          .put(versions, (nightlyVersion, previousVersions._2))
+        // Reuse versions and current sbt-related related tasks
         setReleaseVersion(updatedState)
       }
 

@@ -149,6 +149,10 @@ lazy val `sbt-platform` = project
       "net.databinder.dispatch" %% "dispatch-json4s-native" % "0.11.3",
       "com.github.nscala-time" %% "nscala-time" % "2.14.0"
     ) ++ testDependencies,
+    // Solves binary incompatible library mix...
+    dependencyOverrides += "org.json4s" %% "json4s-core" % "3.2.10",
+    dependencyOverrides += "org.json4s" %% "json4s-native" % "3.2.10",
+    dependencyOverrides += "org.json4s" %% "json4s-ast" % "3.2.10",
     ivyScriptedCachePath := {
       if (sys.env.get("CI").exists(_.toBoolean))
         "-Dsbt.ivy.home=/drone/.ivy2"
