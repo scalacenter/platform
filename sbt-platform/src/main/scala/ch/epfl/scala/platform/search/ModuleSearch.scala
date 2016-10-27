@@ -73,8 +73,10 @@ object ModuleSearch {
   def exists(module: ScalaModule, targetVersion: Version): Response[Boolean] = {
     searchInMaven(module).map { results =>
       val bintrayModules = results.filter(rm => rm.repo == "jcenter")
-      val targetModule = bintrayModules.head
-      targetModule.versions.contains(targetVersion.repr)
+      if (bintrayModules.isEmpty) false else {
+        val targetModule = bintrayModules.head
+        targetModule.versions.contains(targetVersion.repr)
+      }
     }
   }
 

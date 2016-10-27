@@ -125,7 +125,7 @@ lazy val `release-manager` = project
 val circeVersion = "0.5.1"
 val ivyScriptedCachePath = settingKey[String]("Ivy scripted cache path.")
 lazy val `sbt-platform` = project
-  .in(file("utils"))
+  .in(file("sbt-platform"))
   .settings(allSettings)
   .settings(ScriptedPlugin.scriptedSettings)
   .settings(
