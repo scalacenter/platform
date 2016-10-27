@@ -349,9 +349,8 @@ object PlatformKeys {
       logger.info(s"Current version is $definedVersion.")
       logger.info(s"Next version is set to $nextVersion.")
       // Reuse sbtReleaseVersion and set versions for integration purposes
-      val updatedState = st.put(validReleaseVersion, definedVersion)
+      st.put(validReleaseVersion, definedVersion)
         .put(versions, (definedVersion.repr, nextVersion))
-      setReleaseVersion(updatedState)
     }
 
     val checkVersionIsUnpublished: ReleaseStep = { (st: State) =>
@@ -377,7 +376,8 @@ object PlatformKeys {
         val nightlyVersion = s"${targetVersion.repr}-alpha-$year-$month-$day"
         val generatedVersion = targetVersion.copy(nightlyVersion)
         logger.info(s"Nightly version is set to ${generatedVersion.repr}.")
-        st.put(validReleaseVersion, generatedVersion)
+        val updatedState = st.put(validReleaseVersion, generatedVersion)
+        setReleaseVersion(updatedState)
       }
 
       import ReleaseKeys._
