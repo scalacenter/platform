@@ -221,7 +221,14 @@ object PlatformKeys {
             // Fetch git endpoint automatically
             if (g.trackingRemote.isEmpty) sys.error(Feedback.incorrectGitHubRepo)
             val p = g.cmd("config", "remote.%s.url" format g.trackingRemote)
-            Some(url(p.!!.trim))
+            val gitResult = p.!!.trim
+            gitResult match {
+              case GitHubReleaser.SshGitHubUrl(org, name) =>
+                Some(url(GitHubReleaser.generateGitHubUrl(org, name)))
+              case GitHubReleaser.HttpsGitHubUrl(org, name) =>
+                Some(url(gitResult))
+              case _ => sys.error(s"Unexpected github homepage: $gitResult.")
+            }
           case Some(vcs) => sys.error("Only git is supported for now.")
           case None => None
         }

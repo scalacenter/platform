@@ -11,6 +11,8 @@ object GitHubReleaser extends GitHubDataTypes with GitHubResources {
     """https?://(?:www\.)?github\.com/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)/?""".r
   val SshGitHubUrl =
     """git@github.com:([a-zA-Z0-9]+)/([a-zA-Z0-9]+)\.git""".r
+  def generateGitHubUrl(org: String, name: String) =
+    s"https://github.com/$org/$name"
 
   trait GithubApi {
     val baseUrl = "https://api.github.com"
