@@ -428,7 +428,8 @@ object PlatformKeys {
           releaseStepTask(platformRunMiMa),
           releaseStepTask(platformBeforePublishHook),
           publishArtifacts,
-          releaseStepTask(platformAfterPublishHook)
+          releaseStepTask(platformAfterPublishHook),
+          releaseStepTask(bintrayRelease)
         )
       }
     }
