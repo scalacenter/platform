@@ -40,6 +40,7 @@ trait PlatformSettings {
 
   // Drone-defined environment variables
   val insideCi = settingKey[Boolean]("Checks if CI is executing the build.")
+  val ciRootDir = settingKey[File]("The root folder for the CI.")
   val ciName = settingKey[Option[String]]("Get the name of the CI server.")
   val ciRepo = settingKey[Option[String]]("Get the repository run by the CI.")
   val ciBranch = settingKey[Option[String]]("Get the current git branch.")
@@ -74,6 +75,10 @@ trait PlatformSettings {
   val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
   val platformVcsEndpoint = settingKey[Option[URL]]("Get `scmInfo` from the git repository.")
   val platformNightlyReleaseProcess = settingKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
+  val platformSignArtifact = settingKey[Boolean]("Enable to sign artifacts with the platform pgp key.")
+  val platformCustomRings = settingKey[Option[File]]("File that stores the pgp secret ring.")
+  val platformDefaultPublicRingName = settingKey[String]("Default file name for fetching the public gpg keys.")
+  val platformDefaultPrivateRingName = settingKey[String]("Default file name for fetching the private gpg keys.")
   // Release process hooks -- useful for easily extending the default release process
   val platformBeforePublishHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
   val platformAfterPublishHook = taskKey[Unit]("A release hook to customize the end of the release process.")
@@ -119,7 +124,7 @@ object PlatformKeys {
 
   /** Define custom release steps and add them to the default pipeline. */
 
-  import com.typesafe.sbt.pgp.PgpKeys
+  import com.typesafe.sbt.SbtPgp.autoImport._
 
   lazy val defaultReleaseSettings = Seq(
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
@@ -131,6 +136,7 @@ object PlatformKeys {
   val emptyModules = Set.empty[ModuleID]
   lazy val platformSettings: Seq[Setting[_]] = Seq(
     insideCi := getEnvVariable("CI").exists(toBoolean),
+    ciRootDir := file("/drone"),
     ciName := getEnvVariable("CI_NAME"),
     ciRepo := getEnvVariable("CI_REPO"),
     ciBranch := getEnvVariable("CI_BRANCH"),
@@ -250,6 +256,39 @@ object PlatformKeys {
           sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName))
       }
     },
+    platformSignArtifact := true,
+    platformCustomRings := None,
+    platformDefaultPublicRingName := "platform.pubring.asc",
+    platformDefaultPrivateRingName := "platform.secring.asc",
+    pgpSigningKey := {
+      val PlatformPgpKey = "11BCFDCC60929524"
+      if (platformSignArtifact.value) {
+        Some(new java.math.BigInteger(PlatformPgpKey, 16).longValue)
+      } else None
+    },
+    pgpPassphrase := {
+      if (platformSignArtifact.value)
+        sys.env.get("PLATFORM_PGP_PASSPHRASE").map(_.toCharArray)
+      else None
+    },
+    pgpPublicRing := {
+      if (platformSignArtifact.value) {
+        SettingsDefinition.getPgpRingFile(
+          insideCi.value,
+          ciRootDir.value,
+          platformCustomRings.value,
+          platformDefaultPublicRingName.value)
+      } else pgpPublicRing.value
+    },
+    pgpSecretRing := {
+      if (platformSignArtifact.value) {
+        SettingsDefinition.getPgpRingFile(
+          insideCi.value,
+          ciRootDir.value,
+          platformCustomRings.value,
+          platformDefaultPrivateRingName.value)
+      } else pgpSecretRing.value
+    },
     platformBeforePublishHook := {},
     platformAfterPublishHook := {},
     commands += PlatformReleaseProcess.Nightly.releaseCommand
@@ -262,6 +301,20 @@ object PlatformKeys {
         targetModule.orgId %% targetModule.artifactId % rmod.latest_version))
       moduleResponse.map(_.map(Set[ModuleID](_)).getOrElse(emptyModules))
         .getOrElse(emptyModules)
+    }
+
+    def getPgpRingFile(insideCi: Boolean,
+                       ciDir: File,
+                       customRing: Option[File],
+                       defaultRingFileName: String) = {
+      if (insideCi) ciDir / ".gnupg" / defaultRingFileName
+      else {
+        if (customRing.isEmpty) {
+          val homeFolder = sys.env.getOrElse("HOME",
+            "Define `platformCustom*SecretRing` to look up the gpg keys.")
+          file(s"$homeFolder/.gnupg/$defaultRingFileName")
+        } else customRing.get
+      }
     }
   }
 
@@ -291,8 +344,9 @@ object PlatformKeys {
       val definedVersion = userDefinedVersion
         .getOrElse(st.extract.get(platformModuleBaseVersion))
       val sbtReleaseVersion = sbtrelease.Version(definedVersion.repr).get
-      val nextVersion = Bump.Major.bump.apply(sbtReleaseVersion).string
-      logger.info(s"Current version is $nextVersion.")
+      // TODO(jvican): Make sure minor and major depend on platform version
+      val nextVersion = Bump.Minor.bump.apply(sbtReleaseVersion).string
+      logger.info(s"Current version is $definedVersion.")
       logger.info(s"Next version is set to $nextVersion.")
       // Reuse sbtReleaseVersion and set versions for integration purposes
       val updatedState = st.put(validReleaseVersion, definedVersion)
@@ -370,7 +424,6 @@ object PlatformKeys {
           tagAsNightly,
           releaseStepTask(platformValidatePomData),
           checkSnapshotDependencies,
-          runClean,
           runTest,
           releaseStepTask(platformRunMiMa),
           releaseStepTask(platformBeforePublishHook),
