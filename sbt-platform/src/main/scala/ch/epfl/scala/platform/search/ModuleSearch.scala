@@ -30,11 +30,6 @@ case class ResolvedModule(name: String,
                           versions: List[String],
                           latest_version: String)
 
-object ResolvedModule {
-  implicit def toSbtModuleID(module: ResolvedModule): ModuleID =
-    ModuleID(module.owner, module.name, module.latest_version)
-}
-
 case class Resolution(info: ScalaModule) extends BintrayApi {
   override def resolve: Request = {
     Gigahorse
@@ -63,7 +58,7 @@ object ModuleSearch {
 
   private[platform] def compareAndGetLatest(ms: Seq[ResolvedModule]) = {
     /* The **recommended** way of versioning a nightly is with ALPHA,
-     * this filtering is just done to avoid surprises when fetching artifacts. */
+     * this filtering is just done if someone uses nightly instead. */
     val nonNightlyVersions = ms.map(m => m -> Version(m.latest_version))
       .filterNot(t => t._2.items.contains(Literal("nightly")))
     if (nonNightlyVersions.isEmpty) None

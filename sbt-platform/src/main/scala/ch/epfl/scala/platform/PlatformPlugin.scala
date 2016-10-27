@@ -250,13 +250,17 @@ object PlatformKeys {
           sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName))
       }
     },
+    platformBeforePublishHook := {},
+    platformAfterPublishHook := {},
     commands += PlatformReleaseProcess.Nightly.releaseCommand
   )
 
   object SettingsDefinition {
     def getPublishedArtifacts(targetModule: ScalaModule): Set[ModuleID] = {
       val response = ModuleSearch.searchLatest(targetModule)
-      response.map(_.map(Set[ModuleID](_)).getOrElse(emptyModules))
+      val moduleResponse = response.map(_.map(rmod =>
+        targetModule.orgId %% targetModule.artifactId % rmod.latest_version))
+      moduleResponse.map(_.map(Set[ModuleID](_)).getOrElse(emptyModules))
         .getOrElse(emptyModules)
     }
   }
