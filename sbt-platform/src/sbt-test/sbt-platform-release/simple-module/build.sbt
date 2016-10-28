@@ -9,24 +9,18 @@ lazy val checkVariablesContent =
   taskKey[Unit]("Check the content of variables")
 checkVariablesContent := {
   if (insideCi.value) {
-    // Check the CI environment
-    assert(ciName.value != None)
-    assert(ciName.value.get != "")
-    assert(ciRepo.value != None)
-    assert(ciRepo.value.get != "")
-    assert(ciBranch.value != None)
-    assert(ciBranch.value.get != "")
-    assert(ciCommit.value != None)
-    assert(ciCommit.value.get != "")
-    assert(ciBuildDir.value != None)
-    assert(ciBuildDir.value.get != "")
-    assert(ciBuildUrl.value != None)
-    assert(ciBuildUrl.value.get != "")
-    assert(ciBuildNumber.value != None)
-    assert(ciBuildNumber.value.get >= 0)
-    assert(ciJobNumber.value != None)
-    assert(ciJobNumber.value.get >= 0)
-    // CI_PULL_REQUEST and CI_TAG may not be defined
+    assert(ciEnvironment.value != None)
+    val ciEnv = ciEnvironment.value.get
+    assert(ciEnv.rootDir.exists)
+    assert(ciEnv.name != "")
+    assert(ciEnv.repo != "")
+    assert(ciEnv.branch != "")
+    assert(ciEnv.commit != "")
+    assert(ciEnv.buildDir != "")
+    assert(ciEnv.buildUrl != "")
+    assert(ciEnv.buildNumber >= 0)
+    assert(ciEnv.jobNumber >= 0)
+    // Don't check optional pull request and tag envars
   }
 }
 

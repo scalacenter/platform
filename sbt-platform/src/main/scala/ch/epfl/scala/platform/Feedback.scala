@@ -7,7 +7,7 @@ object Feedback {
     s"The version $version is already published. Try another one."
 
   def undefinedEnvironmentVariable(name: String) =
-    s"Your environment does not define $name. Set it before proceeding!"
+    s"Undefined environment variable $name."
 
   def malformattedVersion(version: String) = s"Version $version is incorrect. $VersioningTip."
 

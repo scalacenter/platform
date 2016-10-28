@@ -10,17 +10,7 @@ $ exec git commit -m "test"
 > run
 $ exists target/scala-2.11
 > inspect insideCi
-> inspect insideCi
-> inspect ciName
-> inspect ciRepo
-> inspect ciBranch
-> inspect ciCommit
-> inspect ciBuildDir
-> inspect ciBuildUrl
-> inspect ciBuildNumber
-> inspect ciPullRequest
-> inspect ciJobNumber
-> inspect ciTag
+> inspect ciEnvironment
 > inspect sonatypeUsername
 > inspect sonatypePassword
 > inspect platformReleaseOnMerge

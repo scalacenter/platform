@@ -34,23 +34,36 @@ object PlatformPlugin extends sbt.AutoPlugin {
 trait PlatformSettings {
   def getEnvVariable(key: String): Option[String] = sys.env.get(key)
 
+  def getDroneEnvVariableOrDie(key: String) = {
+    getEnvVariable(key)
+      .getOrElse(sys.error(Feedback.undefinedEnvironmentVariable(key)))
+  }
+
+  def getDroneEnvVariableOrDie[T](key: String, conversion: String => T): T = {
+    getEnvVariable(key)
+      .map(conversion)
+      .getOrElse(sys.error(Feedback.undefinedEnvironmentVariable(key)))
+  }
+
   def toBoolean(presumedBoolean: String) = presumedBoolean.toBoolean
 
   def toInt(presumedInt: String) = presumedInt.toInt
 
-  // Drone-defined environment variables
+  case class CIEnvironment(rootDir: File,
+                           name: String,
+                           repo: String,
+                           branch: String,
+                           commit: String,
+                           buildDir: String,
+                           buildUrl: String,
+                           buildNumber: Int,
+                           pullRequest: Option[String],
+                           jobNumber: Int,
+                           tag: Option[String])
+
+  // CI-defined environment variables
   val insideCi = settingKey[Boolean]("Checks if CI is executing the build.")
-  val ciRootDir = settingKey[Option[File]]("The root folder for the CI.")
-  val ciName = settingKey[Option[String]]("Get the name of the CI server.")
-  val ciRepo = settingKey[Option[String]]("Get the repository run by the CI.")
-  val ciBranch = settingKey[Option[String]]("Get the current git branch.")
-  val ciCommit = settingKey[Option[String]]("Get the current git commit.")
-  val ciBuildDir = settingKey[Option[String]]("Get the CI build directory.")
-  val ciBuildUrl = settingKey[Option[String]]("Get the CI build URL.")
-  val ciBuildNumber = settingKey[Option[Int]]("Get the CI build number.")
-  val ciPullRequest = settingKey[Option[String]]("Get the pull request id.")
-  val ciJobNumber = settingKey[Option[Int]]("Get the CI job number.")
-  val ciTag = settingKey[Option[String]]("Get the git tag.")
+  val ciEnvironment = settingKey[Option[CIEnvironment]]("Get the Drone environment.")
 
   // Custom environment variables
   val sonatypeUsername = settingKey[Option[String]]("Get sonatype username.")
@@ -134,17 +147,31 @@ object PlatformKeys {
   val emptyModules = Set.empty[ModuleID]
   lazy val platformSettings: Seq[Setting[_]] = Seq(
     insideCi := getEnvVariable("CI").exists(toBoolean),
-    ciRootDir := Some(file("/drone")),
-    ciName := getEnvVariable("CI_NAME"),
-    ciRepo := getEnvVariable("CI_REPO"),
-    ciBranch := getEnvVariable("CI_BRANCH"),
-    ciCommit := getEnvVariable("CI_COMMIT"),
-    ciBuildDir := getEnvVariable("CI_BUILD_DIR"),
-    ciBuildUrl := getEnvVariable("CI_BUILD_URL"),
-    ciBuildNumber := getEnvVariable("CI_BUILD_NUMBER").map(toInt),
-    ciPullRequest := getEnvVariable("CI_PULL_REQUEST"),
-    ciJobNumber := getEnvVariable("CI_JOB_NUMBER").map(toInt),
-    ciTag := getEnvVariable("CI_TAG"),
+    ciEnvironment := {
+      if (insideCi.value) None
+      else {
+        for {
+          ciName <- getEnvVariable("CI_NAME")
+          ciRepo <- getEnvVariable("CI_REPO")
+          ciBranch <- getEnvVariable("CI_BRANCH")
+          ciCommit <- getEnvVariable("CI_COMMIT")
+          ciBuildDir <- getEnvVariable("CI_BUILD_DIR")
+          ciBuildUrl <- getEnvVariable("CI_BUILD_URL")
+          ciBuildNumber <- getEnvVariable("CI_BUILD_NUMBER")
+          ciJobNumber <- getEnvVariable("CI_JOB_NUMBER")
+        } yield CIEnvironment(file("/drone"),
+                              ciName,
+                              ciRepo,
+                              ciBranch,
+                              ciCommit,
+                              ciBuildDir,
+                              ciBuildUrl,
+                              ciBuildNumber.toInt,
+                              getEnvVariable("CI_PULL_REQUEST"),
+                              ciJobNumber.toInt,
+                              getEnvVariable("CI_TAG"))
+      }
+    },
     sonatypeUsername := getEnvVariable("SONATYPE_USERNAME"),
     sonatypePassword := getEnvVariable("SONATYPE_PASSWORD"),
     platformLogger := streams.value.log,
@@ -283,8 +310,7 @@ object PlatformKeys {
     pgpPublicRing := {
       if (platformSignArtifact.value) {
         SettingsDefinition.getPgpRingFile(
-          insideCi.value,
-          ciRootDir.value.get,
+          ciEnvironment.value,
           platformCustomRings.value,
           platformDefaultPublicRingName.value)
       } else pgpPublicRing.value
@@ -292,8 +318,7 @@ object PlatformKeys {
     pgpSecretRing := {
       if (platformSignArtifact.value) {
         SettingsDefinition.getPgpRingFile(
-          insideCi.value,
-          ciRootDir.value.get,
+          ciEnvironment.value,
           platformCustomRings.value,
           platformDefaultPrivateRingName.value)
       } else pgpSecretRing.value
@@ -312,16 +337,16 @@ object PlatformKeys {
         .getOrElse(emptyModules)
     }
 
-    def getPgpRingFile(insideCi: Boolean,
-                       ciDir: File,
+    def getPgpRingFile(ciEnvironment: Option[CIEnvironment],
                        customRing: Option[File],
                        defaultRingFileName: String) = {
-      if (insideCi) ciDir / ".gnupg" / defaultRingFileName
-      else {
+      ciEnvironment.map {
+        _.rootDir / ".gnupg" / defaultRingFileName
+      }.getOrElse {
         if (customRing.isEmpty) {
-          val homeFolder = sys.env.getOrElse("HOME",
-            "Define `platformCustom*SecretRing` to look up the gpg keys.")
-          file(s"$homeFolder/.gnupg/$defaultRingFileName")
+          val homeFolder = System.getProperty("user.home")
+          if (homeFolder.isEmpty) sys.error("Define $HOME to start with.")
+          else file(s"$homeFolder/.gnupg/$defaultRingFileName")
         } else customRing.get
       }
     }
