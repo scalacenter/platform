@@ -1,6 +1,7 @@
 package ch.epfl.scala.platform
 
 import cats.data.Xor
+import ch.epfl.scala.platform
 import ch.epfl.scala.platform.github.GitHubReleaser
 import ch.epfl.scala.platform.github.GitHubReleaser.{GitHubEndpoint, GitHubRelease}
 import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
@@ -14,7 +15,7 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
 import sbtrelease.{Git, ReleaseStateTransformations}
 import sbtrelease.Version.Bump
 
-import scala.util.Try
+import scala.util.{Random, Try}
 
 object PlatformPlugin extends sbt.AutoPlugin {
 
@@ -148,7 +149,7 @@ object PlatformKeys {
   lazy val platformSettings: Seq[Setting[_]] = Seq(
     insideCi := getEnvVariable("CI").exists(toBoolean),
     ciEnvironment := {
-      if (insideCi.value) None
+      if (!insideCi.value) None
       else {
         for {
           ciName <- getEnvVariable("CI_NAME")
@@ -160,16 +161,16 @@ object PlatformKeys {
           ciBuildNumber <- getEnvVariable("CI_BUILD_NUMBER")
           ciJobNumber <- getEnvVariable("CI_JOB_NUMBER")
         } yield CIEnvironment(file("/drone"),
-                              ciName,
-                              ciRepo,
-                              ciBranch,
-                              ciCommit,
-                              ciBuildDir,
-                              ciBuildUrl,
-                              ciBuildNumber.toInt,
-                              getEnvVariable("CI_PULL_REQUEST"),
-                              ciJobNumber.toInt,
-                              getEnvVariable("CI_TAG"))
+          ciName,
+          ciRepo,
+          ciBranch,
+          ciCommit,
+          ciBuildDir,
+          ciBuildUrl,
+          ciBuildNumber.toInt,
+          getEnvVariable("CI_PULL_REQUEST"),
+          ciJobNumber.toInt,
+          getEnvVariable("CI_TAG"))
       }
     },
     sonatypeUsername := getEnvVariable("SONATYPE_USERNAME"),
@@ -207,7 +208,7 @@ object PlatformKeys {
         /* This is a setting because modifies previousArtifacts, so we protect
          * ourselves from errors if users don't have connection to Internet. */
         val targetModule = platformScalaModule.value
-        SettingsDefinition.getPublishedArtifacts(targetModule)
+        Helper.getPublishedArtifacts(targetModule)
       } else highPriorityArtifacts
     },
     platformFetchLatestPublishedVersion := {
@@ -215,7 +216,7 @@ object PlatformKeys {
       // Retry in case where sbt boots up without Internet connection
       val retryPreviousArtifacts =
       if (previousArtifacts.nonEmpty) previousArtifacts
-      else SettingsDefinition.getPublishedArtifacts(platformScalaModule.value)
+      else Helper.getPublishedArtifacts(platformScalaModule.value)
       val moduleId = retryPreviousArtifacts.headOption.getOrElse(
         sys.error(Feedback.forceDefinitionOfPreviousArtifacts))
       Version(moduleId.revision)
@@ -309,7 +310,7 @@ object PlatformKeys {
     },
     pgpPublicRing := {
       if (platformSignArtifact.value) {
-        SettingsDefinition.getPgpRingFile(
+        Helper.getPgpRingFile(
           ciEnvironment.value,
           platformCustomRings.value,
           platformDefaultPublicRingName.value)
@@ -317,7 +318,7 @@ object PlatformKeys {
     },
     pgpSecretRing := {
       if (platformSignArtifact.value) {
-        SettingsDefinition.getPgpRingFile(
+        Helper.getPgpRingFile(
           ciEnvironment.value,
           platformCustomRings.value,
           platformDefaultPrivateRingName.value)
@@ -328,7 +329,7 @@ object PlatformKeys {
     commands += PlatformReleaseProcess.Nightly.releaseCommand
   )
 
-  object SettingsDefinition {
+  object Helper {
     def getPublishedArtifacts(targetModule: ScalaModule): Set[ModuleID] = {
       val response = ModuleSearch.searchLatest(targetModule)
       val moduleResponse = response.map(_.map(rmod =>
@@ -371,6 +372,13 @@ object PlatformKeys {
         sys.error(Feedback.malformattedVersion(definedVersion)))
     }
 
+    private def generateUbiquituousVersion(version: String, st: State) = {
+      val ci = st.extract.get(ciEnvironment)
+      val unique = ci.map(_.buildNumber.toString)
+        .getOrElse(Random.nextLong.abs.toString)
+      s"$version-$unique"
+    }
+
     val validateAndSetVersion: ReleaseStep = { (st0: State) =>
       val (st, logger) = st0.extract.runTask(platformLogger, st0)
       val userDefinedVersion = st.get(commandLineDefinedVersion).flatten.map(
@@ -406,7 +414,10 @@ object PlatformKeys {
         val month = now.dayOfMonth().get
         val day = now.monthOfYear().get
         val year = now.year().get
-        val nightlyVersion = s"${targetVersion.repr}-alpha-$year-$month-$day"
+        val template = s"${targetVersion.repr}-alpha-$year-$month-$day"
+        val nightlyVersion =
+          if (!platform.testing) template
+          else generateUbiquituousVersion(template, st)
         val generatedVersion = targetVersion.copy(nightlyVersion)
         logger.info(s"Nightly version is set to ${generatedVersion.repr}.")
         val previousVersions = st.get(versions).getOrElse(

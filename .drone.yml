@@ -1,7 +1,7 @@
 build:
   image: jvican/scala-sbt-git
   volumes:
-    - /platform:/drone/.gnupg/
+    - /platform:/drone/.gnupg
   environment:
     - GITHUB_PLATFORM_TEST_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
     - PLATFORM_PGP_PASSPHRASE=$$PLATFORM_PGP_PASSPHRASE
