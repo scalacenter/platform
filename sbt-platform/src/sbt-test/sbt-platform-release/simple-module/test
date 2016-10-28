@@ -23,15 +23,11 @@ $ exists target/scala-2.11
 > inspect ciTag
 > inspect sonatypeUsername
 > inspect sonatypePassword
-> inspect bintrayUsername
-> inspect bintrayPassword
 > inspect platformReleaseOnMerge
 > inspect platformModuleTags
 > inspect platformTargetBranch
 > inspect sonatypeUsername
 > inspect sonatypePassword
-> inspect bintrayUsername
-> inspect bintrayPassword
 > inspect platformReleaseOnMerge
 > inspect platformModuleTags
 > inspect platformTargetBranch
