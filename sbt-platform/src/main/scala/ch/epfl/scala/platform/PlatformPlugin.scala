@@ -203,10 +203,19 @@ object PlatformKeys {
     },
     platformReleaseNotesDir := baseDirectory.value / "notes",
     platformGetReleaseNotes := {
-      val notesFileName = s"${version.value}.md"
-      val notesFile = platformReleaseNotesDir.value / notesFileName
-      // TODO(jvican): Add proper error handling
-      IO.read(notesFile)
+      val mdFile = s"${version.value}.md"
+      val markdownFile = s"${version.value}.markdown"
+      val notes = List(mdFile, markdownFile).foldLeft("") { (acc, curr) =>
+        if (acc.nonEmpty) acc
+        else {
+          val presumedFile = platformReleaseNotesDir.value / curr
+          if (!presumedFile.exists) acc
+          else IO.read(presumedFile)
+        }
+      }
+      if (notes.isEmpty)
+        platformLogger.value.info("Release notes are empty.")
+      notes
     },
     platformGitHubRepo := {
       releaseVcs.value match {
