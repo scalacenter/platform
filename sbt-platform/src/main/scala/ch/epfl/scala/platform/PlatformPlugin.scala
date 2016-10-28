@@ -40,7 +40,7 @@ trait PlatformSettings {
 
   // Drone-defined environment variables
   val insideCi = settingKey[Boolean]("Checks if CI is executing the build.")
-  val ciRootDir = settingKey[File]("The root folder for the CI.")
+  val ciRootDir = settingKey[Option[File]]("The root folder for the CI.")
   val ciName = settingKey[Option[String]]("Get the name of the CI server.")
   val ciRepo = settingKey[Option[String]]("Get the repository run by the CI.")
   val ciBranch = settingKey[Option[String]]("Get the current git branch.")
@@ -55,8 +55,6 @@ trait PlatformSettings {
   // Custom environment variables
   val sonatypeUsername = settingKey[Option[String]]("Get sonatype username.")
   val sonatypePassword = settingKey[Option[String]]("Get sonatype password.")
-  val bintrayUsername = settingKey[Option[String]]("Get bintray username.")
-  val bintrayPassword = settingKey[Option[String]]("Get bintray password.")
 
   // FORMAT: ON
   val platformLogger = taskKey[Logger]("Return the sbt logger.")
@@ -73,7 +71,7 @@ trait PlatformSettings {
   val platformReleaseNotesDir = settingKey[File]("Directory with the markdown release notes.")
   val platformGetReleaseNotes = taskKey[String]("Get the correct release notes for a release.")
   val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
-  val platformVcsEndpoint = settingKey[Option[URL]]("Get `scmInfo` from the git repository.")
+  val platformGitHubRepo = settingKey[Option[(String, String)]]("Get GitHub organization and repository from .git folder.")
   val platformNightlyReleaseProcess = settingKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
   val platformSignArtifact = settingKey[Boolean]("Enable to sign artifacts with the platform pgp key.")
   val platformCustomRings = settingKey[Option[File]]("File that stores the pgp secret ring.")
@@ -136,7 +134,7 @@ object PlatformKeys {
   val emptyModules = Set.empty[ModuleID]
   lazy val platformSettings: Seq[Setting[_]] = Seq(
     insideCi := getEnvVariable("CI").exists(toBoolean),
-    ciRootDir := file("/drone"),
+    ciRootDir := Some(file("/drone")),
     ciName := getEnvVariable("CI_NAME"),
     ciRepo := getEnvVariable("CI_REPO"),
     ciBranch := getEnvVariable("CI_BRANCH"),
@@ -149,14 +147,12 @@ object PlatformKeys {
     ciTag := getEnvVariable("CI_TAG"),
     sonatypeUsername := getEnvVariable("SONATYPE_USERNAME"),
     sonatypePassword := getEnvVariable("SONATYPE_PASSWORD"),
-    bintrayUsername := getEnvVariable("BINTRAY_USERNAME"),
-    bintrayPassword := getEnvVariable("BINTRAY_PASSWORD"),
     platformLogger := streams.value.log,
     platformReleaseOnMerge := false, // By default, disabled
     platformModuleTags := Seq.empty[String],
     platformTargetBranch := "platform-release",
     platformValidatePomData := {
-      if (platformVcsEndpoint.value.isEmpty)
+      if (scmInfo.value.isEmpty)
         throw new NoSuchElementException(Feedback.forceDefinitionOfScmInfo)
       if (licenses.value.isEmpty)
         throw new NoSuchElementException(Feedback.forceValidLicense)
@@ -201,8 +197,7 @@ object PlatformKeys {
       val currentVersion = platformModuleBaseVersion.value
       val previousVersion = platformFetchLatestPublishedVersion.value
       mimaFailOnProblem := currentVersion.items.head > previousVersion.items.head
-      val firstVersions = Seq("0.1", "0.1.0")
-      if (firstVersions.contains(version.value) && mimaPreviousArtifacts.value.isEmpty)
+      if (version.value.startsWith("0.") && mimaPreviousArtifacts.value.isEmpty)
         sys.error(Feedback.forceDefinitionOfPreviousArtifacts)
       mimaReportBinaryIssues.value
     },
@@ -213,24 +208,29 @@ object PlatformKeys {
       // TODO(jvican): Add proper error handling
       IO.read(notesFile)
     },
-    platformVcsEndpoint := {
-      // Bintray does the same, but we want this to work for sonatype also
-      homepage.value.orElse {
-        releaseVcs.value match {
-          case Some(g: Git) =>
-            // Fetch git endpoint automatically
-            if (g.trackingRemote.isEmpty) sys.error(Feedback.incorrectGitHubRepo)
-            val p = g.cmd("config", "remote.%s.url" format g.trackingRemote)
-            val gitResult = p.!!.trim
-            gitResult match {
-              case GitHubReleaser.SshGitHubUrl(org, name) =>
-                Some(url(GitHubReleaser.generateGitHubUrl(org, name)))
-              case GitHubReleaser.HttpsGitHubUrl(org, name) =>
-                Some(url(gitResult))
-              case _ => sys.error(s"Unexpected github homepage: $gitResult.")
-            }
-          case Some(vcs) => sys.error("Only git is supported for now.")
-          case None => None
+    platformGitHubRepo := {
+      releaseVcs.value match {
+        case Some(g: Git) =>
+          // Fetch git endpoint automatically
+          if (g.trackingRemote.isEmpty) sys.error(Feedback.incorrectGitHubRepo)
+          val trackingRemote = g.trackingRemote
+          val p = g.cmd("config", "remote.%s.url" format trackingRemote)
+          val gitResult = p.!!.trim
+          gitResult match {
+            case GitHubReleaser.SshGitHubUrl(org, repo) => Some(org, repo)
+            case GitHubReleaser.HttpsGitHubUrl(org, repo) => Some(org, repo)
+            case _ => sys.error(Feedback.incorrectGitHubUrl(trackingRemote, gitResult))
+          }
+        case Some(vcs) => sys.error("Only git is supported for now.")
+        case None => None
+      }
+    },
+    scmInfo := {
+      scmInfo.value.orElse {
+        platformGitHubRepo.value.map { t =>
+          val (org, repo) = t
+          val gitHubUrl = GitHubReleaser.generateGitHubUrl(org, repo)
+          ScmInfo(url(gitHubUrl), s"scm:git:$gitHubUrl")
         }
       }
     },
@@ -249,16 +249,9 @@ object PlatformKeys {
       val githubToken = sys.env.get(tokenEnvName)
       githubToken match {
         case Some(token) =>
-          platformVcsEndpoint.value.map(_.toString) match {
-            case Some(GitHubReleaser.HttpsGitHubUrl(org, repo)) =>
-              createReleaseInGitHub(org, repo, token)
-            case Some(GitHubReleaser.SshGitHubUrl(org, repo)) =>
-              createReleaseInGitHub(org, repo, token)
-            case Some(wrongUrl) =>
-              sys.error(Feedback.incorrectGitHubUrl)
-            case None =>
-              sys.error(Feedback.expectedScmInfo)
-          }
+          val (org, repo) = platformGitHubRepo.value.getOrElse(
+            sys.error(Feedback.incorrectGitHubRepo))
+          createReleaseInGitHub(org, repo, token)
         case None =>
           sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName))
       }
@@ -282,7 +275,7 @@ object PlatformKeys {
       if (platformSignArtifact.value) {
         SettingsDefinition.getPgpRingFile(
           insideCi.value,
-          ciRootDir.value,
+          ciRootDir.value.get,
           platformCustomRings.value,
           platformDefaultPublicRingName.value)
       } else pgpPublicRing.value
@@ -291,7 +284,7 @@ object PlatformKeys {
       if (platformSignArtifact.value) {
         SettingsDefinition.getPgpRingFile(
           insideCi.value,
-          ciRootDir.value,
+          ciRootDir.value.get,
           platformCustomRings.value,
           platformDefaultPrivateRingName.value)
       } else pgpSecretRing.value
@@ -359,7 +352,7 @@ object PlatformKeys {
         .put(versions, (definedVersion.repr, nextVersion))
     }
 
-    val checkVersionIsUnpublished: ReleaseStep = { (st: State) =>
+    val checkVersionIsNotPublished: ReleaseStep = { (st: State) =>
       val definedVersion = st.get(validReleaseVersion).getOrElse(
         sys.error(Feedback.undefinedVersion))
       val module = st.extract.get(platformScalaModule)
@@ -430,7 +423,7 @@ object PlatformKeys {
       val releaseProcess = {
         Seq[ReleaseStep](
           validateAndSetVersion,
-          checkVersionIsUnpublished,
+          checkVersionIsNotPublished,
           tagAsNightly,
           releaseStepTask(platformValidatePomData),
           checkSnapshotDependencies,

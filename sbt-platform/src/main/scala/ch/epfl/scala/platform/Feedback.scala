@@ -14,6 +14,9 @@ object Feedback {
   def invalidOrNonExistingVersions(version: String, next: String) =
     s"Version $version and $next are invalid or have not been defined. $VersioningTip."
 
+  def incorrectGitHubUrl(remote: String, res: String) =
+    s"Your Git remote branch $remote is incorrect: $res."
+
   val unexpectedEmptyVersion =
     "The sbt-defined version is empty. Set a well-formatted version in `version.sbt`."
   val forceDefinitionOfScmInfo =
@@ -24,8 +27,6 @@ object Feedback {
     "Unexpected empty `mimaPreviousArtifacts`. Set it to perform MiMa checks"
   val undefinedVersion =
     "No versions are set! Did you pass a release version to `releaseNightly` or set the sbt version setting?"
-  val incorrectGitHubUrl =
-    "The value of the setting `scmInfo` is not a GitHub url."
   val incorrectGitHubRepo =
     "Your git repo does not have a remote branch, set it before continuing."
   val expectedScmInfo =

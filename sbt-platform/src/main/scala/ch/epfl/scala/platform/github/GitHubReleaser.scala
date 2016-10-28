@@ -1,18 +1,23 @@
 package ch.epfl.scala.platform.github
 
+import ch.epfl.scala.platform
 import gigahorse._
 import ch.epfl.scala.platform.logger
 import coursier.core.Version
-import io.circe._, io.circe.generic.auto._, io.circe.parser._, io.circe.syntax._
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.parser._
+import io.circe.syntax._
 
 object GitHubReleaser extends GitHubDataTypes with GitHubResources {
   type CirceResult[T] = cats.data.Xor[io.circe.Error, T]
   val HttpsGitHubUrl =
-    """https?://(?:www\.)?github\.com/([a-zA-Z0-9]+)/([a-zA-Z0-9]+)/?""".r
+    """https?://(?:www\.)?github\.com/([a-zA-Z0-9_-.]+)/([a-zA-Z0-9_-.]+)/?""".r
   val SshGitHubUrl =
-    """git@github.com:([a-zA-Z0-9]+)/([a-zA-Z0-9]+)\.git""".r
-  def generateGitHubUrl(org: String, name: String) =
-    s"https://github.com/$org/$name"
+    """git@github.com:([a-zA-Z0-9_-.]+)/([a-zA-Z0-9_-.]+)\.git""".r
+
+  def generateGitHubUrl(org: String, repo: String) =
+    s"https://github.com/$org/$repo"
 
   trait GithubApi {
     val baseUrl = "https://api.github.com"
@@ -33,7 +38,6 @@ object GitHubReleaser extends GitHubDataTypes with GitHubResources {
 
   case class GitHubEndpoint(owner: String, repo: String, authToken: String)
     extends GithubApi {
-    val testing = System.getProperty("platform.test") == "true"
 
     val defaultGithubHeaders = Seq(
       HeaderNames.ACCEPT -> "application/vnd.github.v3+json",
@@ -41,14 +45,22 @@ object GitHubReleaser extends GitHubDataTypes with GitHubResources {
       HeaderNames.AUTHORIZATION -> s"token $authToken"
     ).toMap.mapValues(List(_))
 
-    case class ReleaseRequest(tag_name: String, target_commitish: String,
-                              name: String, body: String, draft: Boolean,
+    case class ReleaseRequest(tag_name: String,
+                              target_commitish: String,
+                              name: String,
+                              body: String,
+                              draft: Boolean,
                               prerelease: Boolean)
 
     object ReleaseRequest {
       def apply(release: GitHubRelease): ReleaseRequest = {
         val versionNumber = s"v${release.version.repr}"
-        ReleaseRequest(versionNumber, release.branch, versionNumber, release.body, release.isDraft || testing, release.preRelease(release.version))
+        ReleaseRequest(versionNumber,
+                       release.branch,
+                       versionNumber,
+                       release.body,
+                       release.isDraft || platform.testing,
+                       release.preRelease(release.version))
       }
     }
 

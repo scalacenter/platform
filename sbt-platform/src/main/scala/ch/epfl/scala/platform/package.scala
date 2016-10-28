@@ -1,6 +1,7 @@
 package ch.epfl.scala
 
 package object platform {
+  val testing = System.getProperty("platform.test") == "true"
   object logger {
     def elem[T](es: sourcecode.Text[T]*)(implicit line: sourcecode.Line,
                                          file: sourcecode.File): Unit = {
