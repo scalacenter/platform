@@ -1,8 +1,14 @@
 build:
   image: jvican/scala-sbt-git
+  volumes:
+    - /platform:/drone/.gnupg/
   environment:
     - GITHUB_PLATFORM_TEST_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
+    - PLATFORM_PGP_PASSPHRASE=$$PLATFORM_PGP_PASSPHRASE
+		- BINTRAY_USERNAME=$$BINTRAY_USERNAME
+		- BINTRAY_PASSWORD=$$BINTRAY_PASSWORD
   commands:
+    - ./bin/store_credentials.sh $BINTRAY_USERNAME $BINTRAY_PASSWORD
     - test -e "/drone/.sbt" && mv /drone/.sbt $HOME/.sbt
     - git config --global user.email "lucky@luke.com"
     - git config --global user.name "Lucky Luke, the Cowboy"
