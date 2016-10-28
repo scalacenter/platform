@@ -12,9 +12,9 @@ import io.circe.syntax._
 object GitHubReleaser extends GitHubDataTypes with GitHubResources {
   type CirceResult[T] = cats.data.Xor[io.circe.Error, T]
   val HttpsGitHubUrl =
-    """https?://(?:www\.)?github\.com/([a-zA-Z0-9_-.]+)/([a-zA-Z0-9_-.]+)/?""".r
+    """https?://(?:www\.)?github\.com/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)/?""".r
   val SshGitHubUrl =
-    """git@github.com:([a-zA-Z0-9_-.]+)/([a-zA-Z0-9_-.]+)\.git""".r
+    """git@github.com:([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)\.git""".r
 
   def generateGitHubUrl(org: String, repo: String) =
     s"https://github.com/$org/$repo"
