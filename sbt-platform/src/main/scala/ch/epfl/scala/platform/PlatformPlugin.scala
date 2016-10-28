@@ -457,8 +457,8 @@ object PlatformKeys {
       val releaseProcess = {
         Seq[ReleaseStep](
           validateAndSetVersion,
-          checkVersionIsNotPublished,
           tagAsNightly,
+          checkVersionIsNotPublished,
           releaseStepTask(platformValidatePomData),
           checkSnapshotDependencies,
           runTest,
