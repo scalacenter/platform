@@ -9,8 +9,8 @@ $ exec git commit -m "test"
 > compile
 > run
 $ exists target/scala-2.11
-> inspect insideCi
-> inspect ciEnvironment
+> inspect platformInsideCi
+> inspect platformCiEnvironment
 > inspect sonatypeUsername
 > inspect sonatypePassword
 > inspect platformReleaseOnMerge

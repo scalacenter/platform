@@ -1,0 +1,9 @@
+$ exec git init .
+$ exec git remote add origin https://github.com/jvican/stoml
+$ exec git fetch
+$ exec git checkout -t origin/sbt-platform-plugin-test-git-tag
+
+# Release nightly here for MiMa checks to succeed
+> compile
+# This will always be run by the CI
+> releaseStable
