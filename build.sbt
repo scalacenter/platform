@@ -3,12 +3,12 @@
 
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
-/* bintrayOrganization := Some("scalaplatform"),
-  bintrayRepository := "tools",
-  bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
-  publishTo := (publishTo in bintray).value,
-  publishArtifact in Test := false,
-  releasePublishArtifactsAction := PgpKeys.publishSigned.value,*/
+  /* bintrayOrganization := Some("scalaplatform"),
+    bintrayRepository := "tools",
+    bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
+    publishTo := (publishTo in bintray).value,
+    publishArtifact in Test := false,
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,*/
   licenses := Seq(
     // Scala Center license... BSD 3-clause
     "BSD" -> url("http://opensource.org/licenses/BSD-3-Clause")
@@ -16,18 +16,18 @@ lazy val publishSettings = Seq(
   homepage := Some(url("https://github.com/scalaplatform/platform")),
   autoAPIMappings := true,
   apiURL := Some(url("https://scalaplatform.github.io/platform")),
-/*  releaseProcess := Seq[ReleaseStep](
-    checkSnapshotDependencies,
-    inquireVersions,
-    runTest,
-    setReleaseVersion,
-    commitReleaseVersion,
-    tagRelease,
-    publishArtifacts,
-    setNextVersion,
-    commitNextVersion,
-    pushChanges
-  ),*/
+  /*  releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      publishArtifacts,
+      setNextVersion,
+      commitNextVersion,
+      pushChanges
+    ),*/
   pomExtra :=
     <developers>
       <developer>
@@ -87,27 +87,44 @@ lazy val platform = project
   .aggregate(process, `release-manager`)
   .dependsOn(process, `release-manager`)
 
+lazy val makeProcess = taskKey[Unit]("Make the process.")
 lazy val process: Project = project
   .in(file("process"))
   .enablePlugins(OrnatePlugin)
   .settings(allSettings)
   .settings(scalaVersion := "2.11.8")
   .settings(
+    ghpages.settings,
+    git.remoteRepo := "git@github.com:scalacenter/platform-staging",
     name := "platform-process",
-    ornateTargetDir := Some(file("docs/")),
-    compile in Compile := Def.taskDyn {
-      val analysis = (compile in Compile).value
-      Def.task {
-        (ornate in process).value
-        // Work around Ornate limitation to add custom CSS
-        val targetDir = (ornateTargetDir in process).value.get
-        val cssFolder = targetDir / "_theme" / "css"
-        val customCss = cssFolder / "custom.css"
-        val mainCss = cssFolder / "app.css"
-        IO.append(mainCss, IO.read(customCss))
-        analysis
+    ornateSourceDir := Some(baseDirectory.value / "src" / "ornate"),
+    ornateTargetDir := Some(target.value / "site" / "process"),
+    makeProcess := {
+      val logger = streams.value.log
+      ornate.value
+      // Work around Ornate limitation to add custom CSS
+      val targetDir = ornateTargetDir.value.get
+      val cssFolder = targetDir / "_theme" / "css"
+      if (!cssFolder.exists) cssFolder.mkdirs()
+      val processDir = baseDirectory.value
+      val resourcesFolder = processDir / "src" / "resources"
+      val customCss = resourcesFolder / "css" / "custom.css"
+      val mainCss = cssFolder / "app.css"
+      logger.info("Adding custom CSS...")
+      IO.append(mainCss, IO.read(customCss))
+
+      // Redirecting index to contents...
+      import java.nio.file.{Paths, Files}
+      def getPath(f: java.io.File): java.nio.file.Path =
+        Paths.get(f.toPath.toAbsolutePath.toString)
+      val destFile = targetDir / ".." / "index.html"
+      if (!destFile.exists) {
+        val destLink = getPath(destFile)
+        val srcLink = getPath(targetDir / "contents.html")
+        logger.info("Generating index.html...")
+        Files.createSymbolicLink(destLink, srcLink)
       }
-    }.value
+    }
   )
 
 lazy val `release-manager` = project
@@ -172,4 +189,22 @@ lazy val `sbt-platform` = project
     fork in Test := true,
     javaOptions in Test ++= Seq("-Dplatform.debug=true",
       "-Dplatform.test=true")
+  )
+
+lazy val docs = project
+  .in(file("docs"))
+  .settings(moduleName := "sbt-platform-docs")
+  .enablePlugins(MicrositesPlugin)
+  .settings(allSettings)
+  .settings(
+    micrositeName := "sbt-platform",
+    micrositeDescription := "The SBT plugin for Scala Platform modules' maintainers.",
+    micrositeBaseUrl := "/sbt-platform",
+    micrositeAuthor := "Scala Center",
+    micrositeHomepage := "scala.epfl.ch",
+    micrositeGithubOwner := "scalacenter",
+    micrositeGithubRepo := "platform-staging",
+    siteDirectory in makeSite := target(_ / "site" / "sbt-platform").value,
+    git.remoteRepo := "git@github.com:scalacenter/sbt-platform",
+    git.branch := Some("master")
   )

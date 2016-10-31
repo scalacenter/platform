@@ -23,3 +23,6 @@ project/plugins/project/
 
 # Drone
 .secrets.yml
+
+# Project specific
+process/site/

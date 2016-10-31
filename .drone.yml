@@ -14,7 +14,7 @@ build:
     - git config --global user.name "Lucky Luke, the Cowboy"
     - export COURSIER_CACHE="/drone/.coursier-cache"
     - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted -Dsbt.ivy.home=/drone/.ivy2
-    - mv $HOME/.sbt /drone/.sbt 
+    - mv $HOME/.sbt /drone/.sbt
 
 cache:
   mount:
