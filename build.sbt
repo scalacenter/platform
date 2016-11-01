@@ -88,6 +88,8 @@ lazy val platform = project
   .dependsOn(process, `release-manager`)
 
 lazy val makeProcess = taskKey[Unit]("Make the process.")
+lazy val createProcessIndex = taskKey[Unit]("Create index.html.")
+lazy val publishProcess = taskKey[Unit]("Make and publish the process.")
 lazy val process: Project = project
   .in(file("process"))
   .enablePlugins(OrnatePlugin)
@@ -98,7 +100,8 @@ lazy val process: Project = project
     git.remoteRepo := "git@github.com:scalacenter/platform-staging",
     name := "platform-process",
     ornateSourceDir := Some(baseDirectory.value / "src" / "ornate"),
-    ornateTargetDir := Some(target.value / "site" / "process"),
+    ornateTargetDir := Some(target.value / "site"),
+    siteSourceDirectory := ornateTargetDir.value.get,
     makeProcess := {
       val logger = streams.value.log
       ornate.value
@@ -112,19 +115,31 @@ lazy val process: Project = project
       val mainCss = cssFolder / "app.css"
       logger.info("Adding custom CSS...")
       IO.append(mainCss, IO.read(customCss))
-
+    },
+    createProcessIndex := {
+      val logger = streams.value.log
       // Redirecting index to contents...
+      val repositoryTarget = GhPagesKeys.repository.value
       import java.nio.file.{Paths, Files}
       def getPath(f: java.io.File): java.nio.file.Path =
         Paths.get(f.toPath.toAbsolutePath.toString)
-      val destFile = targetDir / ".." / "index.html"
-      if (!destFile.exists) {
-        val destLink = getPath(destFile)
-        val srcLink = getPath(targetDir / "contents.html")
-        logger.info("Generating index.html...")
-        Files.createSymbolicLink(destLink, srcLink)
+      val parentPath = getPath(repositoryTarget)
+      val destFile = getPath(repositoryTarget / "index.html")
+      logger.info(s"Checking that $destFile does not exist.")
+      if (!Files.isSymbolicLink(destFile)) {
+        val srcLink = Paths.get("contents.html")
+        logger.info(s"Generating index.html poiting to $srcLink.")
+        Files.createSymbolicLink(destFile, srcLink)
       }
-    }
+    },
+    GhPagesKeys.synchLocal :=
+      GhPagesKeys.synchLocal.dependsOn(createProcessIndex).value,
+    publishProcess := Def.sequential(
+      makeProcess,
+      GhPagesKeys.cleanSite,
+      GhPagesKeys.synchLocal,
+      GhPagesKeys.pushSite
+    ).value
   )
 
 lazy val `release-manager` = project

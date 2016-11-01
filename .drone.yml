@@ -11,6 +11,7 @@ build:
   commands:
     - setup_environment.sh /drone
     - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
+    - sbt process/publishProcess
     - prepare_cache.sh /drone
 
 
