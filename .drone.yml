@@ -2,18 +2,15 @@ build:
   image: jvican/scala-sbt-git
   pull: true
   volumes:
-    - /platform:/drone/.keys
+    - /platform:/keys
   environment:
-    - GITHUB_PLATFORM_TEST_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
+    - GITHUB_PLATFORM_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
     - PLATFORM_PGP_PASSPHRASE=$$PLATFORM_PGP_PASSPHRASE
     - BINTRAY_USERNAME=$$BINTRAY_USERNAME
     - BINTRAY_PASSWORD=$$BINTRAY_PASSWORD
   commands:
-    - setup_environment.sh /drone
     - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
-    - sbt process/publishProcess
-    - prepare_cache.sh /drone
-
+    - sbt process/publishProcess docs/publishMicrosite
 
 cache:
   mount:

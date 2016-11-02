@@ -38,7 +38,6 @@ object Feedback {
 
   def unexpectedReleaseProcess(process: String) =
     s"The release process $process does not exist."
-
   val undefinedVersion =
     "Undefined version before releasing. Did you forget to define it?"
 
@@ -62,6 +61,15 @@ object Feedback {
 
   val expectedScmInfo =
     "Set `scmInfo` before proceeding, it's required for a correct release process."
+
+  val noHomeForRings =
+    "Undefined $HOME disallows the default pgp ring folder. Set it or redefine `platformPgpRings`."
+
+  val expectedCustomRing =
+    "Default rings were not found. Define `platformPgpRings` to point to existing pgp rings."
+
+  val undefinedPreviousMiMaVersions =
+    "MiMa could not find previous versions. MiMa will not be executed."
 
   val emptyReleaseNotes = "Release notes are empty."
   val parsingError = "JSON response could not be parsed."

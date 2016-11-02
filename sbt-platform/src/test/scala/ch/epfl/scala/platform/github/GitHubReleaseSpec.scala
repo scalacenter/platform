@@ -9,7 +9,7 @@ import GitHubReleaser._
 class GitHubReleaseSpec extends JUnitSuite {
   /* Succeeds always because draft is set to true while testing. */
   @Test def createReleaseInGithub(): Unit = {
-    val testEnvName = "GITHUB_PLATFORM_TEST_TOKEN"
+    val testEnvName = "GITHUB_PLATFORM_TOKEN"
     val authToken = sys.env.get(testEnvName)
     assert(authToken.isDefined,
       Feedback.undefinedEnvironmentVariable(testEnvName))

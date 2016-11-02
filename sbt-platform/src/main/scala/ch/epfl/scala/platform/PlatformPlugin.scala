@@ -48,42 +48,36 @@ trait PlatformSettings {
                            pullRequest: Option[String],
                            jobNumber: Int,
                            tag: Option[String])
-
-  // CI-defined environment variables
+  // FORMAT: OFF
   val platformInsideCi = settingKey[Boolean]("Checks if CI is executing the build.")
   val platformCiEnvironment = settingKey[Option[CIEnvironment]]("Get the Drone environment.")
-
-  // Custom environment variables
-  val sonatypeUsername = settingKey[Option[String]]("Get sonatype username.")
-  val sonatypePassword = settingKey[Option[String]]("Get sonatype password.")
-
-  // FORMAT: OFF
-  val platformLogger = taskKey[Logger]("Return the sbt logger.")
   val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
-  val platformModuleTags = settingKey[Seq[String]]("Tags for the bintray module package.")
+  val platformModuleName = settingKey[String]("Name for the Platform module in Bintray.")
+  val platformModuleTags = settingKey[Seq[String]]("Tags for the platform module package in Bintray.")
   val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
-  val platformValidatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
-  // TODO(jvican): Make sure every sbt subproject has an independent module
   val platformScalaModule = settingKey[ScalaModule]("Create the ScalaModule from the basic assert info.")
   val platformSbtDefinedVersion = settingKey[Version]("Get the sbt-defined version of the current module.")
-  val platformCurrentVersion = taskKey[Version]("Get the current version used for releases.")
-  val platformLatestPublishedVersion = taskKey[Version]("Fetch latest published stable version.")
-  val platformNextVersionFun = taskKey[Version => Version]("Function that decides the next version.")
-  val platformRunMiMa = taskKey[Unit]("Run MiMa and report results based on current version.")
-  val platformGitHubToken = settingKey[String]("Token to publish releses to GitHub.")
+  val platformGitHubToken = settingKey[String]("Token to publish releases to GitHub.")
   val platformReleaseNotesDir = settingKey[File]("Directory with the markdown release notes.")
-  val platformGetReleaseNotes = taskKey[String]("Get the correct release notes for a release.")
-  val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
   val platformGitHubRepo = settingKey[Option[(String, String)]]("Get GitHub organization and repository from .git folder.")
-  val platformNightlyReleaseProcess = settingKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
-  val platformStableReleaseProcess = settingKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
   val platformSignArtifact = settingKey[Boolean]("Enable to sign artifacts with the platform pgp key.")
-  val platformCustomRings = settingKey[Option[File]]("File that stores the pgp secret ring.")
+  val platformPgpRings = settingKey[Option[(File, File)]]("Files that store the pgp public and secret ring respectively.")
   val platformDefaultPublicRingName = settingKey[String]("Default file name for fetching the public gpg keys.")
   val platformDefaultPrivateRingName = settingKey[String]("Default file name for fetching the private gpg keys.")
-  // Release process hooks -- useful for easily extending the default release process
-  val platformBeforePublishHook = taskKey[Unit]("A release hook to customize the beginning of the release process.")
-  val platformAfterPublishHook = taskKey[Unit]("A release hook to customize the end of the release process.")
+
+  val platformLogger = taskKey[Logger]("Return the sbt logger.")
+  val platformValidatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
+  val platformCurrentVersion = taskKey[Version]("Get the current version to be released.")
+  val platformPreviousArtifacts = taskKey[Set[ModuleID]]("Get `mimaPreviousArtifacts` or fetch latest artifact to run MiMa.")
+  val platformLatestPublishedModule = taskKey[Option[ModuleID]]("Fetch latest published stable module.")
+  val platformLatestPublishedVersion = taskKey[Option[Version]]("Fetch latest published stable version.")
+  val platformRunMiMa = taskKey[Unit]("Run MiMa and report results based on current version.")
+  val platformGetReleaseNotes = taskKey[String]("Get the correct release notes for a release.")
+  val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
+  val platformNightlyReleaseProcess = taskKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
+  val platformStableReleaseProcess = taskKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
+  val platformBeforePublishHook = taskKey[Unit]("A hook to customize all the release processes before publishing to Bintray.")
+  val platformAfterPublishHook = taskKey[Unit]("A hook to customize all the release processes after publishing to Bintray.")
   // FORMAT: ON
 }
 
@@ -168,11 +162,10 @@ object PlatformKeys {
             getEnvVariable("CI_TAG"))
       }
     },
-    sonatypeUsername := getEnvVariable("SONATYPE_USERNAME"),
-    sonatypePassword := getEnvVariable("SONATYPE_PASSWORD"),
     platformLogger := streams.value.log,
     platformReleaseOnMerge := false, // By default, disabled
-    platformModuleTags := Seq.empty[String],
+    platformModuleName := bintrayPackage.value,
+    platformModuleTags := bintrayPackageLabels.value,
     platformTargetBranch := "platform-release",
     platformValidatePomData := {
       if (scmInfo.value.isEmpty)
@@ -182,7 +175,8 @@ object PlatformKeys {
       bintrayEnsureLicenses.value
     },
     platformSbtDefinedVersion := {
-      if (version.value.isEmpty) sys.error(Feedback.unexpectedEmptyVersion)
+      if (version.value.isEmpty)
+        sys.error(Feedback.unexpectedEmptyVersion)
       val definedVersion = version.value
       val validatedVersion = for {
         version <- Try(Version(definedVersion)).toOption
@@ -210,33 +204,41 @@ object PlatformKeys {
         Helper.getPublishedArtifacts(targetModule)
       } else highPriorityArtifacts
     },
+    platformLatestPublishedModule := {
+      Helper.getPublishedArtifacts(platformScalaModule.value).headOption
+    },
     platformLatestPublishedVersion := {
+      platformLatestPublishedModule.value
+        .map(m => Version(m.revision))
+    },
+    /* This is a task, not a settings as `mimaPreviousArtifacts.` */
+    platformPreviousArtifacts := {
       val previousArtifacts = mimaPreviousArtifacts.value
       // Retry in case where sbt boots up without Internet connection
-      val retryPreviousArtifacts =
       if (previousArtifacts.nonEmpty) previousArtifacts
-      else Helper.getPublishedArtifacts(platformScalaModule.value)
-      val moduleId = retryPreviousArtifacts.headOption.getOrElse(
-        sys.error(Feedback.forceDefinitionOfPreviousArtifacts))
-      Version(moduleId.revision)
+      else platformLatestPublishedModule.value.toSet
     },
-    platformNextVersionFun := {
-      (version: Version) =>
-        Bump.Minor.bump.apply(version.toSbtRelease).toCoursier
-    },
+    releaseVersionBump := Bump.Minor,
     platformRunMiMa := {
       val currentVersion = platformCurrentVersion.value
-      val previousVersion = platformLatestPublishedVersion.value
-      mimaFailOnProblem := currentVersion.items.head > previousVersion.items.head
-      val canBreakCompat = version.value.startsWith("0.")
+      val previousVersions = platformPreviousArtifacts.value
+        .map(m => Version(m.revision))
+      if (previousVersions.isEmpty)
+        platformLogger.value.error(Feedback.undefinedPreviousMiMaVersions)
+      val canBreakCompat = currentVersion.repr.startsWith("0.")
+      val majorCurrentNumber = currentVersion.items.head
+      val majorBumps = previousVersions.map (previousVersion =>
+        majorCurrentNumber > previousVersion.items.head)
+      mimaFailOnProblem := !canBreakCompat && majorBumps.exists(b => b)
       if (canBreakCompat && mimaPreviousArtifacts.value.isEmpty)
         sys.error(Feedback.forceDefinitionOfPreviousArtifacts)
       mimaReportBinaryIssues.value
     },
     platformReleaseNotesDir := baseDirectory.value / "notes",
     platformGetReleaseNotes := {
-      val mdFile = s"${version.value}.md"
-      val markdownFile = s"${version.value}.markdown"
+      val version = platformCurrentVersion.value
+      val mdFile = s"$version.md"
+      val markdownFile = s"$version.markdown"
       val notes = List(mdFile, markdownFile).foldLeft("") { (acc, curr) =>
         if (acc.nonEmpty) acc
         else {
@@ -276,33 +278,38 @@ object PlatformKeys {
         }
       }
     },
+    platformGitHubToken := {
+      val tokenEnvName = "GITHUB_PLATFORM_TOKEN"
+      sys.env.getOrElse(tokenEnvName,
+        sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName)))
+    },
     platformReleaseToGitHub := {
       def createReleaseInGitHub(org: String, repo: String, token: String) = {
         val endpoint = GitHubEndpoint(org, repo, token)
         val notes = platformGetReleaseNotes.value
-        val releaseVersion = Version(version.value)
+        val releaseVersion = platformCurrentVersion.value
         platformLogger.value.info(
-          s"Releasing $releaseVersion to GitHub($org, $repo, $token)")
+          s"Creating a GitHub release for $releaseVersion in $org:$repo.")
         val release = GitHubRelease(releaseVersion, notes)
         endpoint.pushRelease(release)
       }
 
-      // TODO(jvican): Change environment name in Drone
-      val tokenEnvName = "GITHUB_PLATFORM_TEST_TOKEN"
-      val githubToken = sys.env.get(tokenEnvName)
-      githubToken match {
-        case Some(token) =>
-          val (org, repo) = platformGitHubRepo.value.getOrElse(
-            sys.error(Feedback.incorrectGitHubRepo))
-          createReleaseInGitHub(org, repo, token)
-        case None =>
-          sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName))
-      }
+      val token = platformGitHubToken.value
+      val (org, repo) = platformGitHubRepo.value.getOrElse(
+        sys.error(Feedback.incorrectGitHubRepo))
+      createReleaseInGitHub(org, repo, token)
     },
     platformSignArtifact := true,
-    platformCustomRings := None,
     platformDefaultPublicRingName := "platform.pubring.asc",
     platformDefaultPrivateRingName := "platform.secring.asc",
+    platformPgpRings := {
+      val homeFolder = System.getProperty("user.home")
+      if (homeFolder.isEmpty) sys.error(Feedback.expectedCustomRing)
+      val gpgFolder = file(s"$homeFolder/.gnupg")
+      val publicRing = gpgFolder / platformDefaultPublicRingName.value
+      val privateRing = gpgFolder / platformDefaultPrivateRingName.value
+      Some(publicRing -> privateRing)
+    },
     pgpSigningKey := {
       val PlatformPgpKey = "11BCFDCC60929524"
       if (platformSignArtifact.value) {
@@ -317,14 +324,14 @@ object PlatformKeys {
     pgpPublicRing := {
       if (platformSignArtifact.value) {
         Helper.getPgpRingFile(platformCiEnvironment.value,
-          platformCustomRings.value,
+          platformPgpRings.value.map(_._1),
           platformDefaultPublicRingName.value)
       } else pgpPublicRing.value
     },
     pgpSecretRing := {
       if (platformSignArtifact.value) {
         Helper.getPgpRingFile(platformCiEnvironment.value,
-          platformCustomRings.value,
+          platformPgpRings.value.map(_._2),
           platformDefaultPrivateRingName.value)
       } else pgpSecretRing.value
     },
@@ -386,15 +393,8 @@ object PlatformKeys {
     def getPgpRingFile(ciEnvironment: Option[CIEnvironment],
                        customRing: Option[File],
                        defaultRingFileName: String) = {
-      ciEnvironment.map {
-        _.rootDir / ".gnupg" / defaultRingFileName
-      }.getOrElse {
-        if (customRing.isEmpty) {
-          val homeFolder = System.getProperty("user.home")
-          if (homeFolder.isEmpty) sys.error("Define $HOME to start with.")
-          else file(s"$homeFolder/.gnupg/$defaultRingFileName")
-        } else customRing.get
-      }
+      ciEnvironment.map(_.rootDir / ".gnupg" / defaultRingFileName)
+        .orElse(customRing).getOrElse(sys.error(Feedback.expectedCustomRing))
     }
   }
 
@@ -423,14 +423,13 @@ object PlatformKeys {
       updated.put(validReleaseVersion, definedVersion)
     }
 
-    val decideAndValidateVersion: ReleaseStep = { (st0: State) =>
-      val logger = st0.globalLogging.full
-      val userVersion = st0.get(commandLineVersion).flatten.map(validateVersion)
-      val definedVersion = userVersion.getOrElse(st0.extract.get(platformSbtDefinedVersion))
+    val decideAndValidateVersion: ReleaseStep = { (st: State) =>
+      val logger = st.globalLogging.full
+      val userVersion = st.get(commandLineVersion).flatten.map(validateVersion)
+      val definedVersion = userVersion.getOrElse(st.extract.get(platformSbtDefinedVersion))
       // TODO(jvican): Make sure minor and major depend on platform version
-      val (st, nextVersionFun) =
-        st0.extract.runTask(platformNextVersionFun, st0)
-      val nextVersion = nextVersionFun.apply(definedVersion)
+      val bumpFunction = st.extract.get(releaseVersionBump)
+      val nextVersion = bumpFunction.bump.apply(definedVersion.toSbtRelease).toCoursier
       logger.info(s"Current version is $definedVersion.")
       logger.info(s"Next version is set to $nextVersion.")
       updateCurrentVersion(definedVersion, st)
@@ -494,14 +493,16 @@ object PlatformKeys {
             case ParseResult.ReleaseVersion(value) => value
           })
 
-        val releaseParts = selectedReleaseProcess.toLowerCase match {
-          case "nightly" =>
-            logger.info("Nightly release process has been selected.")
-            extracted.get(platformNightlyReleaseProcess)
-          case "stable" =>
-            logger.info("Stable release process has been selected.")
-            extracted.get(platformStableReleaseProcess)
-          case rp => sys.error(Feedback.unexpectedReleaseProcess(rp))
+        val (updatedState, releaseParts) = {
+          selectedReleaseProcess.toLowerCase match {
+            case "nightly" =>
+              logger.info("Nightly release process has been selected.")
+              extracted.runTask(platformNightlyReleaseProcess, startState)
+            case "stable" =>
+              logger.info("Stable release process has been selected.")
+              extracted.runTask(platformStableReleaseProcess, startState)
+            case rp => sys.error(Feedback.unexpectedReleaseProcess(rp))
+          }
         }
 
         val initialChecks = releaseParts.map(_.check)
@@ -518,8 +519,8 @@ object PlatformKeys {
             case _ => s
           }
         }
-        initialChecks.foreach(_ (startState))
-        Function.chain(process :+ removeFailureCommand)(startState)
+        initialChecks.foreach(_ (updatedState))
+        Function.chain(process :+ removeFailureCommand)(updatedState)
       }
 
     val aliases = {
@@ -615,6 +616,7 @@ object PlatformKeys {
           releaseStepTask(platformRunMiMa),
           releaseStepTask(platformBeforePublishHook),
           publishArtifacts,
+          releaseStepTask(platformReleaseToGitHub),
           releaseStepTask(platformAfterPublishHook),
           releaseStepTask(bintrayRelease)
         )

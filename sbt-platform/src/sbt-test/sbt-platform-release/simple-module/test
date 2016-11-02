@@ -11,16 +11,30 @@ $ exec git commit -m "test"
 $ exists target/scala-2.11
 > inspect platformInsideCi
 > inspect platformCiEnvironment
-> inspect sonatypeUsername
-> inspect sonatypePassword
 > inspect platformReleaseOnMerge
+> inspect platformModuleName
 > inspect platformModuleTags
 > inspect platformTargetBranch
-> inspect sonatypeUsername
-> inspect sonatypePassword
-> inspect platformReleaseOnMerge
-> inspect platformModuleTags
-> inspect platformTargetBranch
+> inspect platformScalaModule
+> inspect platformSbtDefinedVersion
+> inspect platformGitHubToken
+> inspect platformReleaseNotesDir
+> inspect platformGitHubRepo
+> inspect platformSignArtifact
+> inspect platformPgpRings
+> inspect platformDefaultPublicRingName
+> inspect platformDefaultPrivateRingName
+> inspect platformLogger
+> inspect platformValidatePomData
+> inspect platformCurrentVersion
+> inspect platformLatestPublishedVersion
+> inspect platformRunMiMa
+> inspect platformGetReleaseNotes
+> inspect platformReleaseToGitHub
+> inspect platformNightlyReleaseProcess
+> inspect platformStableReleaseProcess
+> inspect platformBeforePublishHook
+> inspect platformAfterPublishHook
 > checkVariablesContent
 > platformValidatePomData
 > checkPreviousArtifact
