@@ -51,7 +51,6 @@ speed up developers' workflow and let module maintainers focus on the essential.
 <p>The <code class="hljs">sbt-platform</code> plugin provides a tight integration with the Scala Platform CI
 server and infrastructure. For now, it covers the following use cases:</p>
 <ul>
-<li><a href="https://scalacenter.github.io/platform-staging">Scala Platform policies</a>.</li>
 <li>Automatic release of nightlies.</li>
 <li>Automatic release of stable versions when a git tag is found.</li>
 <li>MiMa compatibility checks and PGP signatures for artifacts (with Scala Platform keys).</li>
@@ -67,11 +66,10 @@ server and infrastructure. For now, it covers the following use cases:</p>
 </ul>
 </li>
 </ul>
-<p>Together with our CI, that provides a default cached Scala and SBT setup, the
-plugin aims to provide a complete developer experience with
-good error detection.</p>
+<p>Together with <a href="ci-integration.html">our CI</a>, the plugin aims to provide a complete
+developer experience with good error detection.</p>
 <p>As <code class="hljs">sbt-platform</code> is still <em>work in progress</em>, we're open to suggestions
-on improving Scala Platform modules' maintainers. Potential next steps are:</p>
+on improving Scala Platform modules' maintainers. Our potential next steps are:</p>
 <ul>
 <li>Adding support for Sonatype.</li>
 <li>Releasing to more than one Maven/Ivy repository (Scala Platform's and your personal one).</li>
@@ -82,12 +80,14 @@ running <code class="hljs">sbt test</code> for all the projects, run it only for
 <li>Improving MiMa binary compatibility checks.</li>
 <li>Adding source compatibility checks using Scala Meta.</li>
 </ul>
-<p>Note that while this is an active Scala Center project,
-we hope to evolve the infrastructure as the Scala Platform grows and the community
-gets involved.</p>
 <p>If any of the previous features calls your attention, feel free to help out and make a PR.
 <code class="hljs">sbt-platform</code> follows the same <a href="https://github.com/scalacenter/platform-staging/CONTRIBUTING.md">CONTRIBUTION</a>
-guidelines of the Scala Platform process.</p>
+guidelines than the Scala Platform process.</p>
+<blockquote class="note">
+<p>We hope to improve the infrastructure and the maintainers support as the Scala Platform
+grows and the community gets involved. By then, we will confidently know which features
+make a real difference in maintainers' life, and will optimize for them.</p>
+</blockquote>
 <h2 id="usage" class="a_section" data-magellan-target="usage">Usage<a class="a_hlink" href="#usage"></a></h2>
 <p><code class="hljs">sbt-platform</code> defines two main commands:</p>
 <div class="row"><div class="small-expand columns a_xscroll a_table"><table>
@@ -109,29 +109,39 @@ releaseStable [<span class="hljs-keyword">release</span>-<span class="hljs-keywo
 <p>Release commands are executed by the CI. To set it up, check
 the <a href="sbt-platform.html">CI documentation</a>.</p>
 <h2 id="setup" class="a_section" data-magellan-target="setup">Setup<a class="a_hlink" href="#setup"></a></h2>
-<p>There is a default setup that should be enough to get you started
-as soon as possible. Before using any Platform-defined command, make
-sure that <a href="ci-integration.html">the integration with the CI works</a>.</p>
-<h3 id="common-scenarios" class="a_section" data-magellan-target="common-scenarios">Common scenarios<a class="a_hlink" href="#common-scenarios"></a></h3>
-<p>Do you want to publish to another Bintray repository aside from Scala Platform's?</p>
+<p><code class="hljs">sbt-platform</code> already comes with a default setup, thought out to get
+you started as soon as possible. You only need to make sure that
+<a href="ci-integration.html">the integration with the CI works</a>.</p>
+<p>However, you may find interesting changing the value of some sbt keys.
+The general syntax for this is:</p>
 <div class="row">
-<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">bintrayRepository := <span class="hljs-string">"your-repository"</span>
-<span class="hljs-comment">// You probably push to your personal repository</span>
-bintrayOrganization := <span class="hljs-type">None</span>
+<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">nameOfSbtSettingOrTask := {
+  <span class="hljs-comment">// Write here Scala code that returns a value</span>
+  <span class="hljs-comment">// according to the type of the settings or task</span>
+}
 </code></pre>
 </div>
-<p>Do you want to disable cross-compilation for the release?</p>
-<div class="row">
-<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">releaseCrossBuild := <span class="hljs-literal">false</span>
-</code></pre>
-</div>
-<blockquote class="note">
-<p>Note that all Platform modules have to cross-compile with the last two
-official Scala major versions. The same applies for releases. Check
-<a href="sbt-platform.html#release">Scala Platform release process</a>.</p>
-</blockquote>
-<h3 id="platform-specific-keys-and-tasks" class="a_section" data-magellan-target="platform-specific-keys-and-tasks">Platform-specific keys and tasks<a class="a_hlink" href="#platform-specific-keys-and-tasks"></a></h3>
-<p>Understanding the most important keys for your sbt build is essential.</p>
+<h3 id="common-general-settings-and-tasks" class="a_section" data-magellan-target="common-general-settings-and-tasks">Common general settings and tasks<a class="a_hlink" href="#common-general-settings-and-tasks"></a></h3>
+<p>This section includes settings and tasks of all the sbt plugins <code class="hljs">sbt-platform</code> depends on.</p>
+<div class="row"><div class="small-expand columns a_xscroll a_table"><table>
+<thead>
+<tr><th>Settings</th><th>Description</th><th>Type</th><th>Default</th></tr>
+</thead>
+<tbody>
+<tr><td>bintrayRepository</td><td>Name of the Bintray repository the artifact will be stored on.</td><td><code class="hljs">String</code></td><td>N/A</td></tr>
+<tr><td>bintrayOrganization</td><td>Name of the Bintray organization the repository is in.</td><td><code class="hljs">String</code></td><td><code class="hljs">&quot;scalaplatform&quot;</code></td></tr>
+<tr><td>publishArtifact in Test</td><td>Setting to include the test sources in the final released artifact.</td><td><code class="hljs">Boolean</code></td><td><code class="hljs">false</code></td></tr>
+</tbody>
+</table></div></div>
+<div class="row"><div class="small-expand columns a_xscroll a_table"><table>
+<thead>
+<tr><th>Tasks</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>bintraySyncMavenCentral</td><td>Sync bintray-published artifacts with maven central</td></tr>
+</tbody>
+</table></div></div>
+<h3 id="platform-specific-settings" class="a_section" data-magellan-target="platform-specific-settings">Platform-specific settings<a class="a_hlink" href="#platform-specific-settings"></a></h3>
 <p>To help you get started, we provide a summary of the most common sbt tasks
 and settings in <code class="hljs">sbt-platform</code> and the plugins it depends on (e.g. <code class="hljs">bintray-sbt</code>).</p>
 <div class="row"><div class="small-expand columns a_xscroll a_table"><table>
@@ -153,6 +163,7 @@ and settings in <code class="hljs">sbt-platform</code> and the plugins it depend
 <tr><td>platformAfterPublishHook</td><td>A hook to customize all the release processes after publishing to Bintray.</td><td><code class="hljs">Task[Unit]</code></td><td>N/A</td></tr>
 </tbody>
 </table></div></div>
+<h3 id="platform-specific-tasks" class="a_section" data-magellan-target="platform-specific-tasks">Platform-specific tasks<a class="a_hlink" href="#platform-specific-tasks"></a></h3>
 <div class="row"><div class="small-expand columns a_xscroll a_table"><table>
 <thead>
 <tr><th>Tasks</th><th>Description</th></tr>
@@ -334,14 +345,21 @@ check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scala
       <ul class="vertical menu">  
   <li>
     
-       <a href="#common-scenarios">Common scenarios</a> 
+       <a href="#common-general-settings-and-tasks">Common general settings and tasks</a> 
     
     
   </li>
   
   <li>
     
-       <a href="#platform-specific-keys-and-tasks">Platform-specific keys and tasks</a> 
+       <a href="#platform-specific-settings">Platform-specific settings</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#platform-specific-tasks">Platform-specific tasks</a> 
     
     
   </li>
