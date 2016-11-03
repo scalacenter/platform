@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sbt-platform</title>
+    <title>The sbt-platform plugin</title>
     <link rel="stylesheet" href="_theme/css/foundation.min.css">
     <link rel="stylesheet" href="_theme/css/app.css">
      <link rel="stylesheet" href="_theme/css/highlight.js/styles/github-gist.css"> 
@@ -39,7 +39,7 @@
             <div class="row">
               
               <main class="columns large-order-2 sections" id="_sections">
-                <h1 id="sbt-platform" class="a_section" data-magellan-target="sbt-platform">sbt-platform<a class="a_hlink" href="#sbt-platform"></a></h1>
+                <h1 id="the-sbt-platform-plugin" class="a_section" data-magellan-target="the-sbt-platform-plugin">The <code class="hljs">sbt-platform</code> plugin<a class="a_hlink" href="#the-sbt-platform-plugin"></a></h1>
 <p><strong>sbt-platform</strong> is a SBT plugin that aims at simplifying the maintenance
 and release of Scala Platform modules. It automates common use cases to
 speed up developers' workflow and let module maintainers focus on the essential.</p>
@@ -105,20 +105,22 @@ Scala Platform process.</p>
 releaseStable [<span class="hljs-keyword">release</span>-<span class="hljs-keyword">version</span> &lt;<span class="hljs-keyword">version</span>&gt;] [<span class="hljs-keyword">skip</span>-tests] [<span class="hljs-keyword">cross</span>]
 </code></pre>
 </div>
-<p>The arguments in brackets are optional and <code class="hljs">&lt;&gt;</code> represents arguments.</p>
+<p>The parameters in brackets are optional and <code class="hljs">&lt;&gt;</code> represents arguments.</p>
 <p>Release commands are executed by the CI. To set it up, check
 the <a href="sbt-platform.html">CI documentation</a>.</p>
 <h2 id="setup" class="a_section" data-magellan-target="setup">Setup<a class="a_hlink" href="#setup"></a></h2>
 <h3 id="in-a-nutshell" class="a_section" data-magellan-target="in-a-nutshell">In a nutshell<a class="a_hlink" href="#in-a-nutshell"></a></h3>
-<p>Check the following example:</p>
-<div class="row">
-<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">
-</code></pre>
-</div>
-<h3 id="platform-specific-keys-and-tasks" class="a_section" data-magellan-target="platform-specific-keys-and-tasks">Platform-specific keys and tasks<a class="a_hlink" href="#platform-specific-keys-and-tasks"></a></h3>
-<p>Understanding the most important keys for your sbt build is essential.</p>
-<p>To help you get started, we provide a summary of the most common sbt tasks
-and settings in <code class="hljs">sbt-platform</code> and the plugins it depends on (e.g. <code class="hljs">bintray-sbt</code>).</p>
+<p>The setup of the plugin is automatic because <code class="hljs">sbt-platform</code> is an <code class="hljs">sbt.AutoPlugin</code>.
+That is, by default, the plugin is enabled automatically for all the subprojects
+and keys are accessible in those scopes.</p>
+<p>There is no specific key you need to set up for <code class="hljs">sbt-platform</code> to work. But you
+are surely interested in fine tuning some behaviour of your build. The
+<a href="sbt-platform.html#common-settings-tasks">Common settings and tasks</a>, as well as
+<a href="sbt-platform.html#platform-settings-tasks">Platform settings and tasks</a>, will help you achieve your
+goals.</p>
+<h3 id="platform-settings-tasks" class="a_section" data-magellan-target="platform-settings-tasks">Common settings and tasks<a class="a_hlink" href="#platform-settings-tasks"></a></h3>
+<h3 id="platform-settings-tasks-1" class="a_section" data-magellan-target="platform-settings-tasks-1">Platform settings and tasks<a class="a_hlink" href="#platform-settings-tasks-1"></a></h3>
+<p>Here is a list of the most important Platform settings and tasks.</p>
 <div class="row"><div class="small-expand columns a_xscroll a_table"><table>
 <thead>
 <tr><th>Settings</th><th>Description</th><th>Type</th><th>Default</th></tr>
@@ -256,7 +258,7 @@ Use either <code class="hljs">releaseStable</code> or <code class="hljs">release
   
   <li  class="a_thispage" >
     
-      <a href="sbt-platform.html">sbt-platform</a>
+      <a href="sbt-platform.html">The sbt-platform plugin</a>
     
     
   </li>
@@ -282,7 +284,7 @@ Use either <code class="hljs">releaseStable</code> or <code class="hljs">release
                        
   <li>
     
-       <a href="#sbt-platform">sbt-platform</a> 
+       <a href="#the-sbt-platform-plugin">The sbt-platform plugin</a> 
     
     
       <ul class="vertical menu">  
@@ -317,7 +319,14 @@ Use either <code class="hljs">releaseStable</code> or <code class="hljs">release
   
   <li>
     
-       <a href="#platform-specific-keys-and-tasks">Platform-specific keys and tasks</a> 
+       <a href="#platform-settings-tasks">Common settings and tasks</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#platform-settings-tasks-1">Platform settings and tasks</a> 
     
     
   </li>
