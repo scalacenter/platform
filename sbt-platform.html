@@ -105,16 +105,31 @@ guidelines of the Scala Platform process.</p>
 releaseStable [<span class="hljs-keyword">release</span>-<span class="hljs-keyword">version</span> &lt;<span class="hljs-keyword">version</span>&gt;] [<span class="hljs-keyword">skip</span>-tests] [<span class="hljs-keyword">cross</span>]
 </code></pre>
 </div>
-<p>The arguments in brackets are optional and <code class="hljs">&lt;&gt;</code> represents arguments.</p>
+<p>All the arguments are optional and <code class="hljs">&lt;&gt;</code> represents the parameters.</p>
 <p>Release commands are executed by the CI. To set it up, check
 the <a href="sbt-platform.html">CI documentation</a>.</p>
 <h2 id="setup" class="a_section" data-magellan-target="setup">Setup<a class="a_hlink" href="#setup"></a></h2>
-<h3 id="in-a-nutshell" class="a_section" data-magellan-target="in-a-nutshell">In a nutshell<a class="a_hlink" href="#in-a-nutshell"></a></h3>
-<p>Check the following example:</p>
+<p>There is a default setup that should be enough to get you started
+as soon as possible. Before using any Platform-defined command, make
+sure that <a href="ci-integration.html">the integration with the CI works</a>.</p>
+<h3 id="common-scenarios" class="a_section" data-magellan-target="common-scenarios">Common scenarios<a class="a_hlink" href="#common-scenarios"></a></h3>
+<p>Do you want to publish to another Bintray repository aside from Scala Platform's?</p>
 <div class="row">
-<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">bintrayRepository := <span class="hljs-string">"your-repository"</span>
+<span class="hljs-comment">// You probably push to your personal repository</span>
+bintrayOrganization := <span class="hljs-type">None</span>
 </code></pre>
 </div>
+<p>Do you want to disable cross-compilation for the release?</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">releaseCrossBuild := <span class="hljs-literal">false</span>
+</code></pre>
+</div>
+<blockquote class="note">
+<p>Note that all Platform modules have to cross-compile with the last two
+official Scala major versions. The same applies for releases. Check
+<a href="sbt-platform.html#release">Scala Platform release process</a>.</p>
+</blockquote>
 <h3 id="platform-specific-keys-and-tasks" class="a_section" data-magellan-target="platform-specific-keys-and-tasks">Platform-specific keys and tasks<a class="a_hlink" href="#platform-specific-keys-and-tasks"></a></h3>
 <p>Understanding the most important keys for your sbt build is essential.</p>
 <p>To help you get started, we provide a summary of the most common sbt tasks
@@ -127,8 +142,8 @@ and settings in <code class="hljs">sbt-platform</code> and the plugins it depend
 <tr><td>platformInsideCi</td><td>Checks if CI is executing the build.</td><td><code class="hljs">Boolean</code></td><td><code class="hljs">false</code></td></tr>
 <tr><td>platformCiEnvironment</td><td>Get the Drone environment</td><td><code class="hljs">Option[CIEnvironment]</code></td><td><code class="hljs">None</code></td></tr>
 <tr><td>platformReleaseOnMerge</td><td>Release on every PR merge.</td><td><code class="hljs">Boolean</code></td><td><code class="hljs">false</code></td></tr>
-<tr><td>platformModuleName</td><td>Name of the module and the bintray package.</td><td><code class="hljs">String</code></td><td>N/A</td></tr>
-<tr><td>platformModuleTags</td><td>Tags for the bintray module package.</td><td><code class="hljs">Seq[String]</code></td><td><code class="hljs">Seq.empty[String]</code></td></tr>
+<tr><td>platformModuleName</td><td>Name of the module and the bintray package.</td><td><code class="hljs">String</code></td><td>bintrayPackage.value</td></tr>
+<tr><td>platformModuleTags</td><td>Tags for the bintray module package.</td><td><code class="hljs">Seq[String]</code></td><td>bintrayPackageLabels.value</td></tr>
 <tr><td>platformTargetBranch</td><td>Branch used for the platform release.</td><td><code class="hljs">String</code></td><td><code class="hljs">&quot;platform-release&quot;</code></td></tr>
 <tr><td>platformGitHubToken</td><td>Token to publish releases to GitHub.</td><td><code class="hljs">String</code></td><td>N/A</td></tr>
 <tr><td>platformReleaseNotesDir</td><td>Directory with the markdown release notes.</td><td><code class="hljs">String</code></td><td><code class="hljs">baseDirectory.value / &quot;notes&quot;</code></td></tr>
@@ -201,7 +216,7 @@ a new GitHub release for every nightly (disabled by default).</p>
 <p>Every time you execute the nightly release process, the release process
 creates a release in GitHub and adds your markdown notes under <code class="hljs">/notes</code>
 as release notes (if any).</p>
-<h3 id="extend-even-more-your-release-process" class="a_section" data-magellan-target="extend-even-more-your-release-process">Extend even more your release process<a class="a_hlink" href="#extend-even-more-your-release-process"></a></h3>
+<h3 id="on-further-extensions" class="a_section" data-magellan-target="on-further-extensions">On further extensions<a class="a_hlink" href="#on-further-extensions"></a></h3>
 <p><code class="hljs">sbt-release</code> provides primitives to write release processes from scratch:</p>
 <ol>
 <li><code class="hljs">releaseStepTask</code> - Run an individual task. Does not aggregate builds.</li>
@@ -319,7 +334,7 @@ check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scala
       <ul class="vertical menu">  
   <li>
     
-       <a href="#in-a-nutshell">In a nutshell</a> 
+       <a href="#common-scenarios">Common scenarios</a> 
     
     
   </li>
@@ -379,7 +394,7 @@ check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scala
   
   <li>
     
-       <a href="#extend-even-more-your-release-process">Extend even more your release process</a> 
+       <a href="#on-further-extensions">On further extensions</a> 
     
     
   </li>
