@@ -85,8 +85,9 @@ running <code class="hljs">sbt test</code> for all the projects, run it only for
 guidelines than the Scala Platform process.</p>
 <blockquote class="note">
 <p>We hope to improve the infrastructure and the maintainers support as the Scala Platform
-grows and the community gets involved. By then, we will confidently know which features
-make a real difference in maintainers' life, and will optimize for them.</p>
+grows and the community gets involved. This plugin only provides support for a subset
+of features that improve maintainers' life. We expect to enrich this subset with
+maintainers' input.</p>
 </blockquote>
 <h2 id="usage" class="a_section" data-magellan-target="usage">Usage<a class="a_hlink" href="#usage"></a></h2>
 <p><code class="hljs">sbt-platform</code> defines two main commands:</p>
@@ -184,9 +185,9 @@ and settings in <code class="hljs">sbt-platform</code> and the plugins it depend
 </table></div></div>
 <h2 id="release-processes" class="a_section" data-magellan-target="release-processes">Release processes<a class="a_hlink" href="#release-processes"></a></h2>
 <p>The release process setup relies on <a href="https://github.com/sbt/sbt-release">sbt-release</a>
-and follows the <a href="https://github.com/scalacenter/platform-staging">Scala Platform release process</a>.</p>
-<p><code class="hljs">sbt-platform</code> defines two default release processes for stable and nightly versions,
-if you want to add a new one or modify the standard ones, go <a href="sbt-platform.html#modify-release-process">here</a>.</p>
+and follows the <a href="https://github.com/scalacenter/platform-staging">Scala Platform release process</a>.
+By using it, modules maintainers can be sure that their practices are valid according to
+the spec.</p>
 <h3 id="platform-bintray-repositories" class="a_section" data-magellan-target="platform-bintray-repositories">Platform Bintray repositories<a class="a_hlink" href="#platform-bintray-repositories"></a></h3>
 <p>The Scala Platform uses Bintray to store and release all the Scala modules artifacts. Bintray allows
 maintainers a fine-grained control over their releases and provides instant release time and synchronization
@@ -197,14 +198,27 @@ with Maven Central. The <a href="https://bintray.com/scalaplatform">Bintray Scal
 <li><a href="https://bintray.com/scalaplatform/tools">tools</a> - Scala Platform maintainers' tools.</li>
 </ol>
 <h3 id="how-nightlies-work" class="a_section" data-magellan-target="how-nightlies-work">How nightlies work<a class="a_hlink" href="#how-nightlies-work"></a></h3>
-<p>The Scala Platform bot invokes <code class="hljs">releaseNightly</code> daily at 00:00. The nightly release process
-will warn you when binary compatibility is broken, the version number is invalid, tests don't
-pass or the release of the artifact to Bintray has failed.</p>
+<p>The Scala Platform bot is executed every night and takes care of:</p>
+<ul>
+<li>Releasing a nightly of every module of the Scala Platform.</li>
+<li>Warns when:
+<ul>
+<li>Binary compatibility is broken</li>
+<li>Version is invalid</li>
+<li>Tests don't pass</li>
+<li>Bintray upload failed</li>
+<li>GitHub release creation failed</li>
+</ul>
+</li>
+</ul>
+<p>In case something goes wrong, notifications are sent via email / Gitter / Slack.
+Nightly releases are available in
+<a href="https://bintray.com/scalaplatform/modules-nightly-releases">modules-nightly-releases</a>.</p>
 <h3 id="stable-releases" class="a_section" data-magellan-target="stable-releases">Stable releases<a class="a_hlink" href="#stable-releases"></a></h3>
 <p>To cut a stable release, tag the <code class="hljs">platform-release</code> branch with the appropiate
-version number and push. When the CI is finished, your release will be available
+version number and push. When Drone finishes, your release will be available
 in <a href="https://bintray.com/scalaplatform/modules-releases">modules-releases</a>.</p>
-<h4 id="decide-the-version-number" class="a_section" data-magellan-target="decide-the-version-number">Decide the version number<a class="a_hlink" href="#decide-the-version-number"></a></h4>
+<h4 id="decide-the-version-number-for-stable-releases" class="a_section" data-magellan-target="decide-the-version-number-for-stable-releases">Decide the version number for stable releases<a class="a_hlink" href="#decide-the-version-number-for-stable-releases"></a></h4>
 <p>You're free to choose the version number of the library as long as the bumped number
 is consistent with the Scala Platform version your module is targeting.
 If the latest Scala Platform release was <code class="hljs">1.2</code> and the next one
@@ -224,9 +238,10 @@ a new GitHub release for every nightly (disabled by default).</p>
 }
 </code></pre>
 </div>
-<p>Every time you execute the nightly release process, the release process
-creates a release in GitHub and adds your markdown notes under <code class="hljs">/notes</code>
-as release notes (if any).</p>
+<p>The previous code checks that the active release process, set when either
+<code class="hljs">releaseStable</code> or <code class="hljs">releaseNightly</code> is run, corresponds to the defined
+nightly process and if so creates a release in GitHub, along with your
+markdown release notes (if any).</p>
 <h3 id="on-further-extensions" class="a_section" data-magellan-target="on-further-extensions">On further extensions<a class="a_hlink" href="#on-further-extensions"></a></h3>
 <p><code class="hljs">sbt-release</code> provides primitives to write release processes from scratch:</p>
 <ol>
@@ -395,7 +410,7 @@ check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scala
       <ul class="vertical menu">  
   <li>
     
-       <a href="#decide-the-version-number">Decide the version number</a> 
+       <a href="#decide-the-version-number-for-stable-releases">Decide the version number for stable releases</a> 
     
     
   </li>

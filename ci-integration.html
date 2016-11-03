@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>The Drone CI integration</title>
     <link rel="stylesheet" href="_theme/css/foundation.min.css">
     <link rel="stylesheet" href="_theme/css/app.css">
-    
+     <link rel="stylesheet" href="_theme/css/highlight.js/styles/github-gist.css"> 
   </head>
   <body>
     <div class="expanded row">
@@ -39,7 +39,66 @@
             <div class="row">
               
               <main class="columns large-order-2 sections" id="_sections">
-                
+                <h1 id="the-drone-ci-integration" class="a_section" data-magellan-target="the-drone-ci-integration">The Drone CI integration<a class="a_hlink" href="#the-drone-ci-integration"></a></h1>
+<p>Our servers provide quick development experience to module maintainers.
+With a powerful baseline server and dynamic scaling, we ensure concurrent and
+fast build times.</p>
+<blockquote class="warning">
+<p>This is work in progress.</p>
+</blockquote>
+<h2 id="setup" class="a_section" data-magellan-target="setup">Setup<a class="a_hlink" href="#setup"></a></h2>
+<ol>
+<li>Go to <a href="http://stats.lassie.io:8001">our Drone setup</a>.</li>
+<li>Log in with your GitHub credentials and turn on the CI in your module.</li>
+<li>Push a <code class="hljs">drone.yml</code> file with the build logic and voilà.</li>
+</ol>
+<blockquote class="warning">
+<p>Only official modules maintainers can log in.</p>
+</blockquote>
+<h3 id="creating-the-drone.yml-file" class="a_section" data-magellan-target="creating-the-drone.yml-file">Creating the <code class="hljs">drone.yml</code> file<a class="a_hlink" href="#creating-the-drone.yml-file"></a></h3>
+<p>The <code class="hljs">drone.yml</code> file is a YAML file that tells Drone how to behave when
+GitHub kicks it in. Let's see an example.</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-yaml"><span class="hljs-attr">build:</span>
+<span class="hljs-attr">  image:</span> scalaplatform/scala-sbt-git
+<span class="hljs-attr">  volumes:</span>
+<span class="hljs-bullet">    -</span> /platform:/keys
+<span class="hljs-attr">  environment:</span>
+<span class="hljs-bullet">    -</span> GITHUB_PLATFORM_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
+<span class="hljs-bullet">    -</span> PLATFORM_PGP_PASSPHRASE=$$PLATFORM_PGP_PASSPHRASE
+<span class="hljs-bullet">    -</span> BINTRAY_USERNAME=$$BINTRAY_USERNAME
+<span class="hljs-bullet">    -</span> BINTRAY_PASSWORD=$$BINTRAY_PASSWORD
+<span class="hljs-attr">  commands:</span>
+<span class="hljs-bullet">    -</span> sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
+<span class="hljs-bullet">    -</span> sbt process/publishProcessAndDocs
+
+<span class="hljs-attr">cache:</span>
+<span class="hljs-attr">  mount:</span>
+<span class="hljs-bullet">    -</span> .git
+<span class="hljs-bullet">    -</span> /drone/.ivy2
+<span class="hljs-bullet">    -</span> /drone/.coursier-cache
+<span class="hljs-bullet">    -</span> /drone/.sbt
+</code></pre>
+</div>
+<h4 id="the-official-scala-platform-docker-image" class="a_section" data-magellan-target="the-official-scala-platform-docker-image">The official Scala Platform docker image<a class="a_hlink" href="#the-official-scala-platform-docker-image"></a></h4>
+<p>Drone is, in a nutshell, a CI wrapper around Docker. This has great benefits:
+you don't need to set up your own image, we already provide you one.</p>
+<p>Pulling <code class="hljs">scalaplatform/scala</code> gives you a fully-working Docker image with
+small size and a common working environment for Scala developers. In addition,
+you get a cached environment for free: say goodbye to downloading dependencies
+every time you run the CI.</p>
+<h2 id="common-configuration-settings" class="a_section" data-magellan-target="common-configuration-settings">Common configuration settings<a class="a_hlink" href="#common-configuration-settings"></a></h2>
+<ol>
+<li>Get latest Docker image</li>
+</ol>
+<p>By default, the Docker image is not updated to benefit from reproducible build results.
+If you want Drone to fetch the latest version every time is executed, add
+the following attribute to the <code class="hljs">build</code> section:</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-yaml"><span class="hljs-attr">pull:</span> <span class="hljs-literal">true</span>
+</code></pre>
+</div>
+
               </main>
               
               
@@ -102,6 +161,57 @@
                 </div>
               
               
+              
+                <div class="small-12 medium-12 large-2 large-order-3 columns a_show-for-xlarge" data-sticky-container>
+                  <nav class="a_pagenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                     <header><p>On This Page</p>
+</header> 
+                    <ul class="vertical menu" data-magellan>
+                       
+  <li>
+    
+       <a href="#the-drone-ci-integration">The Drone CI integration</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#setup">Setup</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#creating-the-drone.yml-file">Creating the drone.yml file</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#the-official-scala-platform-docker-image">The official Scala Platform docker image</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  </ul>
+    
+  </li>
+  
+  <li>
+    
+       <a href="#common-configuration-settings">Common configuration settings</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+ 
+                    </ul>
+                  </nav>
+                </div>
               
             </div>
           </div>
