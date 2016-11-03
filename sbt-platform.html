@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html class="no-js" lang="eng" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sbt-platform</title>
+    <link rel="stylesheet" href="_theme/css/foundation.min.css">
+    <link rel="stylesheet" href="_theme/css/app.css">
+     <link rel="stylesheet" href="_theme/css/highlight.js/styles/github-gist.css"> 
+  </head>
+  <body>
+    <div class="expanded row">
+      <div class="small-12 medium-12 large-12 columns align-self-top">
+        <div class="row">
+          
+          <header class="large-12 columns align-self-top a_header">
+            <div class="row">
+              <div class="large-12 columns a_limited top-bar">
+                <div class="top-bar-left">
+                  <p>The Scala Platform</p>
+
+                </div>
+                <div class="top-bar-right align-right row">
+                  
+                  
+                    <form action="site-search.html" method="get" class="align-right a_search">
+                      <input name="q" type="search"  placeholder="Search
+" >
+                      <button><img alt="&#1F50D;" src="_theme/images/images/search.svg" /></button>
+                    </form>
+                  
+                </div>
+              </div>
+            </div>
+          </header>
+          
+          <div class="small-12 medium-12 large-12 columns align-self-top a_limited a_main">
+            <div class="row">
+              
+              <main class="columns large-order-2 sections" id="_sections">
+                <h1 id="sbt-platform" class="a_section" data-magellan-target="sbt-platform">sbt-platform<a class="a_hlink" href="#sbt-platform"></a></h1>
+<p><strong>sbt-platform</strong> is a SBT plugin that aims at simplifying the maintenance
+and release of Scala Platform modules. It automates common use cases to
+speed up developers' workflow and let module maintainers focus on the essential.</p>
+<p>Add it to your project (<code class="hljs">project/plugins.sbt</code>) with:</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">addSbtPlugin(<span class="hljs-string">"ch.epfl.scala"</span> % <span class="hljs-string">"sbt-platform"</span> % <span class="hljs-string">"0.1"</span>)
+</code></pre>
+</div>
+<p>The <code class="hljs">sbt-platform</code> plugin provides a tight integration with the Scala Platform CI
+server and infrastructure. For now, it covers the following use cases:</p>
+<ul>
+<li><a href="https://scalacenter.github.io/platform-staging">Scala Platform policies</a>.</li>
+<li>Automatic release of nightlies.</li>
+<li>Automatic release of stable versions when a git tag is found.</li>
+<li>MiMa compatibility checks and PGP signatures for artifacts (with Scala Platform keys).</li>
+<li>Integration with our Drone setup for writing your own sbt scripts.</li>
+<li>Automatic detection of cumbersome sbt keys (e.g. <code class="hljs">scmInfo</code>).</li>
+<li>Automatic configuration of common sbt plugins:
+<ul>
+<li><code class="hljs">sbt-bintray</code></li>
+<li><code class="hljs">sbt-pgp</code></li>
+<li><code class="hljs">sbt-release</code></li>
+<li><code class="hljs">sbt-mima-plugin</code></li>
+<li><code class="hljs">sbt-coursier</code></li>
+</ul>
+</li>
+</ul>
+<p>Together with our CI, that provides a default cached Scala and SBT setup, the
+plugin aims to provide a complete developer experience with
+good error detection.</p>
+<p>As <code class="hljs">sbt-platform</code> is still <em>work in progress</em>, we're open to suggestions
+on improving Scala Platform modules' maintainers. Potential next steps are:</p>
+<ul>
+<li>Adding support for Sonatype.</li>
+<li>Releasing to more than one Maven/Ivy repository (Scala Platform's and your personal one).</li>
+<li>Extending the default release steps for every process.</li>
+<li>Adding release processes for release candidates and milestones.</li>
+<li>Adding smart test execution based on changes in git commits, i.e. instead of
+running <code class="hljs">sbt test</code> for all the projects, run it only for the affected subprojects.</li>
+<li>Improving MiMa binary compatibility checks.</li>
+<li>Adding source compatibility checks using Scala Meta.</li>
+</ul>
+<p>Note that while this is an active Scala Center project,
+we hope to evolve the infrastructure as the Scala Platform grows and the community
+gets involved.</p>
+<p>If any of the previous features calls your attention, feel free to help out and make a PR.
+<code class="hljs">sbt-platform</code> follows the same <a href="https://github.com/scalacenter/platform-staging/CONTRIBUTION.md">CONTRIBUTION</a> process (C4) and guidelines specified in the
+Scala Platform process.</p>
+<h2 id="usage" class="a_section" data-magellan-target="usage">Usage<a class="a_hlink" href="#usage"></a></h2>
+<p><code class="hljs">sbt-platform</code> defines two main commands:</p>
+<div class="row"><div class="small-expand columns a_xscroll a_table"><table>
+<thead>
+<tr><th>Platform</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>releaseNightly</td><td>Release a nightly version of the module.</td></tr>
+<tr><td>releaseStable</td><td>Release a stable version of the module.</td></tr>
+</tbody>
+</table></div></div>
+<h3 id="examples-of-use" class="a_section" data-magellan-target="examples-of-use">Examples of use<a class="a_hlink" href="#examples-of-use"></a></h3>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-sql">releaseNightly [<span class="hljs-keyword">release</span>-<span class="hljs-keyword">version</span> &lt;<span class="hljs-keyword">version</span>&gt;] [<span class="hljs-keyword">skip</span>-tests] [<span class="hljs-keyword">cross</span>]
+releaseStable [<span class="hljs-keyword">release</span>-<span class="hljs-keyword">version</span> &lt;<span class="hljs-keyword">version</span>&gt;] [<span class="hljs-keyword">skip</span>-tests] [<span class="hljs-keyword">cross</span>]
+</code></pre>
+</div>
+<p>The arguments in brackets are optional and <code class="hljs">&lt;&gt;</code> represents arguments.</p>
+<p>Release commands are executed by the CI. To set it up, check
+the <a href="sbt-platform.html">CI documentation</a>.</p>
+<h2 id="setup" class="a_section" data-magellan-target="setup">Setup<a class="a_hlink" href="#setup"></a></h2>
+<h3 id="in-a-nutshell" class="a_section" data-magellan-target="in-a-nutshell">In a nutshell<a class="a_hlink" href="#in-a-nutshell"></a></h3>
+<p>Check the following example:</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">
+</code></pre>
+</div>
+<h3 id="platform-specific-keys-and-tasks" class="a_section" data-magellan-target="platform-specific-keys-and-tasks">Platform-specific keys and tasks<a class="a_hlink" href="#platform-specific-keys-and-tasks"></a></h3>
+<p>Understanding the most important keys for your sbt build is essential.</p>
+<p>To help you get started, we provide a summary of the most common sbt tasks
+and settings in <code class="hljs">sbt-platform</code> and the plugins it depends on (e.g. <code class="hljs">bintray-sbt</code>).</p>
+<div class="row"><div class="small-expand columns a_xscroll a_table"><table>
+<thead>
+<tr><th>Settings</th><th>Description</th><th>Type</th><th>Default</th></tr>
+</thead>
+<tbody>
+<tr><td>platformInsideCi</td><td>Checks if CI is executing the build.</td><td><code class="hljs">Boolean</code></td><td><code class="hljs">false</code></td></tr>
+<tr><td>platformCiEnvironment</td><td>Get the Drone environment</td><td><code class="hljs">Option[CIEnvironment]</code></td><td><code class="hljs">None</code></td></tr>
+<tr><td>platformReleaseOnMerge</td><td>Release on every PR merge.</td><td><code class="hljs">Boolean</code></td><td><code class="hljs">false</code></td></tr>
+<tr><td>platformModuleName</td><td>Name of the module and the bintray package.</td><td><code class="hljs">String</code></td><td>N/A</td></tr>
+<tr><td>platformModuleTags</td><td>Tags for the bintray module package.</td><td><code class="hljs">Seq[String]</code></td><td><code class="hljs">Seq.empty[String]</code></td></tr>
+<tr><td>platformTargetBranch</td><td>Branch used for the platform release.</td><td><code class="hljs">String</code></td><td><code class="hljs">&quot;platform-release&quot;</code></td></tr>
+<tr><td>platformGitHubToken</td><td>Token to publish releases to GitHub.</td><td><code class="hljs">String</code></td><td>N/A</td></tr>
+<tr><td>platformReleaseNotesDir</td><td>Directory with the markdown release notes.</td><td><code class="hljs">String</code></td><td><code class="hljs">baseDirectory.value / &quot;notes&quot;</code></td></tr>
+<tr><td>platformSignArtifact</td><td>Enable to sign artifacts with the platform pgp key.</td><td><code class="hljs">Boolean</code></td><td><code class="hljs">true</code></td></tr>
+<tr><td>platformPgpRings</td><td>Files that store the pgp public and secret ring respectively.</td><td><code class="hljs">Option[(File, File)]</code></td><td>N/A</td></tr>
+<tr><td>platformBeforePublishHook</td><td>A hook to customize all the release processes before publishing to Bintray.</td><td><code class="hljs">Task[Unit]</code></td><td>N/A</td></tr>
+<tr><td>platformAfterPublishHook</td><td>A hook to customize all the release processes after publishing to Bintray.</td><td><code class="hljs">Task[Unit]</code></td><td>N/A</td></tr>
+</tbody>
+</table></div></div>
+<div class="row"><div class="small-expand columns a_xscroll a_table"><table>
+<thead>
+<tr><th>Tasks</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>platformValidatePomData</td><td>Ensure that all the data is available before generating a POM file.</td></tr>
+<tr><td>platformCurrentVersion</td><td>Get the current version to be released.</td></tr>
+<tr><td>platformLatestPublishedVersion</td><td>Fetch latest published stable version.</td></tr>
+<tr><td>platformPreviousArtifacts</td><td>Get <code class="hljs">mimaPreviousArtifacts</code> or fetch latest artifact to run MiMa.</td></tr>
+<tr><td>platformNextVersionFun</td><td>Function that decides the next version.</td></tr>
+<tr><td>platformRunMiMa</td><td>Run MiMa and report results based on current version.</td></tr>
+<tr><td>platformGetReleaseNotes</td><td>Get the correct release notes for a release.</td></tr>
+<tr><td>platformReleaseToGitHub</td><td>Create a release in GitHub.</td></tr>
+<tr><td>platformNightlyReleaseProcess</td><td>The default nightly release process.</td></tr>
+<tr><td>platformStableReleaseProcess</td><td>The default stable release process.</td></tr>
+</tbody>
+</table></div></div>
+<h2 id="release-processes" class="a_section" data-magellan-target="release-processes">Release processes<a class="a_hlink" href="#release-processes"></a></h2>
+<p>The release process setup relies on <a href="https://github.com/sbt/sbt-release">sbt-release</a>
+and follows the <a href="https://github.com/scalacenter/platform-staging">Scala Platform release process</a>.</p>
+<p><code class="hljs">sbt-platform</code> defines two default release processes for stable and nightly versions,
+if you want to add a new one or modify the standard ones, go <a href="sbt-platform.html#modify-release-process">here</a>.</p>
+<h3 id="platform-bintray-repositories" class="a_section" data-magellan-target="platform-bintray-repositories">Platform Bintray repositories<a class="a_hlink" href="#platform-bintray-repositories"></a></h3>
+<p>The Scala Platform uses Bintray to store and release all the Scala modules artifacts. Bintray allows
+maintainers a fine-grained control over their releases and provides instant release time and synchronization
+with Maven Central. The <a href="https://bintray.com/scalaplatform">Bintray Scala Platform</a> organization owns repositories:</p>
+<ol>
+<li><a href="https://bintray.com/scalaplatform/modules-releases">modules-releases</a> - Stable releases (and, in the future, milestones and RCs).</li>
+<li><a href="https://bintray.com/scalaplatform/modules-nightly-releases">modules-nightly-releases</a> - Nightly releases.</li>
+<li><a href="https://bintray.com/scalaplatform/tools">tools</a> - Scala Platform maintainers' tools.</li>
+</ol>
+<h3 id="how-nightlies-work" class="a_section" data-magellan-target="how-nightlies-work">How nightlies work<a class="a_hlink" href="#how-nightlies-work"></a></h3>
+<p>The Scala Platform bot invokes <code class="hljs">releaseNightly</code> daily at 00:00. The nightly release process
+will warn you when binary compatibility is broken, the version number is invalid, tests don't
+pass or the release of the artifact to Bintray has failed.</p>
+<h3 id="stable-releases" class="a_section" data-magellan-target="stable-releases">Stable releases<a class="a_hlink" href="#stable-releases"></a></h3>
+<p>When you're ready for a stable release, tag the <code class="hljs">platform-release</code> branch with the appropiate
+version number.</p>
+<p>In order to decide the version number, look at the bump between the latest Scala Platform
+version and the next one. If the latest Scala Platform release was <code class="hljs">1.2</code> and the next one
+is <code class="hljs">1.3</code>, then your stable version can have one minor bump regarding your latest release (<code class="hljs">2.3</code> =&gt; <code class="hljs">2.4</code>).</p>
+<h3 id="modify-release-process" class="a_section" data-magellan-target="modify-release-process">Modifying a release process<a class="a_hlink" href="#modify-release-process"></a></h3>
+<p>If you want to add custom release steps, you can define either <code class="hljs">platformBeforePublishHook</code>
+or <code class="hljs">platformAfterPublishHook</code> to perform an extra task for you. In this case, we'll register
+a new GitHub release for every nightly (disabled by default).</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-scala">platformAfterPublishHook := {
+    <span class="hljs-keyword">val</span> logger = streams.value.log
+    logger.info(<span class="hljs-string">"Cool! Nightlies are now released to GitHub."</span>)
+    releaseStepTask(platformReleaseToGitHub)
+}
+</code></pre>
+</div>
+<p>In the previous snippet, <code class="hljs">releaseStepTask(platformReleaseToGitHub)</code> allows you to reuse
+the already defined task that <a href="https://github.com/scalaplatform/dummy/releases/tag/untagged-ac904793e0df7da84fa6">creates a release in GitHub</a>.
+If you want to extend your example with fancier tasks and commands, have a look at the following
+<code class="hljs">sbt-release</code> helpers:</p>
+<ol>
+<li><code class="hljs">releaseStepTask</code> - Run an individual task. Does not aggregate builds.</li>
+<li><code class="hljs">releaseStepTaskAggregated</code> - Run an aggregated task.</li>
+<li><code class="hljs">releaseStepInputTask</code> - Run an input task, optionally taking the input to pass to it.</li>
+<li><code class="hljs">releaseStepCommand</code> - Run a command.</li>
+</ol>
+<p>If you want to perform major changes in the nightly release process, you can set or
+modify the release process task with <code class="hljs">platformNightlyReleaseProcess</code> or <code class="hljs">platformStableReleaseProcess</code>.
+For more information about the release steps that you can and cannot remove,
+check the <a href="https://github.com/scalacenter/platform-staging/sbt-platform/src/main/scala/ch/epfl/scala/platform/PlatformPlugin.scala">source code</a>.</p>
+<p>We strongly recommend to check the authoritative <code class="hljs">sbt-release</code> <a href="https://github.com/sbt/sbt-release">guide</a> to learn how to
+extend the release process.</p>
+<p><strong>NOTE</strong>: Although you can set up <code class="hljs">sbt-release</code> settings and tasks, because <code class="hljs">sbt-platform</code> relies
+on them, you should never invoke <code class="hljs">release</code> by yourself unless you really know what you're doing.
+Use either <code class="hljs">releaseStable</code> or <code class="hljs">releaseNightly</code>.</p>
+
+              </main>
+              
+              
+                <div data-sticky-container class="small-12 medium-12 large-2 large-order-1 columns a_sitenav_container">
+                  <nav class="a_sitenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                    
+                  <ul>
+                     
+  <li >
+    
+      <a href="platform.html">What is the Process</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="benefits-becoming-module.html">Why become a module?</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="policies.html">Platform policies</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="proposal-submission.html">Submit a proposal</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="joining-platform.html">Joining the Platform</a>
+    
+    
+  </li>
+  
+  <li  class="a_thispage" >
+    
+      <a href="sbt-platform.html">sbt-platform</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="faq.html">FAQ (Frequent Asked Questions)</a>
+    
+    
+  </li>
+ 
+                  </ul>
+                  </nav>
+                </div>
+              
+              
+              
+                <div class="small-12 medium-12 large-2 large-order-3 columns a_show-for-xlarge" data-sticky-container>
+                  <nav class="a_pagenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                     <header><p>On This Page</p>
+</header> 
+                    <ul class="vertical menu" data-magellan>
+                       
+  <li>
+    
+       <a href="#sbt-platform">sbt-platform</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#usage">Usage</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#examples-of-use">Examples of use</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  
+  <li>
+    
+       <a href="#setup">Setup</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#in-a-nutshell">In a nutshell</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#platform-specific-keys-and-tasks">Platform-specific keys and tasks</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  
+  <li>
+    
+       <a href="#release-processes">Release processes</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#platform-bintray-repositories">Platform Bintray repositories</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#how-nightlies-work">How nightlies work</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#stable-releases">Stable releases</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#modify-release-process">Modifying a release process</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  </ul>
+    
+  </li>
+ 
+                    </ul>
+                  </nav>
+                </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer class="small-12 medium-12 large-12 columns align-self-bottom a_footer">
+        <div class="row">
+          <div class="small-12 medium-12 large-12 columns top-bar">
+            <div class="top-bar-left">
+              
+            </div>
+            <div class="top-bar-right">
+              <p>© Scala Center 2016</p>
+
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <script src="_theme/js/jquery.min.js"></script>
+    <script src="_theme/js/what-input.min.js"></script>
+    <script src="_theme/js/foundation.min.js"></script>
+    
+    <script src="_theme/js/app.js"></script>
+    
+  </body>
+</html>
