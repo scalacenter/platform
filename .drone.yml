@@ -10,7 +10,7 @@ build:
     - BINTRAY_PASSWORD=$$BINTRAY_PASSWORD
   commands:
     - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
-    - sbt process/publishProcess docs/publishMicrosite
+    - sbt process/publishProcessAndDocs
 
 cache:
   mount:

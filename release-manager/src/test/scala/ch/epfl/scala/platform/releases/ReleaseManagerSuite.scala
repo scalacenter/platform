@@ -24,12 +24,14 @@ class ReleaseManagerSuite extends JUnitSuite {
 
   @Test def releaseNightly(): Unit = {
     val released = dummyManager.release(Nightly)
+    println(released)
     assert(released.isRight)
     released.right.map(logs => assert(logs.contains("success")))
   }
 
   @Test def releaseBeta(): Unit = {
     val released = dummyManager.release(Beta)
+    println(released)
     assert(released.isRight)
     released.right.map(logs => assert(logs.contains("success")))
   }

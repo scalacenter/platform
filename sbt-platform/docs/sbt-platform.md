@@ -1,13 +1,3 @@
----
-layout: home
-title:  "Home"
-section: "home"
-technologies:
- - first: ["Scala", "sbt-platform plugin is completely written in Scala"]
- - second: ["SBT", "sbt-platform plugin uses SBT and other sbt plugins to simplify modules maintainers' life"]
- - third: ["Scala Center", "sbt-platform plugin is a Scala Center initiative for the good of all the Scala community"]
----
-
 # sbt-platform
 
 **sbt-platform** is a SBT plugin that aims at simplifying the maintenance
@@ -22,7 +12,6 @@ addSbtPlugin("ch.epfl.scala" % "sbt-platform" % "0.1")
 The `sbt-platform` plugin provides a tight integration with the Scala Platform CI
 server and infrastructure. For now, it covers the following use cases:
 
-* [Scala Platform policies](https://scalacenter.github.io/platform-staging).
 * Automatic release of nightlies.
 * Automatic release of stable versions when a git tag is found.
 * MiMa compatibility checks and PGP signatures for artifacts (with Scala Platform keys).
@@ -35,12 +24,11 @@ server and infrastructure. For now, it covers the following use cases:
     * `sbt-mima-plugin`
     * `sbt-coursier`
 
-Together with our CI, that provides a default cached Scala and SBT setup, the 
-plugin aims to provide a complete developer experience with
-good error detection.
+Together with [our CI](ci-integration.md), the plugin aims to provide a complete
+developer experience with good error detection.
 
 As `sbt-platform` is still *work in progress*, we're open to suggestions
-on improving Scala Platform modules' maintainers. Potential next steps are:
+on improving Scala Platform modules' maintainers. Our potential next steps are:
 
 * Adding support for Sonatype.
 * Releasing to more than one Maven/Ivy repository (Scala Platform's and your personal one).
@@ -51,13 +39,14 @@ running `sbt test` for all the projects, run it only for the affected subproject
 * Improving MiMa binary compatibility checks.
 * Adding source compatibility checks using Scala Meta.
 
-Note that while this is an active Scala Center project,
-we hope to evolve the infrastructure as the Scala Platform grows and the community
-gets involved.
-
 If any of the previous features calls your attention, feel free to help out and make a PR.
-`sbt-platform` follows the same [CONTRIBUTION]() process (C4) and guidelines specified in the
-Scala Platform process.
+`sbt-platform` follows the same [CONTRIBUTION](https://github.com/scalacenter/platform-staging/CONTRIBUTING.md)
+guidelines than the Scala Platform process.
+
+> {.note}
+> We hope to improve the infrastructure and the maintainers support as the Scala Platform
+> grows and the community gets involved. By then, we will confidently know which features
+> make a real difference in maintainers' life, and will optimize for them.
 
 ## Usage
 
@@ -69,16 +58,48 @@ Scala Platform process.
 |releaseStable | Release a stable version of the module. |
 
 ### Examples of use
-```scala
-releaseNightly()
+```
+releaseNightly [release-version <version>] [skip-tests] [cross]
+releaseStable [release-version <version>] [skip-tests] [cross]
 ```
 
+All the arguments are optional and `<>` represents the parameters.
+
 Release commands are executed by the CI. To set it up, check
-the [CI documentation](wip).
+the [CI documentation](sbt-platform.md).
 
-## Configuring your setup
+## Setup
 
-Understanding the most important keys for your sbt build is essential.
+`sbt-platform` already comes with a default setup, thought out to get
+you started as soon as possible. You only need to make sure that 
+[the integration with the CI works](ci-integration.md).
+
+However, you may find interesting changing the value of some sbt keys.
+The general syntax for this is:
+
+```scala
+nameOfSbtSettingOrTask := {
+  // Write here Scala code that returns a value
+  // according to the type of the settings or task
+}
+```
+
+### Common general settings and tasks
+
+This section includes settings and tasks of all the sbt plugins `sbt-platform` depends on.
+
+| Settings | Description | Type | Default |
+| ------------- | ------------- | ---- | ---- |
+|bintrayRepository | Name of the Bintray repository the artifact will be stored on. | `String` | N/A |
+|bintrayOrganization | Name of the Bintray organization the repository is in. | `String` | `"scalaplatform"` |
+|publishArtifact in Test | Setting to include the test sources in the final released artifact. | `Boolean` | `false` |
+
+| Tasks | Description |
+| ------------- | ------------- |
+|bintraySyncMavenCentral | Sync bintray-published artifacts with maven central |
+
+
+### Platform-specific settings
 
 To help you get started, we provide a summary of the most common sbt tasks
 and settings in `sbt-platform` and the plugins it depends on (e.g. `bintray-sbt`).
@@ -88,8 +109,8 @@ and settings in `sbt-platform` and the plugins it depends on (e.g. `bintray-sbt`
 |platformInsideCi | Checks if CI is executing the build. | `Boolean` | `false` |
 |platformCiEnvironment | Get the Drone environment | `Option[CIEnvironment]` | `None` |
 |platformReleaseOnMerge | Release on every PR merge.| `Boolean` | `false` |
-|platformModuleName | Name of the module and the bintray package.| `String` | N/A|
-|platformModuleTags | Tags for the bintray module package.| `Seq[String]` | `Seq.empty[String]` |
+|platformModuleName | Name of the module and the bintray package.| `String` | bintrayPackage.value |
+|platformModuleTags | Tags for the bintray module package.| `Seq[String]` | bintrayPackageLabels.value |
 |platformTargetBranch | Branch used for the platform release.| `String` | `"platform-release"` |
 |platformGitHubToken | Token to publish releases to GitHub.| `String` | N/A |
 |platformReleaseNotesDir | Directory with the markdown release notes.| `String` | `baseDirectory.value / "notes"` |
@@ -97,6 +118,8 @@ and settings in `sbt-platform` and the plugins it depends on (e.g. `bintray-sbt`
 |platformPgpRings | Files that store the pgp public and secret ring respectively.| `Option[(File, File)]`| N/A |
 |platformBeforePublishHook | A hook to customize all the release processes before publishing to Bintray.| `Task[Unit]` | N/A |
 |platformAfterPublishHook | A hook to customize all the release processes after publishing to Bintray.| `Task[Unit]`| N/A |
+
+### Platform-specific tasks
 
 | Tasks | Description |
 | ------------- | ------------- |
@@ -108,6 +131,7 @@ and settings in `sbt-platform` and the plugins it depends on (e.g. `bintray-sbt`
 |platformRunMiMa | Run MiMa and report results based on current version.|
 |platformGetReleaseNotes | Get the correct release notes for a release.|
 |platformReleaseToGitHub | Create a release in GitHub.|
+|platformActiveReleaseProcess | The active release process if `releaseNightly` or `releaseStable` has been executed.|
 |platformNightlyReleaseProcess | The default nightly release process.|
 |platformStableReleaseProcess | The default stable release process.|
 
@@ -117,7 +141,7 @@ The release process setup relies on [sbt-release](https://github.com/sbt/sbt-rel
 and follows the [Scala Platform release process](https://github.com/scalacenter/platform-staging).
   
 `sbt-platform` defines two default release processes for stable and nightly versions,
-if you want to add a new one or modify the standard ones, go [here](modify-release-process).
+if you want to add a new one or modify the standard ones, go [here](#modify-release-process).
 
 ### Platform Bintray repositories
 
@@ -137,47 +161,53 @@ pass or the release of the artifact to Bintray has failed.
 
 ### Stable releases
 
-When you're ready for a stable release, tag the `platform-release` branch with the appropiate
-version number.
+To cut a stable release, tag the `platform-release` branch with the appropiate
+version number and push. When the CI is finished, your release will be available
+in [modules-releases](https://bintray.com/scalaplatform/modules-releases).
 
-In order to decide the version number, look at the bump between the latest Scala Platform
-version and the next one. If the latest Scala Platform release was `1.2` and the next one
-is `1.3`, then your stable version can have one minor bump regarding your latest release (`2.3` => `2.4`).
+#### Decide the version number
 
-### Modifying a release process
-<a name="modify-release-process"></a>
+You're free to choose the version number of the library as long as the bumped number
+is consistent with the Scala Platform version your module is targeting.
+If the latest Scala Platform release was `1.2` and the next one
+is `1.3`, then your stable version is only allowed a minor bump (e.g. `2.3` => `2.4`, `1.1` => `1.4`).
 
-If you want to add custom release steps, you can define either `platformBeforePublishHook`
-or `platformAfterPublishHook` to perform an extra task for you. In this case, we'll register
+### Modify the release process {#modify-release-process}
+
+If you want to add custom release steps, define either `platformBeforePublishHook`
+or `platformAfterPublishHook`. As an example, let's register
 a new GitHub release for every nightly (disabled by default).
 
 ```scala
 platformAfterPublishHook := {
     val logger = streams.value.log
-    logger.info("Cool! Nightlies are now released to GitHub.")
-    releaseStepTask(platformReleaseToGitHub)
+    val active = platformActiveReleaseProcess.value  
+    if (active.exists(platformNightlyReleaseProcess.value)) {
+      logger.info("Cool! Nightlies are now released to GitHub.")
+      platformReleaseToGitHub.value
+    }
 }
 ```
 
-In the previous snippet, `releaseStepTask(platformReleaseToGitHub)` allows you to reuse
-the already defined task that [creates a release in GitHub](https://github.com/scalaplatform/dummy/releases/tag/untagged-ac904793e0df7da84fa6).
-If you want to extend your example with fancier tasks and commands, have a look at the following
-`sbt-release` helpers:
+Every time you execute the nightly release process, the release process
+creates a release in GitHub and adds your markdown notes under `/notes`
+as release notes (if any).
+
+### On further extensions
+`sbt-release` provides primitives to write release processes from scratch:
 
 1. `releaseStepTask` - Run an individual task. Does not aggregate builds.
 1. `releaseStepTaskAggregated` - Run an aggregated task.
 1. `releaseStepInputTask` - Run an input task, optionally taking the input to pass to it.
 1. `releaseStepCommand` - Run a command.
 
-If you want to perform major changes in the nightly release process, you can set or
-modify the release process task with `platformNightlyReleaseProcess` or `platformStableReleaseProcess`.
-For more information about the release steps that you can and cannot remove,
-check the [source code](https://github.com/scalacenter/platform-staging/sbt-platform/src/main/scala/ch/epfl/scala/platform/PlatformPlugin.scala).
-
-We strongly recommend to check the authoritative `sbt-release` [guide](https://github.com/sbt/sbt-release) to learn how to
-extend the release process.
+Use them if you want to extend the release process with input tasks, or any
+other feature that requires more fine-grained control.
+When you are finished, set your new release process to `platformNightlyReleaseProcess` or
+`platformStableReleaseProcess`.
   
-**NOTE**: Although you can set up `sbt-release` settings and tasks, because `sbt-platform` relies
-on them, you should never invoke `release` by yourself unless you really know what you're doing.
-Use either `releaseStable` or `releaseNightly`.
-
+> {.note}
+> `sbt-platform` does not provide good support for advanced use cases yet.
+> We strongly recommend you to check the authoritative `sbt-release` [guide](https://github.com/sbt/sbt-release)
+> to learn how to extend the release process. As a plus, you can always
+> check `sbt-platform`'s [source code](https://github.com/scalacenter/platform-staging/sbt-platform/src/main/scala/ch/epfl/scala/platform/PlatformPlugin.scala).

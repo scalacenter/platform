@@ -14,16 +14,6 @@ simple step-by-step tutorial to help you migrate.
 
 ## Continuous Integration servers
 
-Our Drone servers provide quick development experience to module maintainers.
-With a powerful baseline server and dynamic scaling, we ensure concurrent and
-fast build times with short turnaround.
-
-Here are the steps for setting up the CI:
-
-1. Go to [our Drone setup](http://stats.lassie.io:8001).
-2. Log in with your GitHub credentials and turn on the CI in your module.
-3. Push a `drone.yml` file with the build logic and see the CI kicking in.
-
 If you're using Travis, follow [this guide](http://github.com/scalaplatform/) to find out
 the most straightforward way to translate the configuration logic.
 

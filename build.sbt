@@ -87,9 +87,11 @@ lazy val platform = project
   .aggregate(process, `release-manager`)
   .dependsOn(process, `release-manager`)
 
+lazy val mergeDocs = taskKey[Unit]("Merge Process and `sbt-platform docs.")
 lazy val makeProcess = taskKey[Unit]("Make the process.")
 lazy val createProcessIndex = taskKey[Unit]("Create index.html.")
-lazy val publishProcess = taskKey[Unit]("Make and publish the process.")
+lazy val publishProcessAndDocs = taskKey[Unit]("Make and publish the process.")
+lazy val unmergeDocs = taskKey[Unit]("Remote the `sbt-platform` docs from the source folder.")
 lazy val process: Project = project
   .in(file("process"))
   .enablePlugins(OrnatePlugin)
@@ -102,6 +104,23 @@ lazy val process: Project = project
     ornateSourceDir := Some(baseDirectory.value / "src" / "ornate"),
     ornateTargetDir := Some(target.value / "site"),
     siteSourceDirectory := ornateTargetDir.value.get,
+    mergeDocs := {
+      val logger = streams.value.log
+      logger.info("Merging the docs...")
+      val ornateTarget = ornateSourceDir.value
+        .getOrElse(sys.error("Ornate source dir is not set."))
+      IO.copyDirectory(`sbt-platform`.base / "docs", ornateTarget)
+    },
+    unmergeDocs := {
+      val ornateTarget = ornateSourceDir.value
+        .getOrElse(sys.error("Ornate source dir is not set."))
+      val sbtPlatformDocs = `sbt-platform`.base / "docs"
+      sbt.Path.allSubpaths(sbtPlatformDocs).foreach { t =>
+        val (_, relativePath) = t
+        val pathInGlobalDocs = ornateTarget / relativePath
+        IO.delete(pathInGlobalDocs)
+      }
+    },
     makeProcess := {
       val logger = streams.value.log
       ornate.value
@@ -123,7 +142,6 @@ lazy val process: Project = project
       import java.nio.file.{Paths, Files}
       def getPath(f: java.io.File): java.nio.file.Path =
         Paths.get(f.toPath.toAbsolutePath.toString)
-      val parentPath = getPath(repositoryTarget)
       val destFile = getPath(repositoryTarget / "index.html")
       logger.info(s"Checking that $destFile does not exist.")
       if (!Files.isSymbolicLink(destFile)) {
@@ -134,11 +152,13 @@ lazy val process: Project = project
     },
     GhPagesKeys.synchLocal :=
       GhPagesKeys.synchLocal.dependsOn(createProcessIndex).value,
-    publishProcess := Def.sequential(
+    publishProcessAndDocs := Def.sequential(
+      mergeDocs,
       makeProcess,
       GhPagesKeys.cleanSite,
       GhPagesKeys.synchLocal,
-      GhPagesKeys.pushSite
+      GhPagesKeys.pushSite,
+      unmergeDocs
     ).value
   )
 
@@ -204,22 +224,4 @@ lazy val `sbt-platform` = project
     fork in Test := true,
     javaOptions in Test ++= Seq("-Dplatform.debug=true",
       "-Dplatform.test=true")
-  )
-
-lazy val docs = project
-  .in(file("docs"))
-  .settings(moduleName := "sbt-platform-docs")
-  .enablePlugins(MicrositesPlugin)
-  .settings(allSettings)
-  .settings(
-    micrositeName := "sbt-platform",
-    micrositeDescription := "The SBT plugin for Scala Platform modules' maintainers.",
-    micrositeBaseUrl := "/sbt-platform",
-    micrositeAuthor := "Scala Center",
-    micrositeHomepage := "scala.epfl.ch",
-    micrositeGithubOwner := "scalacenter",
-    micrositeGithubRepo := "platform-staging",
-    siteDirectory in makeSite := target(_ / "site" / "sbt-platform").value,
-    git.remoteRepo := "git@github.com:scalacenter/sbt-platform",
-    git.branch := Some("master")
   )

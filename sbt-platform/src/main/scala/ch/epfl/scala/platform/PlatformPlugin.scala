@@ -74,6 +74,7 @@ trait PlatformSettings {
   val platformRunMiMa = taskKey[Unit]("Run MiMa and report results based on current version.")
   val platformGetReleaseNotes = taskKey[String]("Get the correct release notes for a release.")
   val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
+  val platformActiveReleaseProcess = taskKey[Option[Seq[ReleaseStep]]]("The active release process if `releaseNightly` or `releaseStable` has been executed.")
   val platformNightlyReleaseProcess = taskKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
   val platformStableReleaseProcess = taskKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
   val platformBeforePublishHook = taskKey[Unit]("A hook to customize all the release processes before publishing to Bintray.")
@@ -111,11 +112,13 @@ object PlatformKeys {
   )
 
   lazy val publishSettings: Seq[Setting[_]] = Seq(
-    bintrayOrganization := Some("scalaplatform"),
     publishTo := (publishTo in bintray).value,
     // Necessary for synchronization with Maven Central
     publishMavenStyle := true,
+    publishArtifact in Test := false,
     bintrayReleaseOnPublish in ThisBuild := false,
+    bintrayRepository := "modules-releases",
+    bintrayOrganization := Some("scalaplatform"),
     releaseCrossBuild := true
   ) ++ defaultReleaseSettings
 
@@ -127,6 +130,7 @@ object PlatformKeys {
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     // Empty the default release process to avoid errors
     releaseProcess := Seq.empty[ReleaseStep],
+    platformActiveReleaseProcess := None,
     platformNightlyReleaseProcess :=
       PlatformReleaseProcess.Nightly.releaseProcess,
     platformStableReleaseProcess :=
@@ -405,7 +409,7 @@ object PlatformKeys {
     import sbtrelease.ReleaseStateTransformations._
 
     // Attributes for the custom release command
-    val releaseProcess = AttributeKey[String]("releaseProcess")
+    val releaseProcessAttr = AttributeKey[String]("releaseProcess")
     val commandLineVersion = AttributeKey[Option[String]]("commandLineVersion")
     val validReleaseVersion = AttributeKey[Version]("validatedReleaseVersions")
 
@@ -473,6 +477,16 @@ object PlatformKeys {
       }
     }
 
+    def setAndReturnReleaseParts(releaseProcess: TaskKey[Seq[ReleaseStep]],
+                                 st: State) = {
+      val extracted = Project.extract(st)
+      val (st1, parts) = extracted.runTask(releaseProcess, st)
+      // Set the active release process before returning the release parts
+      val active = platformActiveReleaseProcess := Some(parts)
+      val st2 = extracted.append(active, st1)
+      (st2, parts)
+    }
+
     val FailureCommand = "--failure--"
     val releaseCommand: Command =
       Command("releaseModule")(_ => releaseParser) { (st, args) =>
@@ -486,7 +500,7 @@ object PlatformKeys {
 
         val startState = st
           .copy(onFailure = Some(FailureCommand))
-          .put(releaseProcess, selectedReleaseProcess)
+          .put(releaseProcessAttr, selectedReleaseProcess)
           .put(skipTests, args.contains(ParseResult.SkipTests))
           .put(cross, crossEnabled)
           .put(commandLineVersion, args.collectFirst {
@@ -497,10 +511,10 @@ object PlatformKeys {
           selectedReleaseProcess.toLowerCase match {
             case "nightly" =>
               logger.info("Nightly release process has been selected.")
-              extracted.runTask(platformNightlyReleaseProcess, startState)
+              setAndReturnReleaseParts(platformNightlyReleaseProcess, startState)
             case "stable" =>
               logger.info("Stable release process has been selected.")
-              extracted.runTask(platformStableReleaseProcess, startState)
+              setAndReturnReleaseParts(platformStableReleaseProcess, startState)
             case rp => sys.error(Feedback.unexpectedReleaseProcess(rp))
           }
         }
