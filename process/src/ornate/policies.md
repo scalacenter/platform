@@ -71,6 +71,12 @@ in production systems.
     care that changes forwarded to the branch *platform-release* meet the
     compatibility criteria.
 
+### Decide the Maven coordinates
+    
+When releasing stable versions, module maintainers decide under which group id
+the official artifacts get released. If you want to release under your own name,
+you need to get access to 
+
 ## Policies on committers and contributors
 
 The Platform process uses a modified version of C4, a contract designed for

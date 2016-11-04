@@ -1,5 +1,5 @@
 build:
-  image: jvican/scala-sbt-git
+  image: scalaplatform/scala
   pull: true
   volumes:
     - /platform:/keys

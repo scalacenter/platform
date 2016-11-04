@@ -27,6 +27,8 @@ server and infrastructure. For now, it covers the following use cases:
 Together with [our CI](ci-integration.md), the plugin aims to provide a complete
 developer experience with good error detection.
 
+## Next steps
+
 As `sbt-platform` is still *work in progress*, we're open to suggestions
 on improving Scala Platform modules' maintainers. Our potential next steps are:
 
@@ -45,8 +47,9 @@ guidelines than the Scala Platform process.
 
 > {.note}
 > We hope to improve the infrastructure and the maintainers support as the Scala Platform
-> grows and the community gets involved. By then, we will confidently know which features
-> make a real difference in maintainers' life, and will optimize for them.
+> grows and the community gets involved. This plugin only provides support for a subset
+> of features that improve maintainers' life. We expect to enrich this subset with
+> maintainers' input.
 
 ## Usage
 
@@ -139,9 +142,8 @@ and settings in `sbt-platform` and the plugins it depends on (e.g. `bintray-sbt`
 
 The release process setup relies on [sbt-release](https://github.com/sbt/sbt-release)
 and follows the [Scala Platform release process](https://github.com/scalacenter/platform-staging).
-  
-`sbt-platform` defines two default release processes for stable and nightly versions,
-if you want to add a new one or modify the standard ones, go [here](#modify-release-process).
+By using it, modules maintainers can be sure that their practices are valid according to
+the spec.
 
 ### Platform Bintray repositories
 
@@ -155,17 +157,26 @@ with Maven Central. The [Bintray Scala Platform](https://bintray.com/scalaplatfo
 
 ### How nightlies work
 
-The Scala Platform bot invokes `releaseNightly` daily at 00:00. The nightly release process
-will warn you when binary compatibility is broken, the version number is invalid, tests don't
-pass or the release of the artifact to Bintray has failed.
+The Scala Platform bot is executed every night and takes care of:
 
+* Releasing a nightly of every module of the Scala Platform.
+* Warns when:
+    * Binary compatibility is broken
+    * Version is invalid
+    * Tests don't pass
+    * Bintray upload failed
+    
+In case something goes wrong, notifications are sent via email / Gitter / Slack.
+Nightly releases are available in 
+[modules-nightly-releases](https://bintray.com/scalaplatform/modules-nightly-releases).
+    
 ### Stable releases
 
 To cut a stable release, tag the `platform-release` branch with the appropiate
-version number and push. When the CI is finished, your release will be available
+version number and push. When Drone finishes, your release will be available
 in [modules-releases](https://bintray.com/scalaplatform/modules-releases).
 
-#### Decide the version number
+#### Decide the version number for stable releases
 
 You're free to choose the version number of the library as long as the bumped number
 is consistent with the Scala Platform version your module is targeting.
@@ -174,9 +185,10 @@ is `1.3`, then your stable version is only allowed a minor bump (e.g. `2.3` => `
 
 ### Modify the release process {#modify-release-process}
 
-If you want to add custom release steps, define either `platformBeforePublishHook`
-or `platformAfterPublishHook`. As an example, let's register
-a new GitHub release for every nightly (disabled by default).
+The simplest way to modify the default release processes is to use
+`platformBeforePublishHook` and `platformAfterPublishHook`.
+For instance, let's register a new GitHub release for every nightly,
+but only after publishing to Bintray (disabled by default).
 
 ```scala
 platformAfterPublishHook := {
@@ -189,9 +201,10 @@ platformAfterPublishHook := {
 }
 ```
 
-Every time you execute the nightly release process, the release process
-creates a release in GitHub and adds your markdown notes under `/notes`
-as release notes (if any).
+The previous code checks that the active release process, set when either
+`releaseStable` or `releaseNightly` is run, corresponds to the defined
+nightly process and if so creates a release in GitHub, along with your
+markdown release notes (if any).
 
 ### On further extensions
 `sbt-release` provides primitives to write release processes from scratch:
