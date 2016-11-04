@@ -1,9 +1,8 @@
 pipeline:
   sftp_cache:
     image: plugins/sftp-cache
-    address: 128.178.154.62:22
     restore: true
-    mount: [ /drone/.ivy2 ]
+    mount: [ /drone/.ivy2, /drone/.coursier-cache, /drone/.sbt, /drone/.git ]
 
   build:
     image: scalaplatform/scala:0.5
@@ -16,6 +15,5 @@ pipeline:
 
   sftp_cache:
     image: plugins/sftp-cache
-    address: 128.178.154.62:22
     rebuild: true
-    mount: [ /drone/.ivy2 ]
+    mount: [ /drone/.ivy2, /drone/.coursier-cache, /drone/.sbt, /drone/.git ]
