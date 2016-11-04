@@ -4,7 +4,7 @@ pipeline:
     mount: [ .git, .ivy2, .coursier-cache, .sbt ]
 
   build:
-    image: scalaplatform/scala
+    image: jvican/scala-sbt-git
     pull: true
     clone:
       depth: 50
