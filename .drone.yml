@@ -1,20 +1,6 @@
 pipeline:
-  cache:
-    restore: true
-    mount: [ .git, .ivy2, .coursier-cache, .sbt ]
-
   build:
-    image: jvican/scala-sbt-git
-    pull: true
-    clone:
-      depth: 50
-      recursive: true
-    volumes:
-      - /platform:/keys
+    image: scalaplatform/scala
     commands:
       - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
       - sbt process/publishProcessAndDocs
-
-  cache:
-    rebuild: true
-    mount: [ .git, .ivy2, .coursier-cache, .sbt ]
