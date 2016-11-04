@@ -1,7 +1,6 @@
 pipeline:
   sftp_cache:
     image: plugins/sftp-cache
-    address: scalagesrv2.epfl.ch:22
     restore: true
     mount: [ /drone/.ivy2, /drone/.coursier-cache, /drone/.sbt, /drone/.git ]
 
@@ -16,6 +15,5 @@ pipeline:
 
   sftp_cache:
     image: plugins/sftp-cache
-    address: scalagesrv2.epfl.ch:22
     rebuild: true
     mount: [ /drone/.ivy2, /drone/.coursier-cache, /drone/.sbt, /drone/.git ]
