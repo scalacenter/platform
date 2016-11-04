@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="no-js" lang="eng" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Drone CI integration</title>
+    <link rel="stylesheet" href="_theme/css/foundation.min.css">
+    <link rel="stylesheet" href="_theme/css/app.css">
+     <link rel="stylesheet" href="_theme/css/highlight.js/styles/github-gist.css"> 
+  </head>
+  <body>
+    <div class="expanded row">
+      <div class="small-12 medium-12 large-12 columns align-self-top">
+        <div class="row">
+          
+          <header class="large-12 columns align-self-top a_header">
+            <div class="row">
+              <div class="large-12 columns a_limited top-bar">
+                <div class="top-bar-left">
+                  <p>The Scala Platform</p>
+
+                </div>
+                <div class="top-bar-right align-right row">
+                  
+                  
+                    <form action="site-search.html" method="get" class="align-right a_search">
+                      <input name="q" type="search"  placeholder="Search
+" >
+                      <button><img alt="&#1F50D;" src="_theme/images/images/search.svg" /></button>
+                    </form>
+                  
+                </div>
+              </div>
+            </div>
+          </header>
+          
+          <div class="small-12 medium-12 large-12 columns align-self-top a_limited a_main">
+            <div class="row">
+              
+              <main class="columns large-order-2 sections" id="_sections">
+                <h1 id="the-drone-ci-integration" class="a_section" data-magellan-target="the-drone-ci-integration">The Drone CI integration<a class="a_hlink" href="#the-drone-ci-integration"></a></h1>
+<blockquote class="warning">
+<p>This is work in progress.</p>
+</blockquote>
+<p>Our servers provide quick development experience to module maintainers.
+With a powerful baseline server and dynamic scaling, we ensure concurrent and
+fast build times.</p>
+<h2 id="setup" class="a_section" data-magellan-target="setup">Setup<a class="a_hlink" href="#setup"></a></h2>
+<ol>
+<li>Go to <a href="http://stats.lassie.io:8001">our Drone setup</a>.</li>
+<li>Log in with your GitHub credentials and turn on the CI for your module.</li>
+<li>Push a <code class="hljs">drone.yml</code> file with the build logic.</li>
+<li>See how the CI executes in the Drone project view.</li>
+</ol>
+<blockquote class="note">
+<p>Access to CI is restricted to official module maintainers.
+The SPP Process Lead will give access to them when the module
+joins the Platform or they are elected.</p>
+</blockquote>
+<h3 id="creating-the-drone.yml-file" class="a_section" data-magellan-target="creating-the-drone.yml-file">Creating the <code class="hljs">drone.yml</code> file<a class="a_hlink" href="#creating-the-drone.yml-file"></a></h3>
+<p>The <code class="hljs">drone.yml</code> file is a YAML file that tells Drone how to behave when
+GitHub kicks it in. Let's see an example.</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-yaml"><span class="hljs-attr">pipeline:</span>
+<span class="hljs-attr">  build:</span>
+<span class="hljs-attr">    image:</span> scalaplatform/scala
+<span class="hljs-attr">    volumes:</span>
+<span class="hljs-bullet">      -</span> /platform:/keys
+<span class="hljs-attr">    environment:</span>
+<span class="hljs-bullet">      -</span> GITHUB_PLATFORM_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
+<span class="hljs-bullet">      -</span> PLATFORM_PGP_PASSPHRASE=$$PLATFORM_PGP_PASSPHRASE
+<span class="hljs-bullet">      -</span> BINTRAY_USERNAME=$$BINTRAY_USERNAME
+<span class="hljs-bullet">      -</span> BINTRAY_PASSWORD=$$BINTRAY_PASSWORD
+<span class="hljs-attr">    commands:</span>
+<span class="hljs-bullet">      -</span> sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
+<span class="hljs-bullet">      -</span> sbt process/publishProcessAndDocs
+<span class="hljs-attr">    notify:</span>
+      <span class="hljs-comment"># Gitter and email will be supported in the future</span>
+<span class="hljs-attr">      image:</span> slack 
+<span class="hljs-attr">      when:</span>
+<span class="hljs-attr">        status:</span> [ failure ]
+
+<span class="hljs-attr">cache:</span>
+<span class="hljs-attr">  mount:</span>
+<span class="hljs-bullet">    -</span> .git
+<span class="hljs-bullet">    -</span> /drone/.ivy2
+<span class="hljs-bullet">    -</span> /drone/.coursier-cache
+<span class="hljs-bullet">    -</span> /drone/.sbt
+</code></pre>
+</div>
+<h4 id="the-official-scala-platform-docker-image" class="a_section" data-magellan-target="the-official-scala-platform-docker-image">The official Scala Platform docker image<a class="a_hlink" href="#the-official-scala-platform-docker-image"></a></h4>
+<p>Pulling <code class="hljs">scalaplatform/scala</code> gives you a fully-working Docker image with
+small size and a common working environment for Scala developers. In addition,
+you get a cached environment for free: say goodbye to downloading dependencies
+every time you run the CI.</p>
+<h2 id="common-configuration-settings" class="a_section" data-magellan-target="common-configuration-settings">Common configuration settings<a class="a_hlink" href="#common-configuration-settings"></a></h2>
+<h3 id="add-your-special-tokens-to-the-image" class="a_section" data-magellan-target="add-your-special-tokens-to-the-image">Add your special tokens to the image<a class="a_hlink" href="#add-your-special-tokens-to-the-image"></a></h3>
+<p>Drone secrets allow you to store sensitive information like passwords and tokens.</p>
+<h3 id="get-latest-docker-image" class="a_section" data-magellan-target="get-latest-docker-image">Get latest Docker image<a class="a_hlink" href="#get-latest-docker-image"></a></h3>
+<p>By default, the Docker image is not updated to benefit from reproducible build results.
+If you want Drone to fetch the latest version every time is executed, add
+the following attribute to the <code class="hljs">build</code> section:</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-yaml"><span class="hljs-attr">pull:</span> <span class="hljs-literal">true</span>
+</code></pre>
+</div>
+<h3 id="test-different-scala-versions" class="a_section" data-magellan-target="test-different-scala-versions">Test different Scala versions<a class="a_hlink" href="#test-different-scala-versions"></a></h3>
+<p>Drone provides a way with <a href="http://readme.drone.io/0.5/usage/matrix/">matrix builds</a>.
+However, we don't explain how this feature works because sbt already takes care of it.</p>
+<p>You can achieve the same behaviour by prepending <code class="hljs">+</code> to <code class="hljs">compile</code> or <code class="hljs">test</code>.
+SBT then executes the tasks for the Scala versions configured in <code class="hljs">crossScalaVersions</code>.
+<code class="hljs">sbt-platform</code> ensures this value contains the latest two Scala versions.</p>
+<h3 id="failure-notifications" class="a_section" data-magellan-target="failure-notifications">Failure notifications<a class="a_hlink" href="#failure-notifications"></a></h3>
+
+              </main>
+              
+              
+                <div data-sticky-container class="small-12 medium-12 large-2 large-order-1 columns a_sitenav_container">
+                  <nav class="a_sitenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                    
+                  <ul>
+                     
+  <li >
+    
+      <a href="platform.html">What is the Process</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="benefits-becoming-module.html">Why become a module?</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="policies.html">Platform policies</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="proposal-submission.html">Submit a proposal</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="joining-platform.html">Joining the Platform</a>
+    
+    
+  </li>
+  
+  <li  class="a_thispage" >
+    
+      <a href="ci-integration.html">The Drone CI integration</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="sbt-platform.html">sbt-platform</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="faq.html">FAQ (Frequent Asked Questions)</a>
+    
+    
+  </li>
+ 
+                  </ul>
+                  </nav>
+                </div>
+              
+              
+              
+                <div class="small-12 medium-12 large-2 large-order-3 columns a_show-for-xlarge" data-sticky-container>
+                  <nav class="a_pagenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                     <header><p>On This Page</p>
+</header> 
+                    <ul class="vertical menu" data-magellan>
+                       
+  <li>
+    
+       <a href="#the-drone-ci-integration">The Drone CI integration</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#setup">Setup</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#creating-the-drone.yml-file">Creating the drone.yml file</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#the-official-scala-platform-docker-image">The official Scala Platform docker image</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  </ul>
+    
+  </li>
+  
+  <li>
+    
+       <a href="#common-configuration-settings">Common configuration settings</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#add-your-special-tokens-to-the-image">Add your special tokens to the image</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#get-latest-docker-image">Get latest Docker image</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#test-different-scala-versions">Test different Scala versions</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#failure-notifications">Failure notifications</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  </ul>
+    
+  </li>
+ 
+                    </ul>
+                  </nav>
+                </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer class="small-12 medium-12 large-12 columns align-self-bottom a_footer">
+        <div class="row">
+          <div class="small-12 medium-12 large-12 columns top-bar">
+            <div class="top-bar-left">
+              
+            </div>
+            <div class="top-bar-right">
+              <p>© Scala Center 2016</p>
+
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <script src="_theme/js/jquery.min.js"></script>
+    <script src="_theme/js/what-input.min.js"></script>
+    <script src="_theme/js/foundation.min.js"></script>
+    
+    <script src="_theme/js/app.js"></script>
+    
+  </body>
+</html>
