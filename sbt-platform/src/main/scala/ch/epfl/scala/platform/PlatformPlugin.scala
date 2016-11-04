@@ -37,18 +37,33 @@ object PlatformPlugin extends sbt.AutoPlugin {
 }
 
 trait PlatformSettings {
+
+  case class RepositoryInfo(fullName: String, owner: String, name: String,
+                            scm: String, link: String, avatar: String,
+                            branch: String, isPrivate: Boolean,
+                            isTrusted: Boolean)
+
+  case class AuthorInfo(author: String, email: String, avatar: String)
+
+  case class CommitInfo(sha: String, ref: String, branch: String, link: String,
+                        message: String, author: AuthorInfo)
+
+  case class BuildInfo(number: Int, event: String, status: String, link: String,
+                       created: String, started: String, finished: String,
+                       prevBuildStatus: String, prevBuildNumber: Int,
+                       prevCommitSha: String)
+
   case class CIEnvironment(rootDir: File,
-                           name: String,
-                           repo: String,
-                           branch: String,
-                           commit: String,
-                           buildDir: String,
-                           buildUrl: String,
-                           buildNumber: Int,
+                           arch: String,
+                           repo: RepositoryInfo,
+                           commit: CommitInfo,
+                           build: BuildInfo,
+                           remoteUrl: String,
                            pullRequest: Option[String],
-                           jobNumber: Int,
                            tag: Option[String])
+
   // FORMAT: OFF
+  val defaultDroneWorkspace = "/drone"
   val platformInsideCi = settingKey[Boolean]("Checks if CI is executing the build.")
   val platformCiEnvironment = settingKey[Option[CIEnvironment]]("Get the Drone environment.")
   val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
@@ -139,31 +154,61 @@ object PlatformKeys {
 
   val emptyModules = Set.empty[ModuleID]
   lazy val platformSettings: Seq[Setting[_]] = Seq(
-    platformInsideCi := getEnvVariable("CI").exists(toBoolean),
+    platformInsideCi := getEnvVariable("DRONE").exists(_.toBoolean),
     platformCiEnvironment := {
       if (!platformInsideCi.value) None
       else {
+        val repositoryInfo = for {
+          ciRepo <- getEnvVariable("DRONE_REPO")
+          ciRepoOwner <- getEnvVariable("DRONE_REPO_OWNER")
+          ciRepoName <- getEnvVariable("DRONE_REPO_NAME")
+          ciRepoScm <- getEnvVariable("DRONE_REPO_SCM")
+          ciRepoLink <- getEnvVariable("DRONE_REPO_LINK")
+          ciRepoAvatar <- getEnvVariable("DRONE_REPO_AVATAR")
+          ciRepoBranch <- getEnvVariable("DRONE_REPO_BRANCH")
+          ciRepoPrivate <- getEnvVariable("DRONE_REPO_PRIVATE").map(_.toBoolean)
+          ciRepoTrusted <- getEnvVariable("DRONE_REPO_TRUSTED").map(_.toBoolean)
+        } yield RepositoryInfo(ciRepo, ciRepoOwner, ciRepoName, ciRepoScm, ciRepoLink, ciRepoAvatar, ciRepoBranch, ciRepoPrivate, ciRepoTrusted)
+
+        val buildInfo = for {
+          ciBuildNumber <- getEnvVariable("DRONE_BUILD_NUMBER").map(_.toInt)
+          ciBuildEvent <- getEnvVariable("DRONE_BUILD_EVENT")
+          ciBuildStatus <- getEnvVariable("DRONE_BUILD_STATUS")
+          ciBuildLink <- getEnvVariable("DRONE_BUILD_LINK")
+          ciBuildCreated <- getEnvVariable("DRONE_BUILD_CREATED")
+          ciBuildStarted <- getEnvVariable("DRONE_BUILD_STARTED")
+          ciBuildFinished <- getEnvVariable("DRONE_BUILD_FINISHED")
+          ciPrevBuildStatus <- getEnvVariable("DRONE_PREV_BUILD_STATUS")
+          ciPrevBuildNumber <- getEnvVariable("DRONE_PREV_BUILD_NUMBER").map(_.toInt)
+          ciPrevCommitSha <- getEnvVariable("DRONE_PREV_COMMIT_SHA")
+        } yield BuildInfo(ciBuildNumber, ciBuildEvent, ciBuildStatus, ciBuildLink, ciBuildCreated, ciBuildStarted, ciBuildFinished, ciPrevBuildStatus, ciPrevBuildNumber, ciPrevCommitSha)
+
+        val commitInfo = for {
+          ciCommitSha <- getEnvVariable("DRONE_COMMIT_SHA")
+          ciCommitRef <- getEnvVariable("DRONE_COMMIT_REF")
+          ciCommitBranch <- getEnvVariable("DRONE_COMMIT_BRANCH")
+          ciCommitLink <- getEnvVariable("DRONE_COMMIT_LINK")
+          ciCommitMessage <- getEnvVariable("DRONE_COMMIT_MESSAGE")
+          ciAuthor <- getEnvVariable("DRONE_COMMIT_AUTHOR")
+          ciAuthorEmail <- getEnvVariable("DRONE_COMMIT_AUTHOR_EMAIL")
+          ciAuthorAvatar <- getEnvVariable("COMMIT_AUTHOR_AVATAR")
+        } yield CommitInfo(ciCommitSha, ciCommitRef, ciCommitBranch, ciCommitLink, ciCommitMessage, AuthorInfo(ciAuthor, ciAuthorEmail, ciAuthorAvatar))
+
         for {
-          ciName <- getEnvVariable("CI_NAME")
-          ciRepo <- getEnvVariable("CI_REPO")
-          ciBranch <- getEnvVariable("CI_BRANCH")
-          ciCommit <- getEnvVariable("CI_COMMIT")
-          ciBuildDir <- getEnvVariable("CI_BUILD_DIR")
-          ciBuildUrl <- getEnvVariable("CI_BUILD_URL")
-          ciBuildNumber <- getEnvVariable("CI_BUILD_NUMBER")
-          ciJobNumber <- getEnvVariable("CI_JOB_NUMBER")
+          ciDroneArch <- getEnvVariable("DRONE_ARCH")
+          ciRepositoryInfo <- repositoryInfo
+          ciCommitInfo <- commitInfo
+          ciBuildInfo <- buildInfo
+          ciRemoteUrl <- getEnvVariable("DRONE_REMOTE_URL")
         } yield
-          CIEnvironment(file("/drone"),
-            ciName,
-            ciRepo,
-            ciBranch,
-            ciCommit,
-            ciBuildDir,
-            ciBuildUrl,
-            ciBuildNumber.toInt,
-            getEnvVariable("CI_PULL_REQUEST"),
-            ciJobNumber.toInt,
-            getEnvVariable("CI_TAG"))
+          CIEnvironment(file(defaultDroneWorkspace),
+            ciDroneArch,
+            ciRepositoryInfo,
+            ciCommitInfo,
+            ciBuildInfo,
+            ciRemoteUrl,
+            getEnvVariable("DRONE_PULL_REQUEST"),
+            getEnvVariable("DRONE_TAG"))
       }
     },
     platformLogger := streams.value.log,
@@ -231,7 +276,7 @@ object PlatformKeys {
         platformLogger.value.error(Feedback.undefinedPreviousMiMaVersions)
       val canBreakCompat = currentVersion.repr.startsWith("0.")
       val majorCurrentNumber = currentVersion.items.head
-      val majorBumps = previousVersions.map (previousVersion =>
+      val majorBumps = previousVersions.map(previousVersion =>
         majorCurrentNumber > previousVersion.items.head)
       mimaFailOnProblem := !canBreakCompat && majorBumps.exists(b => b)
       if (canBreakCompat && mimaPreviousArtifacts.value.isEmpty)
@@ -345,6 +390,7 @@ object PlatformKeys {
   ) ++ PlatformReleaseProcess.aliases
 
   object Helper {
+
     implicit class XtensionCoursierVersion(v: Version) {
       def toSbtRelease: sbtrelease.Version = {
         val repr = v.repr
@@ -369,10 +415,6 @@ object PlatformKeys {
         .map(conversion)
         .getOrElse(sys.error(Feedback.undefinedEnvironmentVariable(key)))
     }
-
-    def toBoolean(presumedBoolean: String) = presumedBoolean.toBoolean
-
-    def toInt(presumedInt: String) = presumedInt.toInt
 
     def validateVersion(definedVersion: String): Version = {
       val validatedVersion = for {
@@ -458,7 +500,9 @@ object PlatformKeys {
     import ReleaseKeys._
 
     object PlatformParseResult {
+
       case class ReleaseProcess(value: String) extends ParseResult
+
     }
 
     import sbt.complete.DefaultParsers.{Space, token, StringBasic}

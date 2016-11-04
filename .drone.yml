@@ -1,20 +1,19 @@
-build:
-  image: scalaplatform/scala
-  pull: true
-  volumes:
-    - /platform:/keys
-  environment:
-    - GITHUB_PLATFORM_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
-    - PLATFORM_PGP_PASSPHRASE=$$PLATFORM_PGP_PASSPHRASE
-    - BINTRAY_USERNAME=$$BINTRAY_USERNAME
-    - BINTRAY_PASSWORD=$$BINTRAY_PASSWORD
-  commands:
-    - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
-    - sbt process/publishProcessAndDocs
+pipeline:
+  cache:
+    restore: true
+    mount: [ .git, .ivy2, .coursier-cache, .sbt ]
 
-cache:
-  mount:
-    - .git
-    - /drone/.ivy2
-    - /drone/.coursier-cache
-    - /drone/.sbt
+  build:
+    image: scalaplatform/scala
+    clone:
+      depth: 50
+      recursive: true
+    volumes:
+      - /platform:/keys
+    commands:
+      - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
+      - sbt process/publishProcessAndDocs
+
+  cache:
+    rebuild: true
+    mount: [ .git, .ivy2, .coursier-cache, .sbt ]
