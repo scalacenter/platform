@@ -5,6 +5,7 @@ pipeline:
 
   build:
     image: scalaplatform/scala
+    pull: true
     clone:
       depth: 50
       recursive: true

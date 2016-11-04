@@ -26,15 +26,17 @@ GitHub kicks it in. Let's see an example.
 
 ```yaml
 pipeline:
+  cache:
+    restore: true
+    mount: [ .git, .ivy2, .coursier-cache, .sbt ]
+    
   build:
     image: scalaplatform/scala
+    clone:
+      depth: 50
+      recursive: true
     volumes:
       - /platform:/keys
-    environment:
-      - GITHUB_PLATFORM_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
-      - PLATFORM_PGP_PASSPHRASE=$$PLATFORM_PGP_PASSPHRASE
-      - BINTRAY_USERNAME=$$BINTRAY_USERNAME
-      - BINTRAY_PASSWORD=$$BINTRAY_PASSWORD
     commands:
       - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
       - sbt process/publishProcessAndDocs
@@ -43,13 +45,10 @@ pipeline:
       image: slack 
       when:
         status: [ failure ]
-
-cache:
-  mount:
-    - .git
-    - /drone/.ivy2
-    - /drone/.coursier-cache
-    - /drone/.sbt
+        
+  cache:
+    rebuild: true
+    mount: [ .git, .ivy2, .coursier-cache, .sbt ]
 ```
 
 #### The official Scala Platform docker image
@@ -64,6 +63,8 @@ every time you run the CI.
 ### Add your special tokens to the image
 
 Drone secrets allow you to store sensitive information like passwords and tokens.
+
+Usually, this is useful for adding GitHub tokens that allow you to publish 
 
 ### Get latest Docker image
 
