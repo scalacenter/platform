@@ -1,3 +1,6 @@
+workspace:
+  base: /drone
+
 pipeline:
   build:
     image: scalaplatform/scala
