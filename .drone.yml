@@ -1,4 +1,8 @@
 pipeline:
+  sftp_cache:
+    restore: true
+    mount: [ .ivy2 ]
+
   build:
     image: scalaplatform/scala:0.5
     volumes:
@@ -6,3 +10,7 @@ pipeline:
     commands:
       - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
       - sbt process/publishProcessAndDocs
+
+  sftp_cache:
+    rebuild: true
+    mount: [ .ivy2 ]
