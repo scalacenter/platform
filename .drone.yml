@@ -1,9 +1,6 @@
 pipeline:
   build:
     image: scalaplatform/scala:0.5
-    clone:
-      depth: 50
-      recursive: true
     volumes:
       - /platform:/keys
     commands:
