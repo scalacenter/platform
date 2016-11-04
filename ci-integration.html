@@ -63,15 +63,17 @@ joins the Platform or they are elected.</p>
 GitHub kicks it in. Let's see an example.</p>
 <div class="row">
 <pre class="hljs small-expand columns a_xscroll"><code class="language-yaml"><span class="hljs-attr">pipeline:</span>
+<span class="hljs-attr">  cache:</span>
+<span class="hljs-attr">    restore:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">    mount:</span> [ .git, .ivy2, .coursier-cache, .sbt ]
+    
 <span class="hljs-attr">  build:</span>
 <span class="hljs-attr">    image:</span> scalaplatform/scala
+<span class="hljs-attr">    clone:</span>
+<span class="hljs-attr">      depth:</span> <span class="hljs-number">50</span>
+<span class="hljs-attr">      recursive:</span> <span class="hljs-literal">true</span>
 <span class="hljs-attr">    volumes:</span>
 <span class="hljs-bullet">      -</span> /platform:/keys
-<span class="hljs-attr">    environment:</span>
-<span class="hljs-bullet">      -</span> GITHUB_PLATFORM_TOKEN=$$GITHUB_PLATFORM_TEST_TOKEN
-<span class="hljs-bullet">      -</span> PLATFORM_PGP_PASSPHRASE=$$PLATFORM_PGP_PASSPHRASE
-<span class="hljs-bullet">      -</span> BINTRAY_USERNAME=$$BINTRAY_USERNAME
-<span class="hljs-bullet">      -</span> BINTRAY_PASSWORD=$$BINTRAY_PASSWORD
 <span class="hljs-attr">    commands:</span>
 <span class="hljs-bullet">      -</span> sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
 <span class="hljs-bullet">      -</span> sbt process/publishProcessAndDocs
@@ -80,13 +82,10 @@ GitHub kicks it in. Let's see an example.</p>
 <span class="hljs-attr">      image:</span> slack 
 <span class="hljs-attr">      when:</span>
 <span class="hljs-attr">        status:</span> [ failure ]
-
-<span class="hljs-attr">cache:</span>
-<span class="hljs-attr">  mount:</span>
-<span class="hljs-bullet">    -</span> .git
-<span class="hljs-bullet">    -</span> /drone/.ivy2
-<span class="hljs-bullet">    -</span> /drone/.coursier-cache
-<span class="hljs-bullet">    -</span> /drone/.sbt
+        
+<span class="hljs-attr">  cache:</span>
+<span class="hljs-attr">    rebuild:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">    mount:</span> [ .git, .ivy2, .coursier-cache, .sbt ]
 </code></pre>
 </div>
 <h4 id="the-official-scala-platform-docker-image" class="a_section" data-magellan-target="the-official-scala-platform-docker-image">The official Scala Platform docker image<a class="a_hlink" href="#the-official-scala-platform-docker-image"></a></h4>
@@ -97,6 +96,7 @@ every time you run the CI.</p>
 <h2 id="common-configuration-settings" class="a_section" data-magellan-target="common-configuration-settings">Common configuration settings<a class="a_hlink" href="#common-configuration-settings"></a></h2>
 <h3 id="add-your-special-tokens-to-the-image" class="a_section" data-magellan-target="add-your-special-tokens-to-the-image">Add your special tokens to the image<a class="a_hlink" href="#add-your-special-tokens-to-the-image"></a></h3>
 <p>Drone secrets allow you to store sensitive information like passwords and tokens.</p>
+<p>Usually, this is useful for adding GitHub tokens that allow you to publish</p>
 <h3 id="get-latest-docker-image" class="a_section" data-magellan-target="get-latest-docker-image">Get latest Docker image<a class="a_hlink" href="#get-latest-docker-image"></a></h3>
 <p>By default, the Docker image is not updated to benefit from reproducible build results.
 If you want Drone to fetch the latest version every time is executed, add
