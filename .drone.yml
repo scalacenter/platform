@@ -1,6 +1,6 @@
 pipeline:
   sftp_cache:
-    image: plugins/sftp_cache
+    image: plugins/sftp-cache
     restore: true
     mount: [ .ivy2 ]
 
@@ -13,6 +13,6 @@ pipeline:
       - sbt process/publishProcessAndDocs
 
   sftp_cache:
-    image: plugins/sftp_cache
+    image: plugins/sftp-cache
     rebuild: true
     mount: [ .ivy2 ]
