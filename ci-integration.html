@@ -198,23 +198,57 @@ to find the binary in the Docker image.</p>
 <h3 id="add-your-special-tokens-to-the-image" class="a_section" data-magellan-target="add-your-special-tokens-to-the-image">Add your special tokens to the image<a class="a_hlink" href="#add-your-special-tokens-to-the-image"></a></h3>
 <p>Drone secrets allow you to store sensitive information like passwords and tokens.
 Think of the GitHub, Bintray and Sonatype tokens your sbt infrastructure may need.</p>
-<p>Secrets are scoped to an image, and are only visible if <code class="hljs">.drone.yml</code> has been signed.</p>
-<h3 id="get-latest-docker-image" class="a_section" data-magellan-target="get-latest-docker-image">Get latest Docker image<a class="a_hlink" href="#get-latest-docker-image"></a></h3>
+<p>Secrets are scoped to an image, and are only visible if <code class="hljs">.drone.yml</code> has been signed.
+They are mapped to environment variables in the Docker images.</p>
+<p>To add a secret, use the Drone CLI:</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-bash">drone secrets add your-user/your-github-repo KEY VALUE
+</code></pre>
+</div>
+<p>where <code class="hljs">your-user/your-github-repo</code> is your GitHub handle, <code class="hljs">KEY</code> is the name of the
+environment variable, and <code class="hljs">VALUE</code> is the value associated with it.</p>
+<p>If you only want to expose the secrets for a concrete Docker image, use</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-bash">drone secrets add --image=scalaplatform/scala your-user/your-github-repo KEY VALUE
+</code></pre>
+</div>
+<p>From then on, the secret <code class="hljs">KEY</code> will be available as an environment variable.
+<code class="hljs">sys.env.get(&quot;KEY&quot;)</code> will give you <code class="hljs">VALUE</code>.</p>
+<blockquote class="note">
+<p>Remember that secrets are only exposed for signed images. Only module maintainers
+can sign the images.</p>
+</blockquote>
+<h3 id="automatically-update-the-docker-image" class="a_section" data-magellan-target="automatically-update-the-docker-image">Automatically update the Docker image<a class="a_hlink" href="#automatically-update-the-docker-image"></a></h3>
 <p><a name="latest-docker-image"></a></p>
-<p>By default, the Docker image is not updated to benefit from reproducible build results.
-If you want Drone to fetch the latest version every time is executed, add
-the following attribute to the <code class="hljs">build</code> section:</p>
+<p>By default, the Docker image is not updated because reproducibility of the CI is key,
+and further updates could break your build. To enable this feature,
+add the following attribute to the <code class="hljs">build</code> section:</p>
 <div class="row">
 <pre class="hljs small-expand columns a_xscroll"><code class="language-yaml"><span class="hljs-attr">pull:</span> <span class="hljs-literal">true</span>
 </code></pre>
 </div>
 <h3 id="test-different-scala-versions" class="a_section" data-magellan-target="test-different-scala-versions">Test different Scala versions<a class="a_hlink" href="#test-different-scala-versions"></a></h3>
-<p>Drone provides a way with <a href="http://readme.drone.io/0.5/usage/matrix/">matrix builds</a>.
-However, we don't explain how this feature works because sbt already takes care of it.</p>
-<p>You can achieve the same behaviour by prepending <code class="hljs">+</code> to <code class="hljs">compile</code> or <code class="hljs">test</code>.
-SBT then executes the tasks for the Scala versions configured in <code class="hljs">crossScalaVersions</code>.
-<code class="hljs">sbt-platform</code> ensures this value contains the latest two Scala versions.</p>
+<p>Drone provides a way with <a href="http://readme.drone.io/0.5/usage/matrix/">matrix builds</a>.</p>
+<p>However, this features doesn't give you a lot of value if you're using sbt.
+Prepend <code class="hljs">+</code> to <code class="hljs">compile</code> or <code class="hljs">test</code> and run the task. Sbt will the prepended tasks for all
+the Scala versions defined in the sbt setting <code class="hljs">crossScalaVersions</code>.</p>
+<p>By default, the <code class="hljs">sbt-platform</code> plugin ensures this value contains the latest two Scala versions.</p>
 <h3 id="get-success-and-failure-notifications" class="a_section" data-magellan-target="get-success-and-failure-notifications">Get success and failure notifications<a class="a_hlink" href="#get-success-and-failure-notifications"></a></h3>
+<p>Add the following to your <code class="hljs">.drone.yml</code> file:</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-yaml"><span class="hljs-attr">pipeline:</span>
+  ...
+  <span class="hljs-comment"># your tasks</span>
+  ...
+<span class="hljs-attr">  slack:</span>
+<span class="hljs-attr">    channel:</span> dev
+<span class="hljs-attr">    username:</span> drone
+<span class="hljs-attr">    template:</span> <span class="hljs-string">|
+      <span class="hljs-template-variable">{{ repo.name }}</span> finished build <span class="hljs-template-variable">{{ build.number }}</span>
+      with a status of <span class="hljs-template-variable">{{ build.status }}</span>
+</span></code></pre>
+</div>
+<p>For more information on notifications and templates, check the <a href="http://readme.drone.io/0.5/usage/notifications/">official Drone documentation</a>.</p>
 
               </main>
               
@@ -366,7 +400,7 @@ SBT then executes the tasks for the Scala versions configured in <code class="hl
   
   <li>
     
-       <a href="#get-latest-docker-image">Get latest Docker image</a> 
+       <a href="#automatically-update-the-docker-image">Automatically update the Docker image</a> 
     
     
   </li>
