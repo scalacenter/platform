@@ -47,7 +47,7 @@ guidelines than the Scala Platform process.
 
 > {.note}
 > We hope to improve the infrastructure and the maintainers support as the Scala Platform
-> grows and the community gets involved. This plugin only provides support for a subset
+> grows and the community gets involved. This plugin only provides support for a basic subset
 > of features that improve maintainers' life. We expect to enrich this subset with
 > maintainers' input.
 
@@ -89,7 +89,7 @@ nameOfSbtSettingOrTask := {
 
 ### Common general settings and tasks
 
-This section includes settings and tasks of all the sbt plugins `sbt-platform` depends on.
+This section includes the most important settings and tasks of the sbt plugins the `sbt-platform` depends on.
 
 | Settings | Description | Type | Default |
 | ------------- | ------------- | ---- | ---- |
@@ -102,10 +102,12 @@ This section includes settings and tasks of all the sbt plugins `sbt-platform` d
 |bintraySyncMavenCentral | Sync bintray-published artifacts with maven central |
 
 
-### Platform-specific settings
+### Platform-specific tasks and settings
 
-To help you get started, we provide a summary of the most common sbt tasks
-and settings in `sbt-platform` and the plugins it depends on (e.g. `bintray-sbt`).
+Aside from reusing the settings and tasks defined by the dependent sbt plugins,
+`sbt-platform` defines their own to make easier customize the plugin functionality.
+
+### Platform-specific settings
 
 | Settings | Description | Type | Default |
 | ------------- | ------------- | ---- | ---- |
@@ -149,7 +151,7 @@ the spec.
 
 The Scala Platform uses Bintray to store and release all the Scala modules artifacts. Bintray allows
 maintainers a fine-grained control over their releases and provides instant release time and synchronization
-with Maven Central. The [Bintray Scala Platform](https://bintray.com/scalaplatform) organization owns repositories:
+with Maven Central. The [Bintray Scala Platform](https://bintray.com/scalaplatform) organization owns the following repositories:
 
 1. [modules-releases](https://bintray.com/scalaplatform/modules-releases) - Stable releases (and, in the future, milestones and RCs).
 1. [modules-nightly-releases](https://bintray.com/scalaplatform/modules-nightly-releases) - Nightly releases.
@@ -160,11 +162,11 @@ with Maven Central. The [Bintray Scala Platform](https://bintray.com/scalaplatfo
 The Scala Platform bot is executed every night and takes care of:
 
 * Releasing a nightly of every module of the Scala Platform.
-* Warns when:
-    * Binary compatibility is broken
-    * Version is invalid
-    * Tests don't pass
-    * Bintray upload failed
+* Warning when:
+    * Binary compatibility is broken;
+    * Version is invalid;
+    * Tests don't pass; and
+    * Bintray upload failed.
     
 In case something goes wrong, notifications are sent via email / Gitter / Slack.
 Nightly releases are available in 
@@ -198,6 +200,10 @@ To enable our infrastructure to release to Maven Central, you need to:
     
 We suggest you to go with the first option. Here you have a [useful video](https://youtu.be/P_3yo-oU1To)
 in case you're lost.
+
+> {.note}
+> Make sure that the organization setting in sbt is set to your desired group id.
+> Ultimately, this is the option that sets the Ivy and Maven path.
     
 ### Modify the release process {#modify-release-process}
 
