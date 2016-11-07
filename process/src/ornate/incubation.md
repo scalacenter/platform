@@ -1,8 +1,5 @@
 # Incubation
 
-> {.note}
-> The following page is not complete yet.
-
 When the Committee decides to incubate your project, the Process lead
 will add the current module maintainers to the [`scalaplatform` GitHub organization](https://github.com/scalaplatform).
 
