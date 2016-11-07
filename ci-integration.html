@@ -205,7 +205,7 @@ to find the binary in the Docker image.</p>
 <h3 id="secrets" class="a_section" data-magellan-target="secrets">Add your special tokens to the image<a class="a_hlink" href="#secrets"></a></h3>
 <p>Drone secrets allow you to store sensitive information like passwords and tokens.
 Think of the GitHub, Bintray and Sonatype tokens your sbt infrastructure may need.</p>
-<p>Secrets are scoped to an image, and are only visible if <code class="hljs">.drone.yml</code> has been signed.
+<p>Secrets are scoped to a repository, and are only visible if <code class="hljs">.drone.yml</code> has been signed.
 They are mapped to environment variables in the Docker images.</p>
 <p>To add a secret, use the Drone CLI:</p>
 <div class="row">
