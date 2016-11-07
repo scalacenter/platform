@@ -14,22 +14,24 @@ life.
     *  [Scala Center Code of Conduct](https://docs.google.com/document/d/1B57XIj2zIh7xx1syKvS3qfC4L8usd0pI0yTSrJMfuew/edit#);
     *  Process to elect maintainers, committers and evolve the modules;
     *  Policies on ticket management, PR & core reviews policies;
-    *  Scala documentation website (public scaladoc);
-    *  Good-looking website under an official Scala namespace;
-    *  Template and infrastructure to write and update the docs; and
-    *  Integration with online Scala tools to provide reproducible code snippets.
+    
+> {.note}
+> In the future, when the Scala Platform consists of an initial set of libraries,
+> this set may be extended to:
+>   *  Scala documentation website (public scaladoc);
+>   *  Good-looking website under an official Scala namespace;
+>   *  Template and infrastructure to write and update the docs; and
+>   *  Integration with online Scala REPL-like tools to provide reproducible code snippets.
     
 3.  Automatic release of modules.
 
     *  Maintainers of module have access to servers and CI.
-    *  A bot automatically releases modules every day, except for
-       stable releases (module maintainers must release with their
-       private organization credentials).
+    *  A bot automatically releases modules every night, and automation
+       for stable, milestones and release candidates is provided in the CI.
     *  Modules maintainers that want to release changes on every merge are
        encouraged to do so, and our infrastructure accommodates this use case.
-    *  The automatic release process checks binary compatibility in every
-       release, and warns module maintainers when releases break our [stability
-       guarantees](policies.md#release).
+    *  The automatic release process checks compatibility of releases according
+       to our [stability guarantees](policies.md#release).
        
 > {.note}
 > Any question so far? check the [FAQ](faq.md).
