@@ -14,8 +14,9 @@ pipeline:
     volumes:
       - /platform:/keys
     commands:
-      - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
-      - sbt process/publishProcessAndDocs
+      - /usr/bin/sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
+      - /usr/bin/sbt process/publishProcessAndDocs
+
 
   sftp_cache:
     image: plugins/sftp-cache
