@@ -95,8 +95,19 @@ notifications to Slack or Gitter when the build succeeds or fails.</p>
 our Drone servers. However, it also allows you to execute tasks that are inaccessible
 from the web interface, like signing the build files, executing Drone locally and managing secrets.</p>
 <p>If you're an official module maintainer, you will certainly need it.</p>
-<p>Learn how to install it in the <a href="http://readme.drone.io/0.5/reference/cli/overview/">official docs</a>.
-<code class="hljs">drone sign your-github-id/your-repo</code></p>
+<p>Learn how to install it in the <a href="http://readme.drone.io/0.5/reference/cli/overview/">official docs</a>.</p>
+<h4 id="signing-your-.drone.yml-after-changing-it" class="a_section" data-magellan-target="signing-your-.drone.yml-after-changing-it">Signing your <code class="hljs">.drone.yml</code> after changing it<a class="a_hlink" href="#signing-your-.drone.yml-after-changing-it"></a></h4>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-bash">drone sign your-github-id/your-repo
+</code></pre>
+</div>
+<h4 id="executing-drone-locally" class="a_section" data-magellan-target="executing-drone-locally">Executing drone locally<a class="a_hlink" href="#executing-drone-locally"></a></h4>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-bash">drone <span class="hljs-built_in">exec</span> --local --privileged your-github-id/your-repo
+</code></pre>
+</div>
+<h4 id="secrets-1" class="a_section" data-magellan-target="secrets-1">Secrets<a class="a_hlink" href="#secrets-1"></a></h4>
+<p>See <a href="ci-integration.html#secrets">the Secrets section</a>.</p>
 <h3 id="creating-the-drone.yml-file" class="a_section" data-magellan-target="creating-the-drone.yml-file">Creating the <code class="hljs">drone.yml</code> file<a class="a_hlink" href="#creating-the-drone.yml-file"></a></h3>
 <p>The <code class="hljs">drone.yml</code> file is a YAML file that tells Drone how to behave when
 GitHub executes webhooks.</p>
@@ -191,7 +202,7 @@ to be executed:</p>
 <p>Read <a href="ci-integration.html#latest-docker-image">Get latest Docker image</a> if Drone keeps failing
 to find the binary in the Docker image.</p>
 </blockquote>
-<h3 id="add-your-special-tokens-to-the-image" class="a_section" data-magellan-target="add-your-special-tokens-to-the-image">Add your special tokens to the image<a class="a_hlink" href="#add-your-special-tokens-to-the-image"></a></h3>
+<h3 id="secrets" class="a_section" data-magellan-target="secrets">Add your special tokens to the image<a class="a_hlink" href="#secrets"></a></h3>
 <p>Drone secrets allow you to store sensitive information like passwords and tokens.
 Think of the GitHub, Bintray and Sonatype tokens your sbt infrastructure may need.</p>
 <p>Secrets are scoped to an image, and are only visible if <code class="hljs">.drone.yml</code> has been signed.
@@ -356,6 +367,29 @@ as features stabilize and spurious bug disappear.</p>
        <a href="#installing-the-drone-cli">Installing the Drone CLI</a> 
     
     
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#signing-your-.drone.yml-after-changing-it">Signing your .drone.yml after changing it</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#executing-drone-locally">Executing drone locally</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#secrets-1">Secrets</a> 
+    
+    
+  </li>
+  </ul>
+    
   </li>
   
   <li>
@@ -399,7 +433,7 @@ as features stabilize and spurious bug disappear.</p>
   
   <li>
     
-       <a href="#add-your-special-tokens-to-the-image">Add your special tokens to the image</a> 
+       <a href="#secrets">Add your special tokens to the image</a> 
     
     
   </li>
