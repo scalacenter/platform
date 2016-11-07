@@ -10,12 +10,11 @@ pipeline:
 
   build:
     image: scalaplatform/scala:0.5
-    pull: true
     volumes:
       - /platform:/keys
     commands:
-      - /usr/bin/sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
-      - /usr/bin/sbt process/publishProcessAndDocs
+      - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
+      - sbt process/publishProcessAndDocs
 
 
   sftp_cache:
