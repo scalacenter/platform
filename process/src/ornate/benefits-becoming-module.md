@@ -30,9 +30,6 @@ life.
     *  The automatic release process checks binary compatibility in every
        release, and warns module maintainers when releases break our [stability
        guarantees](policies.md#release).
-       > {.warning}
-       > Advanced binary (added and removed methods) and source-compatible
-       > checks may be provided in the future.
        
 > {.note}
 > Any question so far? check the [FAQ](faq.md).
