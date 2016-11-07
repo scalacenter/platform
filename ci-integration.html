@@ -48,56 +48,159 @@ With a powerful baseline server and dynamic scaling, we ensure concurrent and
 fast build times.</p>
 <h2 id="setup" class="a_section" data-magellan-target="setup">Setup<a class="a_hlink" href="#setup"></a></h2>
 <ol>
-<li>Go to <a href="http://stats.lassie.io:8001">our Drone setup</a>.</li>
+<li>Join the scalaplatform GitHub organization if you're a module maintainer but not a member.</li>
+<li>Go to our Drone setup: <a href="https://platform-ci.scala-lang.org">https://platform-ci.scala-lang.org</a>.</li>
 <li>Log in with your GitHub credentials and turn on the CI for your module.</li>
-<li>Push a <code class="hljs">drone.yml</code> file with the build logic.</li>
-<li>See how the CI executes in the Drone project view.</li>
+<li>Create a <code class="hljs">drone.yml</code> file with the build logic. Sign it. Push the changes.</li>
+<li>Observe the logs and result of the build in the CI.</li>
 </ol>
 <blockquote class="note">
 <p>Access to CI is restricted to official module maintainers.
 The SPP Process Lead will give access to them when the module
 joins the Platform or they are elected.</p>
 </blockquote>
+<h3 id="what-does-drone-provide-you" class="a_section" data-magellan-target="what-does-drone-provide-you">What does Drone provide you?<a class="a_hlink" href="#what-does-drone-provide-you"></a></h3>
+<ul>
+<li>
+<p>A generic and configurable build for all the projects.</p>
+</li>
+<li>
+<p>Control over the secrets exposed to your project under different situations.</p>
+</li>
+<li>
+<p>Security over the images that can access secrets (tokens, private keys).</p>
+</li>
+<li>
+<p>Command-line interface to quickly manage the CI from your console.</p>
+</li>
+<li>
+<p>Constraints on your build tasks. Start a build task only when:</p>
+<ul>
+<li>A concrete branch(es) has a new event;</li>
+<li>A push is performed;</li>
+<li>A pull request is submitted;</li>
+<li>A git tag is pushed;</li>
+<li>A deploy event happens.</li>
+</ul>
+</li>
+<li>
+<p>Notifications when a change of status happens, e.g. send
+notifications to Slack or Gitter when the build succeeds or fails.</p>
+</li>
+<li>
+<p>Control over the platform that executes the build (Linux, Windows).</p>
+</li>
+<li>
+<p>Environment variables to programmatically create your sbt tasks.</p>
+</li>
+</ul>
+<h3 id="installing-the-drone-cli" class="a_section" data-magellan-target="installing-the-drone-cli">Installing the Drone CLI<a class="a_hlink" href="#installing-the-drone-cli"></a></h3>
+<p>The command-line Drone interface allows you to configure and inspect the state of
+our Drone servers. However, it also allows you to execute tasks that are inaccessible
+from the web interface, like signing the build files, executing Drone locally and managing secrets.</p>
+<p>If you're an official module maintainer, you will certainly need it.</p>
+<p>Learn how to install it in the <a href="http://readme.drone.io/0.5/reference/cli/overview/">official docs</a>.
+<code class="hljs">drone sign your-github-id/your-repo</code></p>
 <h3 id="creating-the-drone.yml-file" class="a_section" data-magellan-target="creating-the-drone.yml-file">Creating the <code class="hljs">drone.yml</code> file<a class="a_hlink" href="#creating-the-drone.yml-file"></a></h3>
 <p>The <code class="hljs">drone.yml</code> file is a YAML file that tells Drone how to behave when
-GitHub kicks it in. Let's see an example.</p>
+GitHub executes webhooks.</p>
+<p>To get you up and running, use the following skeleton:</p>
 <div class="row">
 <pre class="hljs small-expand columns a_xscroll"><code class="language-yaml"><span class="hljs-attr">pipeline:</span>
-<span class="hljs-attr">  cache:</span>
+  <span class="hljs-comment"># Fetch folders from distributed cache</span>
+<span class="hljs-attr">  sftp_cache_restore:</span>
+<span class="hljs-attr">    image:</span> plugins/sftp-cache
 <span class="hljs-attr">    restore:</span> <span class="hljs-literal">true</span>
-<span class="hljs-attr">    mount:</span> [ .git, .ivy2, .coursier-cache, .sbt ]
-    
+<span class="hljs-attr">    mount:</span>
+<span class="hljs-bullet">      -</span> /drone/.ivy2
+<span class="hljs-bullet">      -</span> /drone/.coursier-cache
+<span class="hljs-bullet">      -</span> /drone/.sbt
+<span class="hljs-bullet">      -</span> /drone/.git
+
+  <span class="hljs-comment"># Build your project, executes tests, releases docs...</span>
 <span class="hljs-attr">  build:</span>
-<span class="hljs-attr">    image:</span> scalaplatform/scala
-<span class="hljs-attr">    clone:</span>
-<span class="hljs-attr">      depth:</span> <span class="hljs-number">50</span>
-<span class="hljs-attr">      recursive:</span> <span class="hljs-literal">true</span>
+<span class="hljs-attr">    image:</span> scalaplatform/scala:<span class="hljs-number">0.5</span>
+<span class="hljs-attr">    pull:</span> <span class="hljs-literal">true</span>
 <span class="hljs-attr">    volumes:</span>
 <span class="hljs-bullet">      -</span> /platform:/keys
 <span class="hljs-attr">    commands:</span>
-<span class="hljs-bullet">      -</span> sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
-<span class="hljs-bullet">      -</span> sbt process/publishProcessAndDocs
-<span class="hljs-attr">    notify:</span>
-      <span class="hljs-comment"># Gitter and email will be supported in the future</span>
-<span class="hljs-attr">      image:</span> slack 
-<span class="hljs-attr">      when:</span>
-<span class="hljs-attr">        status:</span> [ failure ]
-        
-<span class="hljs-attr">  cache:</span>
+<span class="hljs-bullet">      -</span> ${COMMAND <span class="hljs-comment">#1}</span>
+<span class="hljs-bullet">      -</span> ${COMMAND <span class="hljs-comment">#2}</span>
+      
+  <span class="hljs-comment"># Release stable whenever a tag is pushed to `platform-release`</span>
+<span class="hljs-attr">  release-stable:</span>
+<span class="hljs-attr">    image:</span> scalaplatform/scala:<span class="hljs-number">0.5</span>
+<span class="hljs-attr">    commands:</span>
+<span class="hljs-bullet">      -</span> sbt releaseStable
+<span class="hljs-attr">    when:</span>
+<span class="hljs-attr">      branch:</span> platform-release
+<span class="hljs-attr">      event:</span> tag
+
+  <span class="hljs-comment"># Save folders in distributed cache</span>
+<span class="hljs-attr">  sftp_cache_rebuild:</span>
+<span class="hljs-attr">    image:</span> plugins/sftp-cache
 <span class="hljs-attr">    rebuild:</span> <span class="hljs-literal">true</span>
-<span class="hljs-attr">    mount:</span> [ .git, .ivy2, .coursier-cache, .sbt ]
+<span class="hljs-attr">    mount:</span>
+<span class="hljs-bullet">      -</span> /drone/.ivy2
+<span class="hljs-bullet">      -</span> /drone/.coursier-cache
+<span class="hljs-bullet">      -</span> /drone/.sbt
+<span class="hljs-bullet">      -</span> /drone/.git
 </code></pre>
 </div>
+<p>Make sure you replace the <code class="hljs">commands</code> key in the <code class="hljs">build</code> section
+with your build steps (e.g. <code class="hljs">sbt clean test docs/publish</code>).</p>
+<p>If you want to learn customize the build, keep on reading.</p>
+<blockquote class="warning">
+<p>Every time you modify <code class="hljs">.drone.yml</code>, you need to sign the configuration file.
+Signing is necessary for security purposes: it prevents you from malicious
+users that want to hijack your setup and stole your keys.</p>
+</blockquote>
 <h4 id="the-official-scala-platform-docker-image" class="a_section" data-magellan-target="the-official-scala-platform-docker-image">The official Scala Platform docker image<a class="a_hlink" href="#the-official-scala-platform-docker-image"></a></h4>
-<p>Pulling <code class="hljs">scalaplatform/scala</code> gives you a fully-working Docker image with
-small size and a common working environment for Scala developers. In addition,
-you get a cached environment for free: say goodbye to downloading dependencies
-every time you run the CI.</p>
+<p>Docker enables us to bundle an official Scala Platform image (<code class="hljs">scalaplatform/scala</code>)
+with popular Scala tools, predefined configurations and private keys for the release.
+The benefits of this image are two-fold: it provides a plug-and-play experience while
+still being lightweight and portable.</p>
+<p>If you want to use it locally, run <code class="hljs">docker pull scalaplatform/scala</code> followed by
+<code class="hljs">docker run -i -t scalaplatform/scala bash</code>. For the CI, make sure that the build
+section of <code class="hljs">.drone.yml</code> is <code class="hljs">scalaplatform/scala</code>.</p>
 <h2 id="common-configuration-settings" class="a_section" data-magellan-target="common-configuration-settings">Common configuration settings<a class="a_hlink" href="#common-configuration-settings"></a></h2>
+<p>Drone configuration files are built around the concept of sections.</p>
+<p>All the tasks that you may want to define go under the global <code class="hljs">pipeline</code>
+section. In the previous example, four independent tasks were defined:
+<code class="hljs">sftp-cache-restore</code>, <code class="hljs">build</code>, <code class="hljs">release-stable</code> and <code class="hljs">sftp-cache-rebuild</code>.</p>
+<blockquote class="note">
+<p>Note that tasks are executed sequentially in the same way they are defined.
+The names of the subtasks are not important and must not be unique.</p>
+</blockquote>
+<h3 id="adding-a-new-independent-subsection" class="a_section" data-magellan-target="adding-a-new-independent-subsection">Adding a new independent subsection<a class="a_hlink" href="#adding-a-new-independent-subsection"></a></h3>
+<p>Add a subsection under <code class="hljs">pipeline</code> that defines, at least, the image and commands
+to be executed:</p>
+<div class="row">
+<pre class="hljs small-expand columns a_xscroll"><code class="language-yaml"><span class="hljs-attr">pipeline:</span>
+  ...
+<span class="hljs-attr">  mynewtask:</span>
+<span class="hljs-attr">    image:</span> redis
+<span class="hljs-attr">    commands:</span>
+<span class="hljs-bullet">      -</span> redis-server
+  ...
+</code></pre>
+</div>
+<p>Drone will pick it up and execute all the sub tasks in the order they are defined.</p>
+<h3 id="need-a-command-in-the-docker-image" class="a_section" data-magellan-target="need-a-command-in-the-docker-image">Need a command in the Docker image?<a class="a_hlink" href="#need-a-command-in-the-docker-image"></a></h3>
+<ul>
+<li>Create a PR to install a new package in the <a href="https://github.com/jvican">Dockerfile</a>.</li>
+<li>Contact the <a href="https://github.com/jvican">SPP Process Lead</a> in Gitter and ask him to do it.</li>
+</ul>
+<blockquote class="note">
+<p>Read <a href="ci-integration.html#latest-docker-image">Get latest Docker image</a> if Drone keeps failing
+to find the binary in the Docker image.</p>
+</blockquote>
 <h3 id="add-your-special-tokens-to-the-image" class="a_section" data-magellan-target="add-your-special-tokens-to-the-image">Add your special tokens to the image<a class="a_hlink" href="#add-your-special-tokens-to-the-image"></a></h3>
-<p>Drone secrets allow you to store sensitive information like passwords and tokens.</p>
-<p>Usually, this is useful for adding GitHub tokens that allow you to publish</p>
+<p>Drone secrets allow you to store sensitive information like passwords and tokens.
+Think of the GitHub, Bintray and Sonatype tokens your sbt infrastructure may need.</p>
+<p>Secrets are scoped to an image, and are only visible if <code class="hljs">.drone.yml</code> has been signed.</p>
 <h3 id="get-latest-docker-image" class="a_section" data-magellan-target="get-latest-docker-image">Get latest Docker image<a class="a_hlink" href="#get-latest-docker-image"></a></h3>
+<p><a name="latest-docker-image"></a></p>
 <p>By default, the Docker image is not updated to benefit from reproducible build results.
 If you want Drone to fetch the latest version every time is executed, add
 the following attribute to the <code class="hljs">build</code> section:</p>
@@ -111,7 +214,7 @@ However, we don't explain how this feature works because sbt already takes care 
 <p>You can achieve the same behaviour by prepending <code class="hljs">+</code> to <code class="hljs">compile</code> or <code class="hljs">test</code>.
 SBT then executes the tasks for the Scala versions configured in <code class="hljs">crossScalaVersions</code>.
 <code class="hljs">sbt-platform</code> ensures this value contains the latest two Scala versions.</p>
-<h3 id="failure-notifications" class="a_section" data-magellan-target="failure-notifications">Failure notifications<a class="a_hlink" href="#failure-notifications"></a></h3>
+<h3 id="get-success-and-failure-notifications" class="a_section" data-magellan-target="get-success-and-failure-notifications">Get success and failure notifications<a class="a_hlink" href="#get-success-and-failure-notifications"></a></h3>
 
               </main>
               
@@ -203,6 +306,20 @@ SBT then executes the tasks for the Scala versions configured in <code class="hl
       <ul class="vertical menu">  
   <li>
     
+       <a href="#what-does-drone-provide-you">What does Drone provide you?</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#installing-the-drone-cli">Installing the Drone CLI</a> 
+    
+    
+  </li>
+  
+  <li>
+    
        <a href="#creating-the-drone.yml-file">Creating the drone.yml file</a> 
     
     
@@ -228,6 +345,20 @@ SBT then executes the tasks for the Scala versions configured in <code class="hl
       <ul class="vertical menu">  
   <li>
     
+       <a href="#adding-a-new-independent-subsection">Adding a new independent subsection</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#need-a-command-in-the-docker-image">Need a command in the Docker image?</a> 
+    
+    
+  </li>
+  
+  <li>
+    
        <a href="#add-your-special-tokens-to-the-image">Add your special tokens to the image</a> 
     
     
@@ -249,7 +380,7 @@ SBT then executes the tasks for the Scala versions configured in <code class="hl
   
   <li>
     
-       <a href="#failure-notifications">Failure notifications</a> 
+       <a href="#get-success-and-failure-notifications">Get success and failure notifications</a> 
     
     
   </li>
