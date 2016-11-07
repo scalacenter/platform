@@ -205,18 +205,12 @@ lazy val `sbt-platform` = project
     dependencyOverrides += "org.json4s" %% "json4s-core" % "3.2.10",
     dependencyOverrides += "org.json4s" %% "json4s-native" % "3.2.10",
     dependencyOverrides += "org.json4s" %% "json4s-ast" % "3.2.10",
-    ivyScriptedCachePath := {
-      if (sys.env.get("CI").exists(_.toBoolean))
-        "-Dsbt.ivy.home=/drone/.ivy2"
-      else s"-Dsbt.ivy.home=${ivyPaths.value.ivyHome.get}"
-    },
     scriptedLaunchOpts := Seq(
       "-Dplugin.version=" + version.value,
       // .jvmopts is ignored, simulate here
       "-XX:MaxPermSize=256m",
       "-Xmx2g",
       "-Xss2m",
-      ivyScriptedCachePath.value,
       "-Dplatform.debug=true",
       "-Dplatform.test=true"
     ),
