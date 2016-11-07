@@ -10,7 +10,8 @@ Here is what you can do:
 
 * Create a Scala Platform proposal;
 * Discuss and give feedback on current proposals in [Scala Internals](https://internals.scala-lang.org);
-* Contribute to any Platform module by:
+* Help contributing and get the infrastructure right ([`sbt-platform`](https://github.com/jvican/platform-staging)).
+* Contribute to any Scala Platform module by:
   * Adding features;
   * Fixing bugs; or
   * Improving documentation.
@@ -22,9 +23,9 @@ Choose one or more and help us improve the Scala ecosystem!
 *Anyone*. It doesn't matter if you are a Committee member, a library author or an open-source Scala developer.
 Just [follow the process](proposal-submission.md).
 
-#### I don't like wasting my time, is submitting a Scala Platform proposal easy?
+#### Is submitting a Scala Platform proposal easy?
 
-The Scala Platform process is designed to be simple and lightweight, even more than
+Yes. Seriously. The Scala Platform process is designed to be simple and lightweight, even more than
 the [Scala Improvement Process](http://docs.scala-lang.org/sips/sip-submission.html).
 The Scala Platform Committee quickly reviews proposals and gives feedback to authors,
 and turnaround times are tweaked to make progress in a short period of time. If you
@@ -39,8 +40,9 @@ As an official initiative by EPFL, the university that gave birth and holds the 
 the Platform has been baptised as the *Scala Platform* because it aims at:
 
 * Helping developers learn and become successful with the language;
-* Providing stable libraries that industrial users can depend on; and,
-* Increasing the impact of Scala and its community.
+* Providing stable libraries that inustrial users can depend on;
+* Grow the Scala community and help its expansion; and,
+* Increasing the impact of the Scala ecosystem.
 
 ## Infrastructure
 
@@ -66,7 +68,8 @@ merged, or how easy is for companies to assign an engineer to fix bugs if you gu
 
 Yes, you can keep it so long as you fulfill the same purposes. The important thing is
 not what infrastructure or CI you use, but the fact that you use it. Setting up
-our CI may give you some performance benefits, though it's up to you if you need them or not.
+our CI gives you some performance benefits and automatic release process,
+though it's up to you if you need them or not.
 
 #### Is the release bot using Platform's Sonatype organization for releasing?
 

@@ -457,7 +457,7 @@ object PlatformKeys {
 
     private def generateUbiquituousVersion(version: String, st: State) = {
       val ci = st.extract.get(platformCiEnvironment)
-      val unique = ci.map(_.buildNumber.toString)
+      val unique = ci.map(_.build.number.toString)
         .getOrElse(Random.nextLong.abs.toString)
       s"$version-$unique"
     }
