@@ -21,7 +21,7 @@ Choose one or more and help us improve the Scala ecosystem!
 #### Who can submit a Scala Platform proposal?
 
 *Anyone*. It doesn't matter if you are a Committee member, a library author or an open-source Scala developer.
-Just [follow the process](proposal-submission.md).
+Go ahead and [follow the process](proposal-submission.md).
 
 #### Is submitting a Scala Platform proposal easy?
 
@@ -64,42 +64,37 @@ Having a default release process gives predictability to the contribution proces
 companies to assign resources and engineers. Remember how motivated we are when our patches get
 merged, or how easy is for companies to assign an engineer to fix bugs if you guarantee they can depend on a new release tomorrow.
 
-#### My module has its own CI, can I keep it?
+#### My module has its own CI, can I keep using it?
 
-Yes, you can keep it so long as you fulfill the same purposes. The important thing is
+Sure, you can keep it so long as it fulfills the same purposes. The important thing is
 not what infrastructure or CI you use, but the fact that you use it. Setting up
 our CI gives you some performance benefits and automatic release process,
 though it's up to you if you need them or not.
 
-#### Is the release bot using Platform's Sonatype organization for releasing?
+#### Is the release bot using Platform's Sonatype organization for the releases?
 
-The release bot only publishes NIGHTLYs and BETAs with the Scala Platform sonatype
-credentials. For stable releases, we want to give credit to the original authors or
-community that contributed to the Platform. For that, we allow module maintainers to
-manually release stable releases under their own Sonatype namespace. The release bot
-will notify all the module maintainers one week ago before the release has to be cut.
-The platform JAR and artifact will depend on those versions, so you must release on time.
+You choose whether we do or not. Check the [`sbt-platform` docs](#maven-coordinate).
 
-> {.note}
-> If you prefer that we release stable releases, you can provide your Sonatype user
-> and password as secrets in the CI, and the release bot will take care of the rest.
+#### I want to use Sonatype, what can I do?
 
-#### I want to use Bintray, what can I do?
+Support for Sonatype is not provided in `sbt-platform` for now. However, you can release to
+Bintray and then synchronize your artifact with Maven Central. If you have rights to publish
+under the `groupId` of the artifact, then open sbt. When you're sure that the CI has published
+the stable version in Bintray, execute the `syncMavenCentral` task and introduce your credentials.
 
-At this moment there's not support for Bintray. If several module maintainers ask for it,
-we can consider releasing to Bintray instead of Sonatype, but this features is not a first priority.
+Within two hours, you should see your artifact hitting the doors of Maven Central.
 
 #### I have my own infrastructure and community, what's the point of joining the Scala Platform?
 
 Joining the Scala Platform is a declaration of intention. It's about creating a bigger
-community that ensures the long-term maintainance of high-quality Scala libraries
+community that ensures the long-term maintenance of high-quality Scala libraries
 for broad and public use. It's about encouraging companies to contribute back to
 the software they use in production, and making the process easier for any party involved
 in its development.
 
 You should join the Platform if you believe in these ideas and want to see your open-source
 project evolving over time, regardless of the help that the Scala Center provides. We all
-benefit from collaborative projects.
+benefit from big, collaborative and inclusive projects.
 
 ## Code of Conduct (CoC)
 
@@ -124,5 +119,5 @@ Conduct. We all should define what civic behaviour is.
 #### I want to report the violation of the CoC, what shall I do?
 
 Contact the SPP Process Lead ([@jvican](https://github.com/jvican)), or a Scala
-Center representative and explain the situation. You can also get in touch with
-any Scala Platform Committee member or module maintainers you want.
+Center representative and explain the situation. You can also get inform of the
+situation to any moderator in the [Scala Discourse](https://dev.scala-lang.org) channel.

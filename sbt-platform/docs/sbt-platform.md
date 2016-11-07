@@ -185,7 +185,7 @@ is consistent with the Scala Platform version your module is targeting.
 If the latest Scala Platform release was `1.2` and the next one
 is `1.3`, then your stable version is only allowed a minor bump (e.g. `2.3` => `2.4`, `1.1` => `1.4`).
 
-### Decide the Maven coordinates
+### Decide the Maven coordinates {#maven-coordinates}
     
 When releasing stable versions, module maintainers can decide the group id
 of their maven coordinates. For instance, already existing organizations or

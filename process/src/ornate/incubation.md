@@ -13,6 +13,11 @@ contributors, polish docs, and prepare for a stable release, the incubation peri
 helps the maintainers to get a feeling of the process, increase their userbase and get
 more committed contributors.
 
+> {.note}
+> Given the compatibility requirements defined in the Platform release process, it
+> is very important that the public API of an incubated module has seen several iterations
+> before a stable release, and is stable enough to last for 18 months.
+
 ## The infrastructure
 
 The incubation process and the integration with the infrastructure
@@ -26,6 +31,6 @@ As an incubated project, you have access to all the Scala Platform infrastructur
 
 The infrastructure consists of:
 
-1. Continuous Integration servers
-1. The Platform sbt release plugin
-1. The nightly release bot
+1. Continuous Integration servers.
+1. The Platform sbt release plugin.
+1. The nightly release bot.
