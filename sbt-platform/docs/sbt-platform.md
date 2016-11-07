@@ -1,4 +1,4 @@
-# sbt-platform
+# The Platform sbt plugin
 
 **sbt-platform** is a SBT plugin that aims at simplifying the maintenance
 and release of Scala Platform modules. It automates common use cases to
