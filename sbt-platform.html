@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sbt-platform</title>
+    <title>The Platform sbt plugin</title>
     <link rel="stylesheet" href="_theme/css/foundation.min.css">
     <link rel="stylesheet" href="_theme/css/app.css">
      <link rel="stylesheet" href="_theme/css/highlight.js/styles/github-gist.css"> 
@@ -39,7 +39,7 @@
             <div class="row">
               
               <main class="columns large-order-2 sections" id="_sections">
-                <h1 id="sbt-platform" class="a_section" data-magellan-target="sbt-platform">sbt-platform<a class="a_hlink" href="#sbt-platform"></a></h1>
+                <h1 id="the-platform-sbt-plugin" class="a_section" data-magellan-target="the-platform-sbt-plugin">The Platform sbt plugin<a class="a_hlink" href="#the-platform-sbt-plugin"></a></h1>
 <p><strong>sbt-platform</strong> is a SBT plugin that aims at simplifying the maintenance
 and release of Scala Platform modules. It automates common use cases to
 speed up developers' workflow and let module maintainers focus on the essential.</p>
@@ -86,7 +86,7 @@ running <code class="hljs">sbt test</code> for all the projects, run it only for
 guidelines than the Scala Platform process.</p>
 <blockquote class="note">
 <p>We hope to improve the infrastructure and the maintainers support as the Scala Platform
-grows and the community gets involved. This plugin only provides support for a subset
+grows and the community gets involved. This plugin only provides support for a basic subset
 of features that improve maintainers' life. We expect to enrich this subset with
 maintainers' input.</p>
 </blockquote>
@@ -124,7 +124,7 @@ The general syntax for this is:</p>
 </code></pre>
 </div>
 <h3 id="common-general-settings-and-tasks" class="a_section" data-magellan-target="common-general-settings-and-tasks">Common general settings and tasks<a class="a_hlink" href="#common-general-settings-and-tasks"></a></h3>
-<p>This section includes settings and tasks of all the sbt plugins <code class="hljs">sbt-platform</code> depends on.</p>
+<p>This section includes the most important settings and tasks of the sbt plugins the <code class="hljs">sbt-platform</code> depends on.</p>
 <div class="row"><div class="small-expand columns a_xscroll a_table"><table>
 <thead>
 <tr><th>Settings</th><th>Description</th><th>Type</th><th>Default</th></tr>
@@ -143,9 +143,10 @@ The general syntax for this is:</p>
 <tr><td>bintraySyncMavenCentral</td><td>Sync bintray-published artifacts with maven central</td></tr>
 </tbody>
 </table></div></div>
+<h3 id="platform-specific-tasks-and-settings" class="a_section" data-magellan-target="platform-specific-tasks-and-settings">Platform-specific tasks and settings<a class="a_hlink" href="#platform-specific-tasks-and-settings"></a></h3>
+<p>Aside from reusing the settings and tasks defined by the dependent sbt plugins,
+<code class="hljs">sbt-platform</code> defines their own to make easier customize the plugin functionality.</p>
 <h3 id="platform-specific-settings" class="a_section" data-magellan-target="platform-specific-settings">Platform-specific settings<a class="a_hlink" href="#platform-specific-settings"></a></h3>
-<p>To help you get started, we provide a summary of the most common sbt tasks
-and settings in <code class="hljs">sbt-platform</code> and the plugins it depends on (e.g. <code class="hljs">bintray-sbt</code>).</p>
 <div class="row"><div class="small-expand columns a_xscroll a_table"><table>
 <thead>
 <tr><th>Settings</th><th>Description</th><th>Type</th><th>Default</th></tr>
@@ -192,7 +193,7 @@ the spec.</p>
 <h3 id="platform-bintray-repositories" class="a_section" data-magellan-target="platform-bintray-repositories">Platform Bintray repositories<a class="a_hlink" href="#platform-bintray-repositories"></a></h3>
 <p>The Scala Platform uses Bintray to store and release all the Scala modules artifacts. Bintray allows
 maintainers a fine-grained control over their releases and provides instant release time and synchronization
-with Maven Central. The <a href="https://bintray.com/scalaplatform">Bintray Scala Platform</a> organization owns repositories:</p>
+with Maven Central. The <a href="https://bintray.com/scalaplatform">Bintray Scala Platform</a> organization owns the following repositories:</p>
 <ol>
 <li><a href="https://bintray.com/scalaplatform/modules-releases">modules-releases</a> - Stable releases (and, in the future, milestones and RCs).</li>
 <li><a href="https://bintray.com/scalaplatform/modules-nightly-releases">modules-nightly-releases</a> - Nightly releases.</li>
@@ -202,12 +203,12 @@ with Maven Central. The <a href="https://bintray.com/scalaplatform">Bintray Scal
 <p>The Scala Platform bot is executed every night and takes care of:</p>
 <ul>
 <li>Releasing a nightly of every module of the Scala Platform.</li>
-<li>Warns when:
+<li>Warning when:
 <ul>
-<li>Binary compatibility is broken</li>
-<li>Version is invalid</li>
-<li>Tests don't pass</li>
-<li>Bintray upload failed</li>
+<li>Binary compatibility is broken;</li>
+<li>Version is invalid;</li>
+<li>Tests don't pass; and</li>
+<li>Bintray upload failed.</li>
 </ul>
 </li>
 </ul>
@@ -239,6 +240,10 @@ they release.</p>
 </ul>
 <p>We suggest you to go with the first option. Here you have a <a href="https://youtu.be/P_3yo-oU1To">useful video</a>
 in case you're lost.</p>
+<blockquote class="note">
+<p>Make sure that the organization setting in sbt is set to your desired group id.
+Ultimately, this is the option that sets the Ivy and Maven path.</p>
+</blockquote>
 <h3 id="modify-release-process" class="a_section" data-magellan-target="modify-release-process">Modify the release process<a class="a_hlink" href="#modify-release-process"></a></h3>
 <p>The simplest way to modify the default release processes is to use
 <code class="hljs">platformBeforePublishHook</code> and <code class="hljs">platformAfterPublishHook</code>.
@@ -316,7 +321,7 @@ check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scala
   
   <li >
     
-      <a href="joining-platform.html">Joining the Platform</a>
+      <a href="joining-platform.html">Incubation</a>
     
     
   </li>
@@ -330,7 +335,7 @@ check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scala
   
   <li  class="a_thispage" >
     
-      <a href="sbt-platform.html">sbt-platform</a>
+      <a href="sbt-platform.html">The Platform sbt plugin</a>
     
     
   </li>
@@ -356,7 +361,7 @@ check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scala
                        
   <li>
     
-       <a href="#sbt-platform">sbt-platform</a> 
+       <a href="#the-platform-sbt-plugin">The Platform sbt plugin</a> 
     
     
       <ul class="vertical menu">  
@@ -392,6 +397,13 @@ check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scala
   <li>
     
        <a href="#common-general-settings-and-tasks">Common general settings and tasks</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#platform-specific-tasks-and-settings">Platform-specific tasks and settings</a> 
     
     
   </li>
