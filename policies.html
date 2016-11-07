@@ -58,60 +58,30 @@ in production systems.</p>
 the compatibility criteria.</p>
 </li>
 <li>
-<p>The Platform follows a <strong>twelve-week</strong> (3 months) release train model.</p>
-<blockquote class="note">
-<p>A release train model consists in a regular pre-planned schedule of software
-releases. This release model was introduced by the browsers to achieve stability
-without stagnation. When merged changes hit master, nightly releases are published
-for developers. After six months, a beta release is published from the state of
-master, and it’s promoted to become the stable release.</p>
-</blockquote>
+<p>The Platform follows a release process with the following properties:</p>
 <ol>
-<li>
-<p>The branch <code class="hljs">platform-release</code> is used to cut releases.</p>
-</li>
-<li>
-<p>Modules must use semantic versioning.</p>
-</li>
-<li>
-<p>Minor versions are released every 12 weeks.</p>
-</li>
-<li>
-<p>Modules can only break source and backwards compatibility in
+<li>The branch <code class="hljs">platform-release</code> is used to cut releases.</li>
+<li>Modules must use semantic versioning.</li>
+<li>Stable versions are released every 12 weeks.</li>
+<li>Modules can only break source and backwards compatibility in
 major releases, that happen: (a) every 18 months (1 year and 6 months),
-or (b) when new Scala versions are released.</p>
+or (b) when new Scala versions are released.
+<ul>
+<li>Unmaintained libraries are removed only in major releases.</li>
+</ul>
 </li>
-<li>
-<p>Unmaintained libraries are removed only in major releases.</p>
-</li>
-<li>
-<p>Nightly versions of the modules are released every night (if changes).</p>
-</li>
-<li>
-<p>Every twelve weeks, the latest nightly is promoted to the beta
-version and the latest beta to stable.</p>
-<div class="row">
-<pre class="hljs small-expand columns a_xscroll"><code class="language-markdown">Latest nightly <span class="hljs-emphasis">*1.0.0-NIGHTLY-12-03-2016*</span> becomes <span class="hljs-emphasis">*1.0.0-b2*</span>.
-Latest beta <span class="hljs-emphasis">*1.0.0-b1*</span> becomes the stable <span class="hljs-emphasis">*1.0.0*</span>.
-</code></pre>
-</div>
-</li>
-<li>
-<p>If bugs are found in beta versions, maintainers can provide exceptional
-artifacts before that beta is promoted to stable.</p>
-</li>
-<li>
-<p>Modules with no changes in <code class="hljs">platform-release</code> are not
-released again. Previous versions are used.</p>
-</li>
-<li>
-<p>Exceptional patch releases may be cut if important bugs are
-found in stable versions.</p>
-</li>
-<li>
-<p>Bug fixes are accepted and released for the major Platform
-releases in the last 24 months.</p>
-</li>
+<li>Platform modules under version 1.0 may break the compatibility requirements,
+as semantic versioning recognises 0.x versions experimental.</li>
+<li>Nightly versions of the modules are released every night (if changes).</li>
+<li>Nightly versions are used to let people try alpha functionality.</li>
+<li>Stable versions are only released if the module maintainers tag the
+<code class="hljs">platform-release</code> branch with the correct module version.</li>
+<li>Exceptional patch releases may be cut if important bugs are
+found in stable versions.</li>
+<li>Bug fixes are accepted and released for the major Platform
+releases in the last 24 months.</li>
+<li>The versioning of modules must follow the same bumps as the one
+for the targeted Platform version.</li>
 </ol>
 </li>
 <li>
@@ -120,17 +90,19 @@ Scala releases. <em>E.g.</em> If 2.12 is the current Scala version, 2.12
 and 2.11.</p>
 </li>
 <li>
-<p>Four different release pipelines:</p>
+<p>Three different release pipelines:</p>
 <ul>
 <li><strong>Nightly</strong> releases are used for early adopters and developers.</li>
-<li><strong>Beta</strong> releases are used for potential users that want to test changes
-and behaviour.</li>
 <li><strong>Stable</strong> releases are ready for production use.</li>
 <li><strong>Bug fixes for stable versions</strong>. Necessary when critical bugs
 are found. Some fixes may break binary and
 source compatibility. The release of such fixes is up to
 modules’ maintainers.</li>
 </ul>
+<p>Aside from these three different release pipelines, we encourage the
+use of <em>Release Candidates</em> and <em>Milestones</em>. Releasing early and
+often encourages users to test your module soon and adapt their
+codebase to your changes.</p>
 </li>
 <li>
 <p>Public methods marked experimental belong to the Experimental API.
@@ -310,7 +282,7 @@ hopes to reproduce their success in the Scala community.</p>
   
   <li >
     
-      <a href="joining-platform.html">Incubation</a>
+      <a href="incubation.html">Incubation</a>
     
     
   </li>

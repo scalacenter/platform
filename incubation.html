@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Why become a module?</title>
+    <title>Incubation</title>
     <link rel="stylesheet" href="_theme/css/foundation.min.css">
     <link rel="stylesheet" href="_theme/css/app.css">
-    
+     <link rel="stylesheet" href="_theme/css/highlight.js/styles/github-gist.css"> 
   </head>
   <body>
     <div class="expanded row">
@@ -39,55 +39,39 @@
             <div class="row">
               
               <main class="columns large-order-2 sections" id="_sections">
-                <h1 id="why-become-a-module" class="a_section" data-magellan-target="why-become-a-module">Why become a module?<a class="a_hlink" href="#why-become-a-module"></a></h1>
-<p>The focus of the Scala Platform process is on <em>growing communities
-around the Platform modules</em>. For that, it enforces commonly-approved
-open-source rules that optimize the experience of contributors and
-maintainers, and provides infrastructure that makes easier developers'
-life.</p>
-<ol>
-<li>
-<p>High-quality build machines, with large memory and powerful CPU resources,
-that ensure a fast and responsive development cycle.</p>
-</li>
-<li>
-<p>Organizational help.</p>
-<ul>
-<li><a href="https://docs.google.com/document/d/1B57XIj2zIh7xx1syKvS3qfC4L8usd0pI0yTSrJMfuew/edit#">Scala Center Code of Conduct</a>;</li>
-<li>Process to elect maintainers, committers and evolve the modules;</li>
-<li>Policies on ticket management, PR &amp; core reviews policies;</li>
-<li>Scala documentation website (public scaladoc);</li>
-<li>Good-looking website under an official Scala namespace;</li>
-<li>Template and infrastructure to write and update the docs; and</li>
-<li>Integration with online Scala tools to provide reproducible code snippets.</li>
-</ul>
-</li>
-<li>
-<p>Automatic release of modules.</p>
-<ul>
-<li>Maintainers of module have access to servers and CI.</li>
-<li>A bot automatically releases modules every day, except for
-stable releases (module maintainers must release with their
-private organization credentials).</li>
-<li>Modules maintainers that want to release changes on every merge are
-encouraged to do so, and our infrastructure accommodates this use case.</li>
-<li>The automatic release process checks binary compatibility in every
-release, and warns module maintainers when releases break our <a href="policies.html#release">stability
-guarantees</a>.
-<blockquote class="warning">
-<p>Advanced binary (added and removed methods) and source-compatible
-checks may be provided in the future.</p>
-</blockquote>
-</li>
-</ul>
-</li>
-</ol>
+                <h1 id="incubation" class="a_section" data-magellan-target="incubation">Incubation<a class="a_hlink" href="#incubation"></a></h1>
 <blockquote class="note">
-<p>Any question so far? check the <a href="faq.html">FAQ</a>.</p>
+<p>The following page is not complete yet.</p>
 </blockquote>
-<p>The above services focus on improving the development experience,
-removing the overhead of getting the contribution rules and the infrastructure
-right.</p>
+<p>When the Committee decides to incubate your project, the Process lead
+will add the current module maintainers to the <a href="https://github.com/scalaplatform"><code class="hljs">scalaplatform</code> GitHub organization</a>.</p>
+<p>The incubation process is key for the development of a module. It's the call for
+action for those who want to get involved and help out in its evolution. While
+some Platform modules with a strong presence in the Community may not need to get
+contributors, polish docs, and prepare for a stable release, the incubation period
+helps the maintainers to get a feeling of the process, increase their userbase and get
+more committed contributors.</p>
+<blockquote class="note">
+<p>Given the compatibility requirements defined in the Platform release process, it
+is very important that the public API of an incubated module has seen several iterations
+before a stable release, and is stable enough to last for 18 months.</p>
+</blockquote>
+<h2 id="the-infrastructure" class="a_section" data-magellan-target="the-infrastructure">The infrastructure<a class="a_hlink" href="#the-infrastructure"></a></h2>
+<p>The incubation process and the integration with the infrastructure
+is meant to be as easy as possible, so that you can focus on the hard tasks:</p>
+<ul>
+<li>Growing your community;</li>
+<li>Tooling around your project;</li>
+<li>Fixing bugs;</li>
+<li>Preparing for a release.</li>
+</ul>
+<p>As an incubated project, you have access to all the Scala Platform infrastructure.</p>
+<p>The infrastructure consists of:</p>
+<ol>
+<li>Continuous Integration servers.</li>
+<li>The Platform sbt release plugin.</li>
+<li>The nightly release bot.</li>
+</ol>
 
               </main>
               
@@ -104,7 +88,7 @@ right.</p>
     
   </li>
   
-  <li  class="a_thispage" >
+  <li >
     
       <a href="benefits-becoming-module.html">Why become a module?</a>
     
@@ -125,7 +109,7 @@ right.</p>
     
   </li>
   
-  <li >
+  <li  class="a_thispage" >
     
       <a href="incubation.html">Incubation</a>
     
@@ -158,6 +142,32 @@ right.</p>
                 </div>
               
               
+              
+                <div class="small-12 medium-12 large-2 large-order-3 columns a_show-for-xlarge" data-sticky-container>
+                  <nav class="a_pagenav" data-sticky data-sticky-on="large" data-anchor="_sections">
+                     <header><p>On This Page</p>
+</header> 
+                    <ul class="vertical menu" data-magellan>
+                       
+  <li>
+    
+       <a href="#incubation">Incubation</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#the-infrastructure">The infrastructure</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+ 
+                    </ul>
+                  </nav>
+                </div>
               
             </div>
           </div>

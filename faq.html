@@ -59,7 +59,7 @@
 <p>Choose one or more and help us improve the Scala ecosystem!</p>
 <h4 id="who-can-submit-a-scala-platform-proposal" class="a_section" data-magellan-target="who-can-submit-a-scala-platform-proposal">Who can submit a Scala Platform proposal?<a class="a_hlink" href="#who-can-submit-a-scala-platform-proposal"></a></h4>
 <p><em>Anyone</em>. It doesn't matter if you are a Committee member, a library author or an open-source Scala developer.
-Just <a href="proposal-submission.html">follow the process</a>.</p>
+Go ahead and <a href="proposal-submission.html">follow the process</a>.</p>
 <h4 id="is-submitting-a-scala-platform-proposal-easy" class="a_section" data-magellan-target="is-submitting-a-scala-platform-proposal-easy">Is submitting a Scala Platform proposal easy?<a class="a_hlink" href="#is-submitting-a-scala-platform-proposal-easy"></a></h4>
 <p>Yes. Seriously. The Scala Platform process is designed to be simple and lightweight, even more than
 the <a href="http://docs.scala-lang.org/sips/sip-submission.html">Scala Improvement Process</a>.
@@ -93,34 +93,28 @@ in the development of a project.</p>
 Having a default release process gives predictability to the contribution process and encourages
 companies to assign resources and engineers. Remember how motivated we are when our patches get
 merged, or how easy is for companies to assign an engineer to fix bugs if you guarantee they can depend on a new release tomorrow.</p>
-<h4 id="my-module-has-its-own-ci-can-i-keep-it" class="a_section" data-magellan-target="my-module-has-its-own-ci-can-i-keep-it">My module has its own CI, can I keep it?<a class="a_hlink" href="#my-module-has-its-own-ci-can-i-keep-it"></a></h4>
-<p>Yes, you can keep it so long as you fulfill the same purposes. The important thing is
+<h4 id="my-module-has-its-own-ci-can-i-keep-using-it" class="a_section" data-magellan-target="my-module-has-its-own-ci-can-i-keep-using-it">My module has its own CI, can I keep using it?<a class="a_hlink" href="#my-module-has-its-own-ci-can-i-keep-using-it"></a></h4>
+<p>Sure, you can keep it so long as it fulfills the same purposes. The important thing is
 not what infrastructure or CI you use, but the fact that you use it. Setting up
 our CI gives you some performance benefits and automatic release process,
 though it's up to you if you need them or not.</p>
-<h4 id="is-the-release-bot-using-platforms-sonatype-organization-for-releasing" class="a_section" data-magellan-target="is-the-release-bot-using-platforms-sonatype-organization-for-releasing">Is the release bot using Platform's Sonatype organization for releasing?<a class="a_hlink" href="#is-the-release-bot-using-platforms-sonatype-organization-for-releasing"></a></h4>
-<p>The release bot only publishes NIGHTLYs and BETAs with the Scala Platform sonatype
-credentials. For stable releases, we want to give credit to the original authors or
-community that contributed to the Platform. For that, we allow module maintainers to
-manually release stable releases under their own Sonatype namespace. The release bot
-will notify all the module maintainers one week ago before the release has to be cut.
-The platform JAR and artifact will depend on those versions, so you must release on time.</p>
-<blockquote class="note">
-<p>If you prefer that we release stable releases, you can provide your Sonatype user
-and password as secrets in the CI, and the release bot will take care of the rest.</p>
-</blockquote>
-<h4 id="i-want-to-use-bintray-what-can-i-do" class="a_section" data-magellan-target="i-want-to-use-bintray-what-can-i-do">I want to use Bintray, what can I do?<a class="a_hlink" href="#i-want-to-use-bintray-what-can-i-do"></a></h4>
-<p>At this moment there's not support for Bintray. If several module maintainers ask for it,
-we can consider releasing to Bintray instead of Sonatype, but this features is not a first priority.</p>
+<h4 id="is-the-release-bot-using-platforms-sonatype-organization-for-the-releases" class="a_section" data-magellan-target="is-the-release-bot-using-platforms-sonatype-organization-for-the-releases">Is the release bot using Platform's Sonatype organization for the releases?<a class="a_hlink" href="#is-the-release-bot-using-platforms-sonatype-organization-for-the-releases"></a></h4>
+<p>You choose whether we do or not. Check the <a href="faq.html#maven-coordinate"><code class="hljs">sbt-platform</code> docs</a>.</p>
+<h4 id="i-want-to-use-sonatype-what-can-i-do" class="a_section" data-magellan-target="i-want-to-use-sonatype-what-can-i-do">I want to use Sonatype, what can I do?<a class="a_hlink" href="#i-want-to-use-sonatype-what-can-i-do"></a></h4>
+<p>Support for Sonatype is not provided in <code class="hljs">sbt-platform</code> for now. However, you can release to
+Bintray and then synchronize your artifact with Maven Central. If you have rights to publish
+under the <code class="hljs">groupId</code> of the artifact, then open sbt. When you're sure that the CI has published
+the stable version in Bintray, execute the <code class="hljs">syncMavenCentral</code> task and introduce your credentials.</p>
+<p>Within two hours, you should see your artifact hitting the doors of Maven Central.</p>
 <h4 id="i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform" class="a_section" data-magellan-target="i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform">I have my own infrastructure and community, what's the point of joining the Scala Platform?<a class="a_hlink" href="#i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform"></a></h4>
 <p>Joining the Scala Platform is a declaration of intention. It's about creating a bigger
-community that ensures the long-term maintainance of high-quality Scala libraries
+community that ensures the long-term maintenance of high-quality Scala libraries
 for broad and public use. It's about encouraging companies to contribute back to
 the software they use in production, and making the process easier for any party involved
 in its development.</p>
 <p>You should join the Platform if you believe in these ideas and want to see your open-source
 project evolving over time, regardless of the help that the Scala Center provides. We all
-benefit from collaborative projects.</p>
+benefit from big, collaborative and inclusive projects.</p>
 <h2 id="code-of-conduct-coc" class="a_section" data-magellan-target="code-of-conduct-coc">Code of Conduct (CoC)<a class="a_hlink" href="#code-of-conduct-coc"></a></h2>
 <h4 id="why-shall-i-conform-to-scala-centers-coc" class="a_section" data-magellan-target="why-shall-i-conform-to-scala-centers-coc">Why shall I conform to Scala Center's CoC?<a class="a_hlink" href="#why-shall-i-conform-to-scala-centers-coc"></a></h4>
 <p>Contributing to the Platform should be a nice experience for any person. Online
@@ -138,8 +132,8 @@ encouraged to propose the inclusion of those policies in the official Code of
 Conduct. We all should define what civic behaviour is.</p>
 <h4 id="i-want-to-report-the-violation-of-the-coc-what-shall-i-do" class="a_section" data-magellan-target="i-want-to-report-the-violation-of-the-coc-what-shall-i-do">I want to report the violation of the CoC, what shall I do?<a class="a_hlink" href="#i-want-to-report-the-violation-of-the-coc-what-shall-i-do"></a></h4>
 <p>Contact the SPP Process Lead (<a href="https://github.com/jvican">@jvican</a>), or a Scala
-Center representative and explain the situation. You can also get in touch with
-any Scala Platform Committee member or module maintainers you want.</p>
+Center representative and explain the situation. You can also get inform of the
+situation to any moderator in the <a href="https://dev.scala-lang.org">Scala Discourse</a> channel.</p>
 
               </main>
               
@@ -179,7 +173,7 @@ any Scala Platform Committee member or module maintainers you want.</p>
   
   <li >
     
-      <a href="joining-platform.html">Incubation</a>
+      <a href="incubation.html">Incubation</a>
     
     
   </li>
@@ -286,21 +280,21 @@ any Scala Platform Committee member or module maintainers you want.</p>
   
   <li>
     
-       <a href="#my-module-has-its-own-ci-can-i-keep-it">My module has its own CI, can I keep it?</a> 
+       <a href="#my-module-has-its-own-ci-can-i-keep-using-it">My module has its own CI, can I keep using it?</a> 
     
     
   </li>
   
   <li>
     
-       <a href="#is-the-release-bot-using-platforms-sonatype-organization-for-releasing">Is the release bot using Platform&#x27;s Sonatype organization for releasing?</a> 
+       <a href="#is-the-release-bot-using-platforms-sonatype-organization-for-the-releases">Is the release bot using Platform&#x27;s Sonatype organization for the releases?</a> 
     
     
   </li>
   
   <li>
     
-       <a href="#i-want-to-use-bintray-what-can-i-do">I want to use Bintray, what can I do?</a> 
+       <a href="#i-want-to-use-sonatype-what-can-i-do">I want to use Sonatype, what can I do?</a> 
     
     
   </li>
