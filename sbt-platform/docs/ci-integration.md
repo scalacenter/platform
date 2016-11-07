@@ -18,6 +18,12 @@ fast build times*.
 
 ### What does Drone provide you?
 
+Drone is a Continuous Integration platform built on container technology. Every build
+is executed inside an ephemeral Docker container, giving developers complete control over
+their build environment with guaranteed isolation.
+
+Drone stands out because it provides:
+
 * A generic and configurable build for all the projects.
 * Control over the secrets exposed to your project under different situations.
 * Security over the images that can access secrets (tokens, private keys).
