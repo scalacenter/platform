@@ -10,17 +10,6 @@ lazy val checkVariablesContent =
 checkVariablesContent := {
   if (platformInsideCi.value) {
     assert(platformCiEnvironment.value != None)
-    val ciEnv = platformCiEnvironment.value.get
-    assert(ciEnv.rootDir.exists)
-    assert(ciEnv.name != "")
-    assert(ciEnv.repo != "")
-    assert(ciEnv.branch != "")
-    assert(ciEnv.commit != "")
-    assert(ciEnv.buildDir != "")
-    assert(ciEnv.buildUrl != "")
-    assert(ciEnv.buildNumber >= 0)
-    assert(ciEnv.jobNumber >= 0)
-    // Don't check optional pull request and tag envars
   }
 }
 
