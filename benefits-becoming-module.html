@@ -56,24 +56,30 @@ that ensure a fast and responsive development cycle.</p>
 <li><a href="https://docs.google.com/document/d/1B57XIj2zIh7xx1syKvS3qfC4L8usd0pI0yTSrJMfuew/edit#">Scala Center Code of Conduct</a>;</li>
 <li>Process to elect maintainers, committers and evolve the modules;</li>
 <li>Policies on ticket management, PR &amp; core reviews policies;</li>
+</ul>
+</li>
+</ol>
+<blockquote class="note">
+<p>In the future, when the Scala Platform consists of an initial set of libraries,
+this set may be extended to:</p>
+<ul>
 <li>Scala documentation website (public scaladoc);</li>
 <li>Good-looking website under an official Scala namespace;</li>
 <li>Template and infrastructure to write and update the docs; and</li>
-<li>Integration with online Scala tools to provide reproducible code snippets.</li>
+<li>Integration with online Scala REPL-like tools to provide reproducible code snippets.</li>
 </ul>
-</li>
+</blockquote>
+<ol start="3">
 <li>
 <p>Automatic release of modules.</p>
 <ul>
 <li>Maintainers of module have access to servers and CI.</li>
-<li>A bot automatically releases modules every day, except for
-stable releases (module maintainers must release with their
-private organization credentials).</li>
+<li>A bot automatically releases modules every night, and automation
+for stable, milestones and release candidates is provided in the CI.</li>
 <li>Modules maintainers that want to release changes on every merge are
 encouraged to do so, and our infrastructure accommodates this use case.</li>
-<li>The automatic release process checks binary compatibility in every
-release, and warns module maintainers when releases break our <a href="policies.html#release">stability
-guarantees</a>.</li>
+<li>The automatic release process checks compatibility of releases according
+to our <a href="policies.html#release">stability guarantees</a>.</li>
 </ul>
 </li>
 </ol>
