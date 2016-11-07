@@ -45,7 +45,21 @@ from the web interface, like signing the build files, executing Drone locally an
 If you're an official module maintainer, you will certainly need it.
 
 Learn how to install it in the [official docs](http://readme.drone.io/0.5/reference/cli/overview/).
-`drone sign your-github-id/your-repo`
+
+#### Signing your `.drone.yml` after changing it
+```bash
+drone sign your-github-id/your-repo
+```
+
+#### Executing drone locally
+
+```bash
+drone exec --local --privileged your-github-id/your-repo
+```
+
+#### Secrets
+
+See [the Secrets section](#secrets).
 
 ### Creating the `drone.yml` file
 
@@ -155,12 +169,12 @@ Drone will pick it up and execute all the sub tasks in the order they are define
 > Read [Get latest Docker image](#latest-docker-image) if Drone keeps failing
 > to find the binary in the Docker image.
 
-### Add your special tokens to the image
+### Add your special tokens to the image {#secrets}
 
 Drone secrets allow you to store sensitive information like passwords and tokens.
 Think of the GitHub, Bintray and Sonatype tokens your sbt infrastructure may need.
 
-Secrets are scoped to an image, and are only visible if `.drone.yml` has been signed.
+Secrets are scoped to a repository, and are only visible if `.drone.yml` has been signed.
 They are mapped to environment variables in the Docker images.
 
 To add a secret, use the Drone CLI:
@@ -203,8 +217,8 @@ pull: true
 
 Drone provides a way with [matrix builds](http://readme.drone.io/0.5/usage/matrix/).
 
-However, this features doesn't give you a lot of value if you're using sbt.
-Prepend `+` to `compile` or `test` and run the task. Sbt will the prepended tasks for all
+However, this feature doesn't provide you much value if you're using sbt.
+Prepend `+` to `compile` or `test` and run the task. Sbt will execute the prepended tasks for all
 the Scala versions defined in the sbt setting `crossScalaVersions`.
 
 By default, the `sbt-platform` plugin ensures this value contains the latest two Scala versions.
@@ -231,9 +245,9 @@ For more information on notifications and templates, check the [official Drone d
 ## Want to know more?
 
 This page only explains the common use cases when using Drone. For fancier configuration,
-we encourage module maintainers to check the Drone documentation.
+we encourage module maintainers to check the [official Drone documentation](http://readme.drone.io/0.5/usage/notifications/).
 
 > {.warning}
 > Drone 0.5 is still beta, so documentation is not as complete as one would expect. In the following
 > weeks, the documentation of the Drone integration as well as the official Drone docs will improve,
-> as features stabilize and spurious bug disappear.
+> as features stabilize and spurious bugs disappear.
