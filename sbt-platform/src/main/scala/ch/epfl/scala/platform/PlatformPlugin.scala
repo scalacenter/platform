@@ -59,7 +59,7 @@ trait PlatformSettings {
                            commit: CommitInfo,
                            build: BuildInfo,
                            remoteUrl: String,
-                           pullRequest: Option[String],
+                           pullRequest: Option[Int],
                            tag: Option[String])
 
   // FORMAT: OFF
@@ -207,7 +207,7 @@ object PlatformKeys {
             ciCommitInfo,
             ciBuildInfo,
             ciRemoteUrl,
-            getEnvVariable("DRONE_PULL_REQUEST"),
+            getEnvVariable("DRONE_PULL_REQUEST").map(_.toInt),
             getEnvVariable("DRONE_TAG"))
       }
     },
