@@ -1,7 +1,7 @@
 # What is the Scala Platform
 
 The Scala Platform is a stable collection of libraries with widespread
-use and a low barrier entry for beginners and intermediate users. Its
+use and a low barrier to entry for beginners and intermediate users. Its
 goal is to provide a smooth and productive programming experience right
 from the start, while ensuring every module's stability and production
 readiness.
@@ -17,11 +17,12 @@ direction of the Platform.
 ## What is a Platform module?
 
 A Platform module is a library of the Scala Platform that is characterized by
-widespread use and a low barrier entry for beginners and intermediate users.
+stability, widespread use and a low barrier to entry for beginners and
+intermediate users.
 
-These two features are the cornerstone of the Scala Platform process.
-Widespread use makes sure that the Community finds the library good and useful,
-while a low barrier entry helps any Scala developer use it for both learning
+These features are the cornerstone of the Scala Platform process.
+While widespread use ensures that a library is fulfilling a need of the Community,
+the low barrier to entry helps Scala developers use it for both learning
 purposes and production systems.
 
 # What is the Process
@@ -35,7 +36,7 @@ range of open source software projects. The mission of the process is to
 provide high-quality software for the good of the Scala community.
 Through a collaborative and meritocratic development process, the
 Platform delivers a **stable** collection of libraries with widespread
-use and a low barrier entry for beginners and intermediate users, ready
+use and a low barrier to entry for beginners and intermediate users, ready
 for serious production use.
 
 The following specification is inspired by the
@@ -81,9 +82,9 @@ later explained in the release and stability policies. Aside from
 compatibility, no guarantee can be made about the performance of a given
 program between different Platform releases.
 
-#### What are the expectations?
+#### What stability guarantees can I expect?
 
-The expectations are defined in the [Scala Platform policies](platform.md).
+The expectations are concretized in the [Scala Platform policies](#release).
 
 ## Committee Members
 
