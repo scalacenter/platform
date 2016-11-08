@@ -43,19 +43,7 @@
 <p>Our servers provide quick development experience to module maintainers.
 With a powerful baseline server and dynamic scaling, we ensure <em>concurrent and
 fast build times</em>.</p>
-<h2 id="setup" class="a_section" data-magellan-target="setup">Setup<a class="a_hlink" href="#setup"></a></h2>
-<ol>
-<li>Join the <code class="hljs">scalaplatform</code> GitHub organization if you're a module maintainer but not a member.</li>
-<li>Go to our Drone setup: <a href="https://platform-ci.scala-lang.org">https://platform-ci.scala-lang.org</a>.</li>
-<li>Log in with your GitHub credentials and turn on the CI for your module.</li>
-<li>Create a <code class="hljs">drone.yml</code> file with the build logic. Sign it. Push the changes.</li>
-<li>Observe the logs and result of the build in the CI.</li>
-</ol>
-<blockquote class="note">
-<p>Access to CI is restricted to official module maintainers.
-If you want to have access to the CI, you need to join the <code class="hljs">scalaplatform</code> GitHub organization.</p>
-</blockquote>
-<h3 id="what-does-drone-provide-you" class="a_section" data-magellan-target="what-does-drone-provide-you">What does Drone provide you?<a class="a_hlink" href="#what-does-drone-provide-you"></a></h3>
+<h2 id="what-does-drone-provide-you" class="a_section" data-magellan-target="what-does-drone-provide-you">What does Drone provide you?<a class="a_hlink" href="#what-does-drone-provide-you"></a></h2>
 <p>Drone is a Continuous Integration platform built on container technology. Every build
 is executed inside an ephemeral Docker container, giving developers complete control over
 their build environment with guaranteed isolation.</p>
@@ -91,9 +79,21 @@ notifications to Slack or Gitter when the build succeeds or fails.</p>
 <p>Control over the platform that executes the build (Linux, Windows).</p>
 </li>
 <li>
-<p>Environment variables to programmatically create your sbt tasks.</p>
+<p>Access to environment variables to programmatically create your sbt tasks.</p>
 </li>
 </ul>
+<h2 id="setup" class="a_section" data-magellan-target="setup">Setup<a class="a_hlink" href="#setup"></a></h2>
+<ol>
+<li>Join the <code class="hljs">scalaplatform</code> GitHub organization if you're a module maintainer but not a member.</li>
+<li>Go to our Drone setup: <a href="https://platform-ci.scala-lang.org">https://platform-ci.scala-lang.org</a>.</li>
+<li>Log in with your GitHub credentials and turn on the CI for your module.</li>
+<li>Create a <code class="hljs">drone.yml</code> file with the build logic. Sign it. Push the changes.</li>
+<li>Observe the logs and result of the build in the CI.</li>
+</ol>
+<blockquote class="note">
+<p>Access to CI is restricted to official module maintainers.
+If you want to have access to the CI, you need to join the <code class="hljs">scalaplatform</code> GitHub organization.</p>
+</blockquote>
 <h3 id="installing-the-drone-cli" class="a_section" data-magellan-target="installing-the-drone-cli">Installing the Drone CLI<a class="a_hlink" href="#installing-the-drone-cli"></a></h3>
 <p>The command-line Drone interface allows you to configure and inspect the state of
 our Drone servers. However, it also allows you to execute tasks that are inaccessible
@@ -281,7 +281,14 @@ as features stabilize and spurious bugs disappear.</p>
                      
   <li >
     
-      <a href="platform.html">What is the Process</a>
+      <a href="platform.html">What is the Scala Platform</a>
+    
+    
+  </li>
+  
+  <li >
+    
+      <a href="platform.html#what-is-the-process">What is the Process</a>
     
     
   </li>
@@ -314,6 +321,13 @@ as features stabilize and spurious bugs disappear.</p>
     
   </li>
   
+  <li >
+    
+      <a href="incubation.html#starting-the-incubation">Starting the incubation</a>
+    
+    
+  </li>
+  
   <li  class="a_thispage" >
     
       <a href="ci-integration.html">The Drone CI integration</a>
@@ -330,7 +344,7 @@ as features stabilize and spurious bugs disappear.</p>
   
   <li >
     
-      <a href="faq.html">FAQ (Frequent Asked Questions)</a>
+      <a href="faq.html">FAQ (Frequently Asked Questions)</a>
     
     
   </li>
@@ -355,17 +369,17 @@ as features stabilize and spurious bugs disappear.</p>
       <ul class="vertical menu">  
   <li>
     
-       <a href="#setup">Setup</a> 
-    
-    
-      <ul class="vertical menu">  
-  <li>
-    
        <a href="#what-does-drone-provide-you">What does Drone provide you?</a> 
     
     
   </li>
   
+  <li>
+    
+       <a href="#setup">Setup</a> 
+    
+    
+      <ul class="vertical menu">  
   <li>
     
        <a href="#installing-the-drone-cli">Installing the Drone CLI</a> 

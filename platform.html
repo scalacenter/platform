@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What is the Process</title>
+    <title>What is the Scala Platform</title>
     <link rel="stylesheet" href="_theme/css/foundation.min.css">
     <link rel="stylesheet" href="_theme/css/app.css">
     
@@ -39,7 +39,28 @@
             <div class="row">
               
               <main class="columns large-order-2 sections" id="_sections">
-                <h1 id="what-is-the-process" class="a_section" data-magellan-target="what-is-the-process">What is the Process<a class="a_hlink" href="#what-is-the-process"></a></h1>
+                <h1 id="what-is-the-scala-platform" class="a_section" data-magellan-target="what-is-the-scala-platform">What is the Scala Platform<a class="a_hlink" href="#what-is-the-scala-platform"></a></h1>
+<p>The Scala Platform is a stable collection of libraries with widespread
+use and a low barrier to entry for beginners and intermediate users. Its
+goal is to provide a smooth and productive programming experience right
+from the start, while ensuring every module's stability and production
+readiness.</p>
+<p>The Platform consists of several independent modules that solve specific
+problems. Committers and developers of each module work together to
+develop and maintain them. Committers also review contributions from any
+Scala developer. For encouraging more contributions from companies and
+industrial users, modules have clear development workflows, that are
+both predictable and easy to follow. The Scala community sets the overall
+direction of the Platform.</p>
+<h2 id="what-is-a-platform-module" class="a_section" data-magellan-target="what-is-a-platform-module">What is a Platform module?<a class="a_hlink" href="#what-is-a-platform-module"></a></h2>
+<p>A Platform module is a library of the Scala Platform that is characterized by
+stability, widespread use and a low barrier to entry for beginners and
+intermediate users.</p>
+<p>These features are the cornerstone of the Scala Platform process.
+While widespread use ensures that a library is fulfilling a need of the Community,
+the low barrier to entry helps Scala developers use it for both learning
+purposes and production systems.</p>
+<h1 id="what-is-the-process" class="a_section" data-magellan-target="what-is-the-process">What is the Process<a class="a_hlink" href="#what-is-the-process"></a></h1>
 <blockquote class="note">
 <p>The following document is a draft and it's open for discussion. For
 more information, check the <a href="https://internals.scala-lang.org/t/early-release-of-the-scala-platform-process/95">public announcement of its pre-release</a>.</p>
@@ -49,7 +70,7 @@ range of open source software projects. The mission of the process is to
 provide high-quality software for the good of the Scala community.
 Through a collaborative and meritocratic development process, the
 Platform delivers a <strong>stable</strong> collection of libraries with widespread
-use and a low barrier entry for beginners and intermediate users, ready
+use and a low barrier to entry for beginners and intermediate users, ready
 for serious production use.</p>
 <p>The following specification is inspired by the
 <a href="http://incubator.apache.org/index.html">Apache process</a> and the
@@ -59,19 +80,6 @@ Other initiatives like the <a href="https://www.haskell.org/platform/">Haskell P
 document has been drafted by the Scala Center and improved by the Platform
 Committee members, that have helped shape the essence of the process
 with their curated feedback and suggestions.</p>
-<h2 id="the-scala-platform" class="a_section" data-magellan-target="the-scala-platform">The Scala Platform<a class="a_hlink" href="#the-scala-platform"></a></h2>
-<p>The Scala Platform is a stable collection of libraries with widespread
-use and a low barrier entry for beginners and intermediate users. Its
-goal is providing a smooth and productive programming experience right
-from the start, while ensuring every module’s stability and production
-readiness.</p>
-<p>The Platform consists of several independent modules that solve specific
-problems. Committers and developers of each module work together to
-develop and maintain them. Committers also review contributions from any
-Scala developer. For encouraging more contributions from companies and
-industrial users, modules have clear development workflows, that are
-both predictable and easy to follow. The Scala community sets the overall
-direction of the Platform.</p>
 <h3 id="expectations" class="a_section" data-magellan-target="expectations">Expectations<a class="a_hlink" href="#expectations"></a></h3>
 <p>The Scala Platform process sets concrete expectations for the stability
 and compatibility of the selected modules. Although the specified
@@ -103,6 +111,8 @@ These same considerations apply to successive point releases and are
 later explained in the release and stability policies. Aside from
 compatibility, no guarantee can be made about the performance of a given
 program between different Platform releases.</p>
+<h4 id="what-stability-guarantees-can-i-expect" class="a_section" data-magellan-target="what-stability-guarantees-can-i-expect">What stability guarantees can I expect?<a class="a_hlink" href="#what-stability-guarantees-can-i-expect"></a></h4>
+<p>The expectations are concretized in the <a href="platform.html#release">Scala Platform policies</a>.</p>
 <h2 id="committee-members" class="a_section" data-magellan-target="committee-members">Committee Members<a class="a_hlink" href="#committee-members"></a></h2>
 <p>The Scala Platform Committee is exclusively composed of members of the Scala community.
 Through a democratic process, they set the direction of the Platform, review
@@ -140,7 +150,14 @@ is Jorge Vicente Cantero (<a href="https://github.com/jvican">@jvican</a>).</p>
                      
   <li  class="a_thispage" >
     
-      <a href="platform.html">What is the Process</a>
+      <a href="platform.html">What is the Scala Platform</a>
+    
+    
+  </li>
+  
+  <li  class="a_thispage" >
+    
+      <a href="platform.html#what-is-the-process">What is the Process</a>
     
     
   </li>
@@ -175,6 +192,13 @@ is Jorge Vicente Cantero (<a href="https://github.com/jvican">@jvican</a>).</p>
   
   <li >
     
+      <a href="incubation.html#starting-the-incubation">Starting the incubation</a>
+    
+    
+  </li>
+  
+  <li >
+    
       <a href="ci-integration.html">The Drone CI integration</a>
     
     
@@ -189,7 +213,7 @@ is Jorge Vicente Cantero (<a href="https://github.com/jvican">@jvican</a>).</p>
   
   <li >
     
-      <a href="faq.html">FAQ (Frequent Asked Questions)</a>
+      <a href="faq.html">FAQ (Frequently Asked Questions)</a>
     
     
   </li>
@@ -208,13 +232,27 @@ is Jorge Vicente Cantero (<a href="https://github.com/jvican">@jvican</a>).</p>
                        
   <li>
     
-       <a href="#what-is-the-process">What is the Process</a> 
+       <a href="#what-is-the-scala-platform">What is the Scala Platform</a> 
     
     
       <ul class="vertical menu">  
   <li>
     
-       <a href="#the-scala-platform">The Scala Platform</a> 
+       <a href="#what-is-a-platform-module">What is a Platform module?</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  
+  <li>
+    
+       <a href="#what-is-the-process">What is the Process</a> 
+    
+    
+      <ul class="vertical menu">  
+  <li>
     
     
       <ul class="vertical menu">  
@@ -222,6 +260,22 @@ is Jorge Vicente Cantero (<a href="https://github.com/jvican">@jvican</a>).</p>
     
        <a href="#expectations">Expectations</a> 
     
+    
+      <ul class="vertical menu">  
+  <li>
+    
+    
+      <ul class="vertical menu">  
+  <li>
+    
+       <a href="#what-stability-guarantees-can-i-expect">What stability guarantees can I expect?</a> 
+    
+    
+  </li>
+  </ul>
+    
+  </li>
+  </ul>
     
   </li>
   </ul>
