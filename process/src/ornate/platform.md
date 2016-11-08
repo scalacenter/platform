@@ -25,7 +25,7 @@ While widespread use ensures that a library is fulfilling a need of the Communit
 the low barrier to entry helps Scala developers use it for both learning
 purposes and production systems.
 
-# What is the Process
+## What is the Process
 
 > {.note}
 > The following document is a draft and it's open for discussion. For
