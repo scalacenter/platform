@@ -4,19 +4,7 @@ Our servers provide quick development experience to module maintainers.
 With a powerful baseline server and dynamic scaling, we ensure *concurrent and
 fast build times*.
 
-## Setup
-
-1. Join the `scalaplatform` GitHub organization if you're a module maintainer but not a member.
-1. Go to our Drone setup: [https://platform-ci.scala-lang.org](https://platform-ci.scala-lang.org).
-1. Log in with your GitHub credentials and turn on the CI for your module.
-1. Create a `drone.yml` file with the build logic. Sign it. Push the changes.
-1. Observe the logs and result of the build in the CI.
-
-> {.note}
-> Access to CI is restricted to official module maintainers.
-> If you want to have access to the CI, you need to join the `scalaplatform` GitHub organization.
-
-### What does Drone provide you?
+## What does Drone provide you?
 
 Drone is a Continuous Integration platform built on container technology. Every build
 is executed inside an ephemeral Docker container, giving developers complete control over
@@ -40,7 +28,19 @@ notifications to Slack or Gitter when the build succeeds or fails.
 
 * Control over the platform that executes the build (Linux, Windows).
 
-* Environment variables to programmatically create your sbt tasks.
+* Access to environment variables to programmatically create your sbt tasks.
+
+## Setup
+
+1. Join the `scalaplatform` GitHub organization if you're a module maintainer but not a member.
+1. Go to our Drone setup: [https://platform-ci.scala-lang.org](https://platform-ci.scala-lang.org).
+1. Log in with your GitHub credentials and turn on the CI for your module.
+1. Create a `drone.yml` file with the build logic. Sign it. Push the changes.
+1. Observe the logs and result of the build in the CI.
+
+> {.note}
+> Access to CI is restricted to official module maintainers.
+> If you want to have access to the CI, you need to join the `scalaplatform` GitHub organization.
 
 ### Installing the Drone CLI
 

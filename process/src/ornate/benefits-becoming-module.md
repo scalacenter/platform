@@ -6,8 +6,7 @@ open-source rules that optimize the experience of contributors and
 maintainers, and provides infrastructure that makes easier developers'
 life.
 
-1.  High-quality build machines, with large memory and powerful CPU resources,
-    that ensure a fast and responsive development cycle.
+1.  High-quality build machines that ensure a fast and responsive development cycle.
     
 2.  Organizational help.
 
@@ -16,18 +15,17 @@ life.
     *  Policies on ticket management, PR & core reviews policies;
     
 > {.note}
-> In the future, when the Scala Platform consists of an initial set of libraries,
-> this set may be extended to:
+> In the future, when the Scala Platform consists of an initial set of libraries
+> and maintainers, this set may be extended to:
 >   *  Scala documentation website (public scaladoc);
 >   *  Good-looking website under an official Scala namespace;
 >   *  Template and infrastructure to write and update the docs; and
 >   *  Integration with online Scala REPL-like tools to provide reproducible code snippets.
     
-3.  Automatic release of modules.
+3.  Release of modules.
 
     *  Maintainers of module have access to servers and CI.
-    *  A bot automatically releases modules every night, and automation
-       for stable, milestones and release candidates is provided in the CI.
+    *  Automation for nightly builds, milestones, release candidates and stable releases.
     *  Modules maintainers that want to release changes on every merge are
        encouraged to do so, and our infrastructure accommodates this use case.
     *  The automatic release process checks compatibility of releases according

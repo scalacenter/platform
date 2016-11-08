@@ -1,4 +1,4 @@
-# FAQ (Frequent Asked Questions)
+# FAQ (Frequently Asked Questions)
 
 If you have a question that it's not here, [send a PR](https://github.com/scalaplatform) or ask in [Gitter](https://gitter.im).
 
@@ -25,11 +25,22 @@ Go ahead and [follow the process](proposal-submission.md).
 
 #### Is submitting a Scala Platform proposal easy?
 
-Yes. Seriously. The Scala Platform process is designed to be simple and lightweight, even more than
+The Scala Platform process is designed to be simple and lightweight, significantly more than
 the [Scala Improvement Process](http://docs.scala-lang.org/sips/sip-submission.html).
 The Scala Platform Committee quickly reviews proposals and gives feedback to authors,
-and turnaround times are tweaked to make progress in a short period of time. If you
-wish to know more, check [the submission steps](proposal-submission.md).
+and turnaround times are tweaked to make progress in a short period of time. However,
+it's worth noting that you need to be committed to devote some time into its development
+in case the Committee accepts your proposal. Everyone involved in the process will help
+you make everything as smooth as possible, and help you in this interesting journey with us.
+
+In a nutshell, the [phases of the submission](proposal-submission.md) are:
+
+1. Get early feedback from the Community. Look for supporters.
+1. Participate in the discussions. Let the Committee discuss your idea.
+   The Committee, with input from the Community, decides which library gets incubated.
+1. Incubate the library and prepare it for a stable release.
+
+If you wish to know more, check [the submission steps](proposal-submission.md).
 
 #### Why is it called the **Scala** Platform?
 
@@ -49,7 +60,8 @@ the Platform has been baptised as the *Scala Platform* because it aims at:
 #### My module already has a release process, can I keep it?
 
 You can keep it, and as a maintainer you can even release versions whenever you
-want, but you must use the Scala Platform release process and the sbt `platform-release` plugin.
+want, but you will need to modify your release process to include the release
+rules specified in the Scala Platform process.
 
 An official release process for all the modules is essential to attract contributors
 and industrial users. Concretely:

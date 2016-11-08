@@ -3,12 +3,11 @@
 
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
-  /* bintrayOrganization := Some("scalaplatform"),
+    bintrayOrganization := Some("scalaplatform"),
     bintrayRepository := "tools",
     bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
     publishTo := (publishTo in bintray).value,
     publishArtifact in Test := false,
-    releasePublishArtifactsAction := PgpKeys.publishSigned.value,*/
   licenses := Seq(
     // Scala Center license... BSD 3-clause
     "BSD" -> url("http://opensource.org/licenses/BSD-3-Clause")
@@ -182,6 +181,7 @@ lazy val `sbt-platform` = project
   .settings(ScriptedPlugin.scriptedSettings)
   .settings(
     sbtPlugin := true,
+    version := "0.1.0",
     publishMavenStyle := false,
     addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0"),
     addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0"),

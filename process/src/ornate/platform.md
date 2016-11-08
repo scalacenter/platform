@@ -1,3 +1,29 @@
+# What is the Scala Platform
+
+The Scala Platform is a stable collection of libraries with widespread
+use and a low barrier entry for beginners and intermediate users. Its
+goal is to provide a smooth and productive programming experience right
+from the start, while ensuring every module's stability and production
+readiness.
+
+The Platform consists of several independent modules that solve specific
+problems. Committers and developers of each module work together to
+develop and maintain them. Committers also review contributions from any
+Scala developer. For encouraging more contributions from companies and
+industrial users, modules have clear development workflows, that are
+both predictable and easy to follow. The Scala community sets the overall
+direction of the Platform.
+
+## What is a Platform module?
+
+A Platform module is a library of the Scala Platform that is characterized by
+widespread use and a low barrier entry for beginners and intermediate users.
+
+These two features are the cornerstone of the Scala Platform process.
+Widespread use makes sure that the Community finds the library good and useful,
+while a low barrier entry helps any Scala developer use it for both learning
+purposes and production systems.
+
 # What is the Process
 
 > {.note}
@@ -20,22 +46,6 @@ Other initiatives like the [Haskell Platform](https://www.haskell.org/platform/)
 document has been drafted by the Scala Center and improved by the Platform
 Committee members, that have helped shape the essence of the process
 with their curated feedback and suggestions.
-
-## The Scala Platform
-
-The Scala Platform is a stable collection of libraries with widespread
-use and a low barrier entry for beginners and intermediate users. Its
-goal is providing a smooth and productive programming experience right
-from the start, while ensuring every module’s stability and production
-readiness.
-
-The Platform consists of several independent modules that solve specific
-problems. Committers and developers of each module work together to
-develop and maintain them. Committers also review contributions from any
-Scala developer. For encouraging more contributions from companies and
-industrial users, modules have clear development workflows, that are
-both predictable and easy to follow. The Scala community sets the overall
-direction of the Platform.
 
 ### Expectations
 
@@ -70,6 +80,10 @@ These same considerations apply to successive point releases and are
 later explained in the release and stability policies. Aside from
 compatibility, no guarantee can be made about the performance of a given
 program between different Platform releases.
+
+#### What are the expectations?
+
+The expectations are defined in the [Scala Platform policies](platform.md).
 
 ## Committee Members
 
