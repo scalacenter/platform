@@ -22,7 +22,7 @@ Modules are merged when they:
 *  Have *at least* one committer cutting releases and maintaining them; and,
 *  Abide by the Code of Conduct.
 
-# Starting the incubation
+## Starting the incubation
 
 When the Committee decides to incubate your project, the Process lead
 will add the current module maintainers to the [`scalaplatform` GitHub organization](https://github.com/scalaplatform).
