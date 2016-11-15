@@ -122,7 +122,7 @@ hopes to reproduce their success in the Scala community.
 >  
 >  #### 2.2. Licensing and Ownership
 >  
->  1. A project that joins the Scala Platform SHOULD choose a license. Share-alike licenses such as the MPLv2 or LGPL are RECOMMENDED.
+>  1. A project that joins the Scala Platform SHOULD choose an open-source license. Share-alike licenses such as the MPLv2 is RECOMMENDED.
 >  1. All contributions to the project source code ("patches") SHALL use the same license as the project.
 >  1. All patches are owned by their authors. There SHALL NOT be any copyright assignment process.
 >  1. Each Contributor SHALL be responsible for identifying themselves in the project Contributor list.
