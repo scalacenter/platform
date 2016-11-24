@@ -9,7 +9,7 @@ If you have a question that it's not here, [send a PR](https://github.com/scalap
 Here is what you can do:
 
 * Create a Scala Platform proposal;
-* Discuss and give feedback on current proposals in [Scala Internals](https://internals.scala-lang.org);
+* Discuss and give feedback on current proposals in [Scala Contributors](https://contributors.scala-lang.org);
 * Help contributing and get the infrastructure right ([`sbt-platform`](https://github.com/jvican/platform-staging)).
 * Contribute to any Scala Platform module by:
   * Adding features;

@@ -7,7 +7,7 @@ suggested library is the best fit for the Scala community.
 
 If you want to submit a library proposal, follow these steps:
 
-1.  [*Open a Discourse discussion thread*](http://internals.scala-lang.org)
+1.  [*Open a Discourse discussion thread*](http://contributors.scala-lang.org)
     describing your idea to get feedback from the Community. Share this link in
     Gitter channels and with other developers whose feedback you consider
     important. Look for supporters and people that may be interesting in

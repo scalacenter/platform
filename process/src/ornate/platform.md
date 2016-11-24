@@ -26,7 +26,7 @@ A Platform module is a library of the Scala Platform. Platform modules
 
 > {.note}
 > The following document is a draft and it's open for discussion. For
-> more information, check the [public announcement of its pre-release](https://internals.scala-lang.org/t/early-release-of-the-scala-platform-process/95).
+> more information, check the [public announcement of its pre-release](https://contributors.scala-lang.org/t/early-release-of-the-scala-platform-process/95).
 
 The Scala Platform Process provides organizational support for a broad
 range of open source software projects. The mission of the process is to
