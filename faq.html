@@ -46,7 +46,7 @@
 <p>Here is what you can do:</p>
 <ul>
 <li>Create a Scala Platform proposal;</li>
-<li>Discuss and give feedback on current proposals in <a href="https://internals.scala-lang.org">Scala Internals</a>;</li>
+<li>Discuss and give feedback on current proposals in <a href="https://contributors.scala-lang.org">Scala Contributors</a>;</li>
 <li>Help contributing and get the infrastructure right (<a href="https://github.com/jvican/platform-staging"><code class="hljs">sbt-platform</code></a>).</li>
 <li>Contribute to any Scala Platform module by:
 <ul>
@@ -87,6 +87,11 @@ the Platform has been baptised as the <em>Scala Platform</em> because it aims at
 <li>Grow the Scala community and help its expansion; and,</li>
 <li>Increasing the impact of the Scala ecosystem.</li>
 </ul>
+<h4 id="is-this-the-only-platform-for-scala" class="a_section" data-magellan-target="is-this-the-only-platform-for-scala">Is this the only Platform for Scala?<a class="a_hlink" href="#is-this-the-only-platform-for-scala"></a></h4>
+<p>No, not at all! The split of the standard library into core and platform is to
+empower Community members to create their own platform. Given the vast diversity
+that the Scala community has, everyone can benefit from creating their own
+platform with their unique features.</p>
 <h2 id="infrastructure" class="a_section" data-magellan-target="infrastructure">Infrastructure<a class="a_hlink" href="#infrastructure"></a></h2>
 <h4 id="my-module-already-has-a-release-process-can-i-keep-it" class="a_section" data-magellan-target="my-module-already-has-a-release-process-can-i-keep-it">My module already has a release process, can I keep it?<a class="a_hlink" href="#my-module-already-has-a-release-process-can-i-keep-it"></a></h4>
 <p>You can keep it, and as a maintainer you can even release versions whenever you
@@ -117,6 +122,12 @@ Bintray and then synchronize your artifact with Maven Central. If you have right
 under the <code class="hljs">groupId</code> of the artifact, then open sbt. When you're sure that the CI has published
 the stable version in Bintray, execute the <code class="hljs">syncMavenCentral</code> task and introduce your credentials.</p>
 <p>Within two hours, you should see your artifact hitting the doors of Maven Central.</p>
+<h4 id="do-i-have-to-move-my-github-project-into-an-independent-organization" class="a_section" data-magellan-target="do-i-have-to-move-my-github-project-into-an-independent-organization">Do I have to move my GitHub project into an independent organization?<a class="a_hlink" href="#do-i-have-to-move-my-github-project-into-an-independent-organization"></a></h4>
+<p>In principle, you don't. Your user will be added to the <a href="https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fscalaplatform&amp;sa=D&amp;sntz=1&amp;usg=AFQjCNFStwF1ZVQ_M25UWiiNvIcRTOIdUw">Scala Platform GitHub organization</a>,
+but your module can stay in your domain. The idea is that this rule, and others,
+will be discussed along with module maintainers when modules start to join the Platform.</p>
+<p>Whether or not you will need to move your module is a decision that will be taken
+by the whole Scala Community.</p>
 <h4 id="i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform" class="a_section" data-magellan-target="i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform">I have my own infrastructure and community, what's the point of joining the Scala Platform?<a class="a_hlink" href="#i-have-my-own-infrastructure-and-community-whats-the-point-of-joining-the-scala-platform"></a></h4>
 <p>Joining the Scala Platform is a declaration of intention. It's about creating a bigger
 community that ensures the long-term maintenance of high-quality Scala libraries
@@ -265,6 +276,13 @@ situation to any moderator in the <a href="https://dev.scala-lang.org">Scala Dis
     
     
   </li>
+  
+  <li>
+    
+       <a href="#is-this-the-only-platform-for-scala">Is this the only Platform for Scala?</a> 
+    
+    
+  </li>
   </ul>
     
   </li>
@@ -306,6 +324,13 @@ situation to any moderator in the <a href="https://dev.scala-lang.org">Scala Dis
   <li>
     
        <a href="#i-want-to-use-sonatype-what-can-i-do">I want to use Sonatype, what can I do?</a> 
+    
+    
+  </li>
+  
+  <li>
+    
+       <a href="#do-i-have-to-move-my-github-project-into-an-independent-organization">Do I have to move my GitHub project into an independent organization?</a> 
     
     
   </li>
