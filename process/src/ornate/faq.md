@@ -55,6 +55,13 @@ the Platform has been baptised as the *Scala Platform* because it aims at:
 * Grow the Scala community and help its expansion; and,
 * Increasing the impact of the Scala ecosystem.
 
+#### Is this the only Platform for Scala?
+
+No, not at all! The split of the standard library into core and platform is to
+empower Community members to create their own platform. Given the vast diversity
+that the Scala community has, everyone can benefit from creating their own
+platform with their unique features.
+
 ## Infrastructure
 
 #### My module already has a release process, can I keep it?
@@ -95,6 +102,15 @@ under the `groupId` of the artifact, then open sbt. When you're sure that the CI
 the stable version in Bintray, execute the `syncMavenCentral` task and introduce your credentials.
 
 Within two hours, you should see your artifact hitting the doors of Maven Central.
+
+#### Do I have to move my GitHub project into an independent organization?
+
+In principle, you don't. Your user will be added to the [Scala Platform GitHub organization](https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fscalaplatform&sa=D&sntz=1&usg=AFQjCNFStwF1ZVQ_M25UWiiNvIcRTOIdUw),
+but your module can stay in your domain. The idea is that this rule, and others,
+will be discussed along with module maintainers when modules start to join the Platform.
+
+Whether or not you will need to move your module is a decision that will be taken
+by the whole Scala Community.
 
 #### I have my own infrastructure and community, what's the point of joining the Scala Platform?
 
