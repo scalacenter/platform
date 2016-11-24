@@ -16,6 +16,7 @@ Drone stands out because it provides:
 * Control over the secrets exposed to your project under different situations.
 * Security over the images that can access secrets (tokens, private keys).
 * Command-line interface to quickly manage the CI from your console.
+* A way to run concurrent builds (for non-sequential tasks).
 * Constraints on your build tasks. Start a build task only when:
     * A concrete branch(es) has a new event;
     * A push is performed;
