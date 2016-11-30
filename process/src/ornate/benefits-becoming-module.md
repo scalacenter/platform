@@ -10,7 +10,7 @@ life.
     
 2.  Organizational help.
 
-    *  [Scala Center Code of Conduct](https://docs.google.com/document/d/1B57XIj2zIh7xx1syKvS3qfC4L8usd0pI0yTSrJMfuew/edit#);
+    *  [Scala Center Code of Conduct](https://contributors.scala-lang.org/t/please-read-scala-code-of-conduct/28);
     *  Process to elect maintainers, committers and evolve the modules;
     *  Policies on ticket management, PR & core reviews policies;
     

@@ -140,7 +140,7 @@ hopes to reproduce their success in the Scala community.
 >  
 >  #### 2.4. Development Process
 >  
->  1. Developers involved in the evolution of the project MUST abide by the [*Scala Center Code of Conduct*](https://docs.google.com/document/d/1B57XIj2zIh7xx1syKvS3qfC4L8usd0pI0yTSrJMfuew/edit#).
+>  1. Developers involved in the evolution of the project MUST abide by the [*Scala CenterCode of Conduct*](https://contributors.scala-lang.org/t/please-read-scala-code-of-conduct/28).
 >  1. Change on the project SHALL be governed by the pattern of accurately identifying problems and applying minimal, accurate solutions to these problems.
 >  1. To request changes, a user SHOULD log an issue on the project Platform Host issue tracker.
 >  1. The user or Contributor SHOULD write the issue by describing the problem they face or observe.

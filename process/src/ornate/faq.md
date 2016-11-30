@@ -131,7 +131,7 @@ benefit from big, collaborative and inclusive projects.
 Contributing to the Platform should be a nice experience for any person. Online
 communities need a discrimination-free and healthy environment to succeed,
 and require explicit contracts that ensure respectful interactions among their
-members. Conforming to the Scala Center Code of Conduct protects you and potential
+members. Conforming to the [Scala Code of Conduct](https://contributors.scala-lang.org/t/please-read-scala-code-of-conduct/28) protects you and potential
 contributors from bad actors. We cannot build communities without enforcing
 civic behaviour. Everyone deserves it.
 
@@ -147,5 +147,4 @@ Conduct. We all should define what civic behaviour is.
 #### I want to report the violation of the CoC, what shall I do?
 
 Contact the SPP Process Lead ([@jvican](https://github.com/jvican)), or a Scala
-Center representative and explain the situation. You can also get inform of the
-situation to any moderator in the [Scala Discourse](https://dev.scala-lang.org) channel.
+Center representative and explain the situation. You can also get inform of thesituation to any moderator in the [Scala Discourse](https://dev.scala-lang.org) channel.
