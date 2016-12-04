@@ -22,7 +22,7 @@ in production systems.
     1.  The branch `platform-release` is used to cut releases.
     1.  Modules must use semantic versioning.
     1.  Stable versions are released every 12 weeks.
-    1.  Modules can only break source and backwards compatibility in
+    1.  Modules can only break forwards or backwards compatibility in
         major releases, that happen: (a) every 18 months (1 year and 6 months),
         or (b) when new Scala versions are released.
         *  Unmaintained libraries are removed only in major releases.
