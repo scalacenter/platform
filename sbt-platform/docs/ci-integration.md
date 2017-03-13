@@ -25,7 +25,7 @@ Drone stands out because it provides:
     * A deploy event happens.
     
 * Notifications when a change of status happens, e.g. send
-notifications to Slack or Gitter when the build succeeds or fails.
+notifications via email/Slack/Gitter when the build succeeds or fails.
 
 * Control over the platform that executes the build (Linux, Windows).
 
@@ -51,7 +51,7 @@ from the web interface, like signing the build files, executing Drone locally an
 
 If you're an official module maintainer, you will certainly need it.
 
-Learn how to install it in the [official docs](http://readme.drone.io/0.5/reference/cli/overview/).
+Learn how to install it in the [official docs][drone].
 
 #### Signing your `.drone.yml` after changing it
 ```bash
@@ -207,7 +207,7 @@ From then on, the secret `KEY` will be available as an environment variable.
 > can sign the images.
 
 If you're stuck or want to know more about secret management, check the
-[official documentation](http://readme.drone.io/0.5/usage/secrets/).
+[official documentation](http://readme.drone.io/usage/secret-guide/).
 
 ### Automatically update the Docker image
 <a name="latest-docker-image"></a>
@@ -222,7 +222,7 @@ pull: true
 
 ### Test different Scala versions
 
-Drone provides a way with [matrix builds](http://readme.drone.io/0.5/usage/matrix/).
+Drone provides a way with [matrix builds](http://readme.drone.io/usage/matrix-guide/).
 
 However, this feature doesn't provide you much value if you're using sbt.
 Prepend `+` to `compile` or `test` and run the task. Sbt will execute the prepended tasks for all
@@ -239,22 +239,36 @@ pipeline:
   ...
   # your tasks
   ...
-  slack:
-    channel: dev
-    username: drone
-    template: |
-      {{ repo.name }} finished build {{ build.number }}
-      with a status of {{ build.status }}
+  notify:
+    image: drillster/drone-email
+    host: smtp.mailgun.org
+    username: noreply@drone.geirsson.com
+    password: ${MAILGUN_PASSWORD} # requires setup by admin, please contact us on gitter.
+    from: noreply@drone.geirsson.com
+    recipients:
+      - your@email.here
+    when:
+      event: push # only run on merge into master
+      branch: [master]
+      status: [changed, failure]
+
 ```
 
-For more information on notifications and templates, check the [official Drone documentation](http://readme.drone.io/0.5/usage/notifications/).
+For more information on notifications and templates, check the [official Drone documentation][drone].
+
+## Troubleshooting (FAQ)
+
+### I got the error `dial tcp: missing address`.
+Your repo is missing the secrets to use sftp-cache plugin. Please contact us on [gitter](https://gitter.im/scalacenter/platform-staging)
 
 ## Want to know more?
 
 This page only explains the common use cases when using Drone. For fancier configuration,
-we encourage module maintainers to check the [official Drone documentation](http://readme.drone.io/0.5/usage/notifications/).
+we encourage module maintainers to check the [official Drone documentation][drone].
 
 > {.warning}
 > Drone 0.5 is still beta, so documentation is not as complete as one would expect. In the following
 > weeks, the documentation of the Drone integration as well as the official Drone docs will improve,
 > as features stabilize and spurious bugs disappear.
+
+[drone]: http://readme.drone.io/
