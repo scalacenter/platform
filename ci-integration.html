@@ -76,7 +76,7 @@ their build environment with guaranteed isolation.</p>
 </li>
 <li>
 <p>Notifications when a change of status happens, e.g. send
-notifications via email/Slack/Gitter when the build succeeds or fails.</p>
+notifications to Slack or Gitter when the build succeeds or fails.</p>
 </li>
 <li>
 <p>Control over the platform that executes the build (Linux, Windows).</p>
@@ -102,7 +102,7 @@ If you want to have access to the CI, you need to join the <code class="hljs">sc
 our Drone servers. However, it also allows you to execute tasks that are inaccessible
 from the web interface, like signing the build files, executing Drone locally and managing secrets.</p>
 <p>If you're an official module maintainer, you will certainly need it.</p>
-<p>Learn how to install it in the <a href="http://readme.drone.io/">official docs</a>.</p>
+<p>Learn how to install it in the <a href="http://readme.drone.io/0.5/reference/cli/overview/">official docs</a>.</p>
 <h4 id="signing-your-.drone.yml-after-changing-it" class="a_section" data-magellan-target="signing-your-.drone.yml-after-changing-it">Signing your <code class="hljs">.drone.yml</code> after changing it<a class="a_hlink" href="#signing-your-.drone.yml-after-changing-it"></a></h4>
 <div class="row">
 <pre class="hljs small-expand columns a_xscroll"><code class="language-bash">drone sign your-github-id/your-repo
@@ -233,7 +233,7 @@ environment variable, and <code class="hljs">VALUE</code> is the value associate
 can sign the images.</p>
 </blockquote>
 <p>If you're stuck or want to know more about secret management, check the
-<a href="http://readme.drone.io/usage/secret-guide/">official documentation</a>.</p>
+<a href="http://readme.drone.io/0.5/usage/secrets/">official documentation</a>.</p>
 <h3 id="automatically-update-the-docker-image" class="a_section" data-magellan-target="automatically-update-the-docker-image">Automatically update the Docker image<a class="a_hlink" href="#automatically-update-the-docker-image"></a></h3>
 <p><a name="latest-docker-image"></a></p>
 <p>By default, the Docker image is not updated because reproducibility of the CI is key,
@@ -244,7 +244,7 @@ add the following attribute to the <code class="hljs">build</code> section:</p>
 </code></pre>
 </div>
 <h3 id="test-different-scala-versions" class="a_section" data-magellan-target="test-different-scala-versions">Test different Scala versions<a class="a_hlink" href="#test-different-scala-versions"></a></h3>
-<p>Drone provides a way with <a href="http://readme.drone.io/usage/matrix-guide/">matrix builds</a>.</p>
+<p>Drone provides a way with <a href="http://readme.drone.io/0.5/usage/matrix/">matrix builds</a>.</p>
 <p>However, this feature doesn't provide you much value if you're using sbt.
 Prepend <code class="hljs">+</code> to <code class="hljs">compile</code> or <code class="hljs">test</code> and run the task. Sbt will execute the prepended tasks for all
 the Scala versions defined in the sbt setting <code class="hljs">crossScalaVersions</code>.</p>
@@ -256,28 +256,18 @@ the Scala versions defined in the sbt setting <code class="hljs">crossScalaVersi
   ...
   <span class="hljs-comment"># your tasks</span>
   ...
-<span class="hljs-attr">  notify:</span>
-<span class="hljs-attr">    image:</span> drillster/drone-email
-<span class="hljs-attr">    host:</span> smtp.mailgun.org
-<span class="hljs-attr">    username:</span> noreply@drone.geirsson.com
-<span class="hljs-attr">    password:</span> ${MAILGUN_PASSWORD} <span class="hljs-comment"># requires setup by admin, please contact us on gitter.</span>
-<span class="hljs-attr">    from:</span> noreply@drone.geirsson.com
-<span class="hljs-attr">    recipients:</span>
-<span class="hljs-bullet">      -</span> your@email.here
-<span class="hljs-attr">    when:</span>
-<span class="hljs-attr">      event:</span> push <span class="hljs-comment"># only run on merge into master</span>
-<span class="hljs-attr">      branch:</span> [master]
-<span class="hljs-attr">      status:</span> [changed, failure]
-
-</code></pre>
+<span class="hljs-attr">  slack:</span>
+<span class="hljs-attr">    channel:</span> dev
+<span class="hljs-attr">    username:</span> drone
+<span class="hljs-attr">    template:</span> <span class="hljs-string">|
+      <span class="hljs-template-variable">{{ repo.name }}</span> finished build <span class="hljs-template-variable">{{ build.number }}</span>
+      with a status of <span class="hljs-template-variable">{{ build.status }}</span>
+</span></code></pre>
 </div>
-<p>For more information on notifications and templates, check the <a href="http://readme.drone.io/">official Drone documentation</a>.</p>
-<h2 id="troubleshooting-faq" class="a_section" data-magellan-target="troubleshooting-faq">Troubleshooting (FAQ)<a class="a_hlink" href="#troubleshooting-faq"></a></h2>
-<h3 id="i-got-the-error-dial-tcp-missing-address." class="a_section" data-magellan-target="i-got-the-error-dial-tcp-missing-address.">I got the error <code class="hljs">dial tcp: missing address</code>.<a class="a_hlink" href="#i-got-the-error-dial-tcp-missing-address."></a></h3>
-<p>Your repo is missing the secrets to use sftp-cache plugin. Please contact us on <a href="https://gitter.im/scalacenter/platform-staging">gitter</a></p>
+<p>For more information on notifications and templates, check the <a href="http://readme.drone.io/0.5/usage/notifications/">official Drone documentation</a>.</p>
 <h2 id="want-to-know-more" class="a_section" data-magellan-target="want-to-know-more">Want to know more?<a class="a_hlink" href="#want-to-know-more"></a></h2>
 <p>This page only explains the common use cases when using Drone. For fancier configuration,
-we encourage module maintainers to check the <a href="http://readme.drone.io/">official Drone documentation</a>.</p>
+we encourage module maintainers to check the <a href="http://readme.drone.io/0.5/usage/notifications/">official Drone documentation</a>.</p>
 <blockquote class="warning">
 <p>Drone 0.5 is still beta, so documentation is not as complete as one would expect. In the following
 weeks, the documentation of the Drone integration as well as the official Drone docs will improve,
@@ -472,22 +462,6 @@ as features stabilize and spurious bugs disappear.</p>
   <li>
     
        <a href="#get-success-and-failure-notifications">Get success and failure notifications</a> 
-    
-    
-  </li>
-  </ul>
-    
-  </li>
-  
-  <li>
-    
-       <a href="#troubleshooting-faq">Troubleshooting (FAQ)</a> 
-    
-    
-      <ul class="vertical menu">  
-  <li>
-    
-       <a href="#i-got-the-error-dial-tcp-missing-address.">I got the error dial tcp: missing address.</a> 
     
     
   </li>
