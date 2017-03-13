@@ -1,5 +1,7 @@
 # The Scala Platform
 
+[![Join the chat at https://gitter.im/scalacenter/platform-staging](https://badges.gitter.im/scalacenter/platform-staging.svg)](https://gitter.im/scalacenter/platform-staging?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Read the [Scala Platform process](https://scalacenter.github.io/platform-staging/).
 
 This repository contains:
