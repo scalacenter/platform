@@ -213,7 +213,11 @@ lazy val `sbt-platform` = project
       "-Xss2m",
       "-Dplatform.debug=true",
       "-Dplatform.test=true"
-    ),
+    ) ++ {
+      // Pass along custom boot properties if specified
+      val bootProps = "sbt.boot.properties"
+      sys.props.get(bootProps).map(x => s"-D$bootProps=$x").toList
+    },
     scriptedBufferLog := false,
     fork in Test := true,
     javaOptions in Test ++= Seq("-Dplatform.debug=true",
