@@ -27,7 +27,8 @@ object PlatformPlugin extends sbt.AutoPlugin {
     bintray.BintrayPlugin &&
       sbtrelease.ReleasePlugin &&
       com.typesafe.sbt.SbtPgp &&
-      com.typesafe.tools.mima.plugin.MimaPlugin
+      com.typesafe.tools.mima.plugin.MimaPlugin &&
+      coursier.CoursierPlugin
 
   override def projectSettings = PlatformKeys.settings
 }
