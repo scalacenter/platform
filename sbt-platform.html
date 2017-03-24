@@ -195,8 +195,8 @@ the spec.</p>
 maintainers a fine-grained control over their releases and provides instant release time and synchronization
 with Maven Central. The <a href="https://bintray.com/scalaplatform">Bintray Scala Platform</a> organization owns the following repositories:</p>
 <ol>
-<li><a href="https://bintray.com/scalaplatform/modules-releases">modules-releases</a> - Stable releases (and, in the future, milestones and RCs).</li>
-<li><a href="https://bintray.com/scalaplatform/modules-nightly-releases">modules-nightly-releases</a> - Nightly releases.</li>
+<li><a href="https://bintray.com/scalaplatform/releases">releases</a> - Stable releases (and, in the future, milestones and RCs).</li>
+<li><a href="https://bintray.com/scalaplatform/nightlies">nightlies</a> - Nightly releases.</li>
 <li><a href="https://bintray.com/scalaplatform/tools">tools</a> - Scala Platform maintainers' tools.</li>
 </ol>
 <h3 id="how-nightlies-work" class="a_section" data-magellan-target="how-nightlies-work">How nightlies work<a class="a_hlink" href="#how-nightlies-work"></a></h3>
@@ -213,12 +213,11 @@ with Maven Central. The <a href="https://bintray.com/scalaplatform">Bintray Scal
 </li>
 </ul>
 <p>In case something goes wrong, notifications are sent via email / Gitter / Slack.
-Nightly releases are available in
-<a href="https://bintray.com/scalaplatform/modules-nightly-releases">modules-nightly-releases</a>.</p>
+Nightly releases are available in <a href="https://bintray.com/scalaplatform/nightlies">nightlies</a>.</p>
 <h3 id="stable-releases" class="a_section" data-magellan-target="stable-releases">Stable releases<a class="a_hlink" href="#stable-releases"></a></h3>
 <p>To cut a stable release, tag the <code class="hljs">platform-release</code> branch with the appropiate
 version number and push. When Drone finishes, your release will be available
-in <a href="https://bintray.com/scalaplatform/modules-releases">modules-releases</a>.</p>
+in <a href="https://bintray.com/scalaplatform/releases">releases</a>.</p>
 <h4 id="decide-the-version-number-for-stable-releases" class="a_section" data-magellan-target="decide-the-version-number-for-stable-releases">Decide the version number for stable releases<a class="a_hlink" href="#decide-the-version-number-for-stable-releases"></a></h4>
 <p>You're free to choose the version number of the library as long as the bumped number
 is consistent with the Scala Platform version your module is targeting.
@@ -280,7 +279,7 @@ When you are finished, set your new release process to <code class="hljs">platfo
 <p><code class="hljs">sbt-platform</code> does not provide good support for advanced use cases yet.
 We strongly recommend you to check the authoritative <code class="hljs">sbt-release</code> <a href="https://github.com/sbt/sbt-release">guide</a>
 to learn how to extend the release process. As a plus, you can always
-check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scalacenter/platform-staging/sbt-platform/src/main/scala/ch/epfl/scala/platform/PlatformPlugin.scala">source code</a>.</p>
+check <code class="hljs">sbt-platform</code>'s <a href="https://github.com/scalacenter/platform-staging/blob/master/sbt-platform/src/main/scala/ch/epfl/scala/platform/PlatformPlugin.scala">source code</a>.</p>
 </blockquote>
 
               </main>
