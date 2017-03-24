@@ -60,6 +60,8 @@ trait PlatformSettings {
 
   // FORMAT: OFF
   val defaultDroneWorkspace = "/drone"
+  val PlatformReleasesRepo = "releases"
+  val PlatformNightliesRepo = "nightlies"
   val platformInsideCi = settingKey[Boolean]("Checks if CI is executing the build.")
   val platformCiEnvironment = settingKey[Option[CIEnvironment]]("Get the Drone environment.")
   val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
@@ -107,7 +109,7 @@ object PlatformKeys {
   import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport._
 
   private val PlatformReleases =
-    Resolver.bintrayRepo("scalaplatform", "modules-releases")
+    Resolver.bintrayRepo("scalaplatform", PlatformReleasesRepo)
   private val PlatformTools =
     Resolver.bintrayRepo("scalaplatform", "tools")
 
@@ -128,7 +130,7 @@ object PlatformKeys {
     publishMavenStyle := true,
     publishArtifact in Test := false,
     bintrayReleaseOnPublish in ThisBuild := false,
-    bintrayRepository := "modules-releases",
+    bintrayRepository := PlatformReleasesRepo,
     bintrayOrganization := Some("scalaplatform"),
     releaseCrossBuild := true
   ) ++ defaultReleaseSettings
@@ -528,6 +530,11 @@ object PlatformKeys {
       (st2, parts)
     }
 
+    private def setBintrayRepository(repo: String, st: State): State = {
+      val extracted = Project.extract(st)
+      extracted.append(bintrayRepository := repo, st)
+    }
+
     val FailureCommand = "--failure--"
     val releaseCommand: Command =
       Command("releaseModule")(_ => releaseParser) { (st, args) =>
@@ -552,10 +559,14 @@ object PlatformKeys {
           selectedReleaseProcess.toLowerCase match {
             case "nightly" =>
               logger.info("Nightly release process has been selected.")
-              setAndReturnReleaseParts(platformNightlyReleaseProcess, startState)
+              val withNightlies =
+                setBintrayRepository(PlatformNightliesRepo, startState)
+              setAndReturnReleaseParts(platformNightlyReleaseProcess, withNightlies)
             case "stable" =>
               logger.info("Stable release process has been selected.")
-              setAndReturnReleaseParts(platformStableReleaseProcess, startState)
+              val withReleases =
+                setBintrayRepository(PlatformReleasesRepo, startState)
+              setAndReturnReleaseParts(platformStableReleaseProcess, withReleases)
             case rp => sys.error(Feedback.unexpectedReleaseProcess(rp))
           }
         }
