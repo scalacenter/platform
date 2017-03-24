@@ -182,7 +182,6 @@ lazy val `sbt-platform-utils` = project
   .settings(
     publishMavenStyle := false,
     scalaVersion := "2.10.6",
-    version := "0.1.1-SNAPSHOT",
     libraryDependencies ++= Seq(
       "com.lihaoyi" %% "sourcecode" % "0.1.3",
       "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
@@ -203,24 +202,22 @@ val ivyScriptedCachePath = settingKey[String]("Ivy scripted cache path.")
 lazy val `sbt-platform` = project
   .in(file("sbt-platform"))
   .dependsOn(`sbt-platform-utils`)
-  //.dependsOn(`shaded-dependencies`)
   .settings(allSettings)
   .settings(ScriptedPlugin.scriptedSettings)
   .settings(
     sbtPlugin := true,
-    version := "0.1.1-SNAPSHOT",
     publishMavenStyle := false,
     addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0"),
     addSbtPlugin("ch.epfl.scala" % "sbt-release" % "1.0.7"),
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.11"),
     addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0"),
+    addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M15-5"),
     libraryDependencies ++= testDependencies,
-    publish := publish.value,
-    publishLocal :=
+    publishLocal := {
       publishLocal
-        //.dependsOn(publishLocal in `shaded-dependencies`)
         .dependsOn(publishLocal in `sbt-platform-utils`)
-        .value,
+        .value
+    },
     scriptedLaunchOpts := Seq(
       "-Dplugin.version=" + version.value,
       // .jvmopts is ignored, simulate here

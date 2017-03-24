@@ -6,7 +6,7 @@ speed up developers' workflow and let module maintainers focus on the essential.
 
 Add it to your project (`project/plugins.sbt`) with:
 ```
-addSbtPlugin("ch.epfl.scala" % "sbt-platform" % "0.1")
+addSbtPlugin("ch.epfl.scala" % "sbt-platform" % "0.2.0")
 ```
 
 The `sbt-platform` plugin provides a tight integration with the Scala Platform CI
@@ -153,8 +153,8 @@ The Scala Platform uses Bintray to store and release all the Scala modules artif
 maintainers a fine-grained control over their releases and provides instant release time and synchronization
 with Maven Central. The [Bintray Scala Platform](https://bintray.com/scalaplatform) organization owns the following repositories:
 
-1. [modules-releases](https://bintray.com/scalaplatform/modules-releases) - Stable releases (and, in the future, milestones and RCs).
-1. [modules-nightly-releases](https://bintray.com/scalaplatform/modules-nightly-releases) - Nightly releases.
+1. [releases](https://bintray.com/scalaplatform/releases) - Stable releases (and, in the future, milestones and RCs).
+1. [nightlies](https://bintray.com/scalaplatform/nightlies) - Nightly releases.
 1. [tools](https://bintray.com/scalaplatform/tools) - Scala Platform maintainers' tools.
 
 ### How nightlies work
@@ -169,14 +169,13 @@ The Scala Platform bot is executed every night and takes care of:
     * Bintray upload failed.
     
 In case something goes wrong, notifications are sent via email / Gitter / Slack.
-Nightly releases are available in 
-[modules-nightly-releases](https://bintray.com/scalaplatform/modules-nightly-releases).
+Nightly releases are available in [nightlies](https://bintray.com/scalaplatform/nightlies).
     
 ### Stable releases
 
 To cut a stable release, tag the `platform-release` branch with the appropiate
 version number and push. When Drone finishes, your release will be available
-in [modules-releases](https://bintray.com/scalaplatform/modules-releases).
+in [releases](https://bintray.com/scalaplatform/releases).
 
 #### Decide the version number for stable releases
 
@@ -245,4 +244,4 @@ When you are finished, set your new release process to `platformNightlyReleasePr
 > `sbt-platform` does not provide good support for advanced use cases yet.
 > We strongly recommend you to check the authoritative `sbt-release` [guide](https://github.com/sbt/sbt-release)
 > to learn how to extend the release process. As a plus, you can always
-> check `sbt-platform`'s [source code](https://github.com/scalacenter/platform-staging/sbt-platform/src/main/scala/ch/epfl/scala/platform/PlatformPlugin.scala).
+> check `sbt-platform`'s [source code](https://github.com/scalacenter/platform-staging/blob/master/sbt-platform/src/main/scala/ch/epfl/scala/platform/PlatformPlugin.scala).
