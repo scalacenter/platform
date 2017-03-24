@@ -91,7 +91,6 @@ trait PlatformSettings {
   val platformBeforePublishHook = taskKey[Unit]("A hook to customize all the release processes before publishing to Bintray.")
   val platformAfterPublishHook = taskKey[Unit]("A hook to customize all the release processes after publishing to Bintray.")
   // FORMAT: ON
-  //val checkJsonMethod = taskKey[Unit]("asdjkf;lakjdf")
 }
 
 object PlatformKeys {
@@ -188,7 +187,7 @@ object PlatformKeys {
           ciCommitMessage <- getEnvVariable("DRONE_COMMIT_MESSAGE")
           ciAuthor <- getEnvVariable("DRONE_COMMIT_AUTHOR")
           ciAuthorEmail <- getEnvVariable("DRONE_COMMIT_AUTHOR_EMAIL")
-          ciAuthorAvatar <- getEnvVariable("COMMIT_AUTHOR_AVATAR")
+          ciAuthorAvatar <- getEnvVariable("DRONE_COMMIT_AUTHOR_AVATAR")
         } yield CommitInfo(ciCommitSha, ciCommitRef, ciCommitBranch, ciCommitLink, ciCommitMessage, AuthorInfo(ciAuthor, ciAuthorEmail, ciAuthorAvatar))
 
         for {
@@ -315,16 +314,6 @@ object PlatformKeys {
         case None => None
       }
     },
-
-/*
-    checkJsonMethod := {
-      println("JSON METHODS")
-      println(classOf[org.json4s.native.JsonMethods].getDeclaredMethods.mkString("\n"))
-      println(classOf[org.json4s.native.JsonMethods].getProtectionDomain.getCodeSource.getLocation)
-      println("JSON AST CLASS")
-      println(classOf[org.json4s.JsonAST.JValue].getDeclaredMethods.mkString("\n"))
-    },
-*/
 
     scmInfo := {
       scmInfo.value.orElse {
