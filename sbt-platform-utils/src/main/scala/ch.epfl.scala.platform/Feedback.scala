@@ -1,6 +1,4 @@
-package ch.epfl.scala.platform
-
-import coursier.core.Version
+package ch.epfl.scala.platform;
 
 object Feedback {
   val PlatformRepo = "https://github.com/scalacenter/platform-staging."
@@ -9,7 +7,7 @@ object Feedback {
   val BugReport =
     s"Please, report this bug at $PlatformRepo."
 
-  def versionIsAlreadyPublished(version: Version) =
+  def versionIsAlreadyPublished(version: String) =
     s"The version $version is already published. Try another one."
 
   def undefinedEnvironmentVariable(name: String) =

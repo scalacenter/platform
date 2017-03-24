@@ -1,13 +1,10 @@
-//import com.typesafe.sbt.pgp.PgpKeys
-//import sbtrelease.ReleaseStateTransformations._
-
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
-    bintrayOrganization := Some("scalaplatform"),
-    bintrayRepository := "tools",
-    bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
-    publishTo := (publishTo in bintray).value,
-    publishArtifact in Test := false,
+  bintrayOrganization := Some("scalaplatform"),
+  bintrayRepository := "tools",
+  bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
+  publishTo := (publishTo in bintray).value,
+  publishArtifact in Test := false,
   licenses := Seq(
     // Scala Center license... BSD 3-clause
     "BSD" -> url("http://opensource.org/licenses/BSD-3-Clause")
@@ -40,6 +37,7 @@ lazy val buildSettings = Seq(
   organization := "ch.epfl.scala",
   resolvers += Resolver.jcenterRepo,
   resolvers += Resolver.bintrayRepo("jvican", "releases"),
+  resolvers += Resolver.bintrayRepo("scalaplatform", "tools"),
   updateOptions := updateOptions.value.withCachedResolution(true)
 )
 
@@ -62,7 +60,7 @@ lazy val compilerOptions = Seq(
 lazy val commonSettings = Seq(
   triggeredMessage in ThisBuild := Watched.clearWhenTriggered,
   watchSources += baseDirectory.value / "resources",
-  scalacOptions in(Compile, console) := compilerOptions,
+  scalacOptions in (Compile, console) := compilerOptions,
   testOptions in Test += Tests.Argument("-oD")
 )
 
@@ -90,7 +88,8 @@ lazy val mergeDocs = taskKey[Unit]("Merge Process and `sbt-platform docs.")
 lazy val makeProcess = taskKey[Unit]("Make the process.")
 lazy val createProcessIndex = taskKey[Unit]("Create index.html.")
 lazy val publishProcessAndDocs = taskKey[Unit]("Make and publish the process.")
-lazy val unmergeDocs = taskKey[Unit]("Remote the `sbt-platform` docs from the source folder.")
+lazy val unmergeDocs =
+  taskKey[Unit]("Remote the `sbt-platform` docs from the source folder.")
 lazy val process: Project = project
   .in(file("process"))
   .enablePlugins(OrnatePlugin)
@@ -141,6 +140,7 @@ lazy val process: Project = project
       import java.nio.file.{Paths, Files}
       def getPath(f: java.io.File): java.nio.file.Path =
         Paths.get(f.toPath.toAbsolutePath.toString)
+
       val destFile = getPath(repositoryTarget / "index.html")
       logger.info(s"Checking that $destFile does not exist.")
       if (!Files.isSymbolicLink(destFile)) {
@@ -151,14 +151,16 @@ lazy val process: Project = project
     },
     GhPagesKeys.synchLocal :=
       GhPagesKeys.synchLocal.dependsOn(createProcessIndex).value,
-    publishProcessAndDocs := Def.sequential(
-      mergeDocs,
-      makeProcess,
-      GhPagesKeys.cleanSite,
-      GhPagesKeys.synchLocal,
-      GhPagesKeys.pushSite,
-      unmergeDocs
-    ).value
+    publishProcessAndDocs := Def
+      .sequential(
+        mergeDocs,
+        makeProcess,
+        GhPagesKeys.cleanSite,
+        GhPagesKeys.synchLocal,
+        GhPagesKeys.pushSite,
+        unmergeDocs
+      )
+      .value
   )
 
 lazy val `release-manager` = project
@@ -174,37 +176,51 @@ lazy val `release-manager` = project
   )
 
 val circeVersion = "0.5.1"
+lazy val `sbt-platform-utils` = project
+  .in(file("sbt-platform-utils"))
+  .settings(allSettings)
+  .settings(
+    publishMavenStyle := false,
+    scalaVersion := "2.10.6",
+    version := "0.1.1-SNAPSHOT",
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %% "sourcecode" % "0.1.3",
+      "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
+      "io.circe" %% "circe-core" % circeVersion,
+      "io.circe" %% "circe-generic" % circeVersion,
+      "io.circe" %% "circe-parser" % circeVersion,
+      "com.github.nscala-time" %% "nscala-time" % "2.14.0",
+      "io.get-coursier" %% "coursier" % "1.0.0-M15-5"
+    ),
+    // Required for circe to work in 2.10
+    addCompilerPlugin(
+      "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full
+    )
+  )
+
 val ivyScriptedCachePath = settingKey[String]("Ivy scripted cache path.")
+
 lazy val `sbt-platform` = project
   .in(file("sbt-platform"))
+  .dependsOn(`sbt-platform-utils`)
+  //.dependsOn(`shaded-dependencies`)
   .settings(allSettings)
   .settings(ScriptedPlugin.scriptedSettings)
   .settings(
     sbtPlugin := true,
-    version := "0.1.0",
+    version := "0.1.1-SNAPSHOT",
     publishMavenStyle := false,
-    addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0"),
     addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0"),
     addSbtPlugin("ch.epfl.scala" % "sbt-release" % "1.0.7"),
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.11"),
-    addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M14"),
-    addCompilerPlugin(
-      "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full
-    ),
-    libraryDependencies ++= Seq(
-      "com.eed3si9n" %% "gigahorse-core" % "0.1.1",
-      "com.lihaoyi" %% "sourcecode" % "0.1.1",
-      "io.circe" %% "circe-core" % circeVersion,
-      "io.circe" %% "circe-generic" % circeVersion,
-      "io.circe" %% "circe-parser" % circeVersion,
-      // Magically solves NoSuchMethodError, bintry depends on it, sigh
-      "net.databinder.dispatch" %% "dispatch-json4s-native" % "0.11.3",
-      "com.github.nscala-time" %% "nscala-time" % "2.14.0"
-    ) ++ testDependencies,
-    // Solves binary incompatible library mix...
-    dependencyOverrides += "org.json4s" %% "json4s-core" % "3.2.10",
-    dependencyOverrides += "org.json4s" %% "json4s-native" % "3.2.10",
-    dependencyOverrides += "org.json4s" %% "json4s-ast" % "3.2.10",
+    addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0"),
+    libraryDependencies ++= testDependencies,
+    publish := publish.value,
+    publishLocal :=
+      publishLocal
+        //.dependsOn(publishLocal in `shaded-dependencies`)
+        .dependsOn(publishLocal in `sbt-platform-utils`)
+        .value,
     scriptedLaunchOpts := Seq(
       "-Dplugin.version=" + version.value,
       // .jvmopts is ignored, simulate here
@@ -221,5 +237,5 @@ lazy val `sbt-platform` = project
     scriptedBufferLog := false,
     fork in Test := true,
     javaOptions in Test ++= Seq("-Dplatform.debug=true",
-      "-Dplatform.test=true")
+                                "-Dplatform.test=true")
   )

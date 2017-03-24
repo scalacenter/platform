@@ -4,16 +4,15 @@ import cats.data.Xor
 import ch.epfl.scala.platform.Feedback
 import coursier.core.Version
 import coursier.core.Version.Literal
-import gigahorse._
-import sbt.ModuleID
 import ch.epfl.scala.platform.util.Error
+import dispatch.{Req, url}
 
 import scala.language.implicitConversions
 
 trait BintrayApi {
   val baseUrl = "https://bintray.com/api/v1"
 
-  def resolve: Request
+  def resolve: Req
 }
 
 /** Represent a simple Scala module. */
@@ -31,12 +30,12 @@ case class ResolvedModule(name: String,
                           latest_version: String)
 
 case class Resolution(info: ScalaModule) extends BintrayApi {
-  override def resolve: Request = {
-    Gigahorse
-      .url(s"$baseUrl/search/packages/maven")
-      .addHeader(HeaderNames.ACCEPT -> MimeTypes.JSON)
-      .addQueryString(("g", info.orgId),
-        ("a", s"${info.artifactId}_${info.scalaBinVersion}"))
+  override def resolve: Req = {
+    val postRequest = url(s"$baseUrl/search/packages/maven").GET
+    postRequest
+      .addHeader("Accept", "application/json")
+      .addQueryParameter("g", info.orgId)
+      .addQueryParameter("a", s"${info.artifactId}_${info.scalaBinVersion}")
   }
 }
 
@@ -52,14 +51,15 @@ object ModuleSearch {
   type Response[T] = Xor[Error, T]
 
   implicit class XtensionCirceXor[T](circe: Xor[io.circe.Error, T]) {
-    def toResponse: Response[T] = circe.leftMap(
-      e => Error(Feedback.parsingError, Some(e)))
+    def toResponse: Response[T] =
+      circe.leftMap(e => Error(Feedback.parsingError, Some(e)))
   }
 
   private[platform] def compareAndGetLatest(ms: Seq[ResolvedModule]) = {
     /* The **recommended** way of versioning a nightly is with ALPHA,
      * this filtering is just done if someone uses nightly instead. */
-    val nonNightlyVersions = ms.map(m => m -> Version(m.latest_version))
+    val nonNightlyVersions = ms
+      .map(m => m -> Version(m.latest_version))
       .filterNot(t => t._2.items.contains(Literal("nightly")))
     if (nonNightlyVersions.isEmpty) None
     else Some(nonNightlyVersions.maxBy(_._2)._1)
@@ -68,7 +68,8 @@ object ModuleSearch {
   def exists(module: ScalaModule, targetVersion: Version): Response[Boolean] = {
     searchInMaven(module).map { results =>
       val bintrayModules = results.filter(rm => rm.repo == "jcenter")
-      if (bintrayModules.isEmpty) false else {
+      if (bintrayModules.isEmpty) false
+      else {
         val targetModule = bintrayModules.head
         targetModule.versions.contains(targetVersion.repr)
       }
@@ -79,14 +80,12 @@ object ModuleSearch {
     searchInMaven(module).map(compareAndGetLatest(_))
 
   def searchInMaven(module: ScalaModule): Response[List[ResolvedModule]] = {
+    import dispatch._
+    import dispatch.Defaults._
     import scala.concurrent._
     import scala.concurrent.duration._
-    Gigahorse.withHttp(Gigahorse.config) { http =>
-      // Stacks are only be published to jcenter
-      val librarySearchResults =
-        http.run(Resolution(module).resolve,
-          Gigahorse.asString andThen decode[List[ResolvedModule]] andThen (_.toResponse))
-      Await.result(librarySearchResults, 90.seconds)
-    }
+    val librarySearchResults = Http(Resolution(module).resolve.OK(
+      as.String andThen decode[List[ResolvedModule]] andThen (_.toResponse)))
+    Await.result(librarySearchResults, 90.seconds)
   }
 }

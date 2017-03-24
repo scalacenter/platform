@@ -1,14 +1,10 @@
 package ch.epfl.scala.platform
 
 import ch.epfl.scala.platform
-import ch.epfl.scala.platform.github.GitHubReleaser
+import ch.epfl.scala.platform.github.{GitHubRelease, GitHubReleaser}
 import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
 import ch.epfl.scala.platform.util.Error
-import ch.epfl.scala.platform.github.GitHubReleaser.{
-GitHubEndpoint,
-GitHubRelease
-}
-
+import ch.epfl.scala.platform.github.GitHubReleaser.GitHubEndpoint
 import cats.data.Xor
 import coursier.core.Version
 import coursier.core.Version.{Literal, Qualifier}
@@ -95,6 +91,7 @@ trait PlatformSettings {
   val platformBeforePublishHook = taskKey[Unit]("A hook to customize all the release processes before publishing to Bintray.")
   val platformAfterPublishHook = taskKey[Unit]("A hook to customize all the release processes after publishing to Bintray.")
   // FORMAT: ON
+  //val checkJsonMethod = taskKey[Unit]("asdjkf;lakjdf")
 }
 
 object PlatformKeys {
@@ -318,6 +315,17 @@ object PlatformKeys {
         case None => None
       }
     },
+
+/*
+    checkJsonMethod := {
+      println("JSON METHODS")
+      println(classOf[org.json4s.native.JsonMethods].getDeclaredMethods.mkString("\n"))
+      println(classOf[org.json4s.native.JsonMethods].getProtectionDomain.getCodeSource.getLocation)
+      println("JSON AST CLASS")
+      println(classOf[org.json4s.JsonAST.JValue].getDeclaredMethods.mkString("\n"))
+    },
+*/
+
     scmInfo := {
       scmInfo.value.orElse {
         platformGitHubRepo.value.map { t =>
@@ -492,7 +500,7 @@ object PlatformKeys {
         .exists(module, definedVersion)
         .flatMap { exists =>
           if (!exists) Xor.right(st)
-          else Xor.left(Error(Feedback.versionIsAlreadyPublished(definedVersion)))
+          else Xor.left(Error(Feedback.versionIsAlreadyPublished(definedVersion.toString)))
         }
         .fold(e => sys.error(e.msg), identity)
     }
