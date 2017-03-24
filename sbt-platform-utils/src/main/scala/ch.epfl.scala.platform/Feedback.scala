@@ -39,6 +39,9 @@ object Feedback {
   val undefinedVersion =
     "Undefined version before releasing. Did you forget to define it?"
 
+  val failedConnection =
+    "Previous artifacts could not be fetched from Bintray. It seems there is no connection to Internet."
+
   val validVersionNotFound =
     "The provided version has not been validated. Run `validateAndSetVersion` before."
 

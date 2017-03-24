@@ -15,6 +15,7 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
 import sbtrelease.{Git, ReleaseStateTransformations}
 import sbtrelease.Version.Bump
 
+import scala.util.control.Exception.catching
 import scala.util.{Random, Try}
 
 object PlatformPlugin extends sbt.AutoPlugin {
@@ -35,19 +36,34 @@ object PlatformPlugin extends sbt.AutoPlugin {
 
 trait PlatformSettings {
 
-  case class RepositoryInfo(fullName: String, owner: String, name: String,
-                            scm: String, link: String, avatar: String,
-                            branch: String, isPrivate: Boolean,
+  case class RepositoryInfo(fullName: String,
+                            owner: String,
+                            name: String,
+                            scm: String,
+                            link: String,
+                            avatar: String,
+                            branch: String,
+                            isPrivate: Boolean,
                             isTrusted: Boolean)
 
   case class AuthorInfo(author: String, email: String, avatar: String)
 
-  case class CommitInfo(sha: String, ref: String, branch: String, link: String,
-                        message: String, author: AuthorInfo)
+  case class CommitInfo(sha: String,
+                        ref: String,
+                        branch: String,
+                        link: String,
+                        message: String,
+                        author: AuthorInfo)
 
-  case class BuildInfo(number: Int, event: String, status: String, link: String,
-                       created: String, started: String, finished: String,
-                       prevBuildStatus: String, prevBuildNumber: Int,
+  case class BuildInfo(number: Int,
+                       event: String,
+                       status: String,
+                       link: String,
+                       created: String,
+                       started: String,
+                       finished: String,
+                       prevBuildStatus: String,
+                       prevBuildNumber: Int,
                        prevCommitSha: String)
 
   case class CIEnvironment(rootDir: File,
@@ -137,7 +153,6 @@ object PlatformKeys {
   ) ++ defaultReleaseSettings
 
   /** Define custom release steps and add them to the default pipeline. */
-
   import com.typesafe.sbt.SbtPgp.autoImport._
 
   lazy val defaultReleaseSettings = Seq(
@@ -165,9 +180,20 @@ object PlatformKeys {
           ciRepoLink <- getEnvVariable("DRONE_REPO_LINK")
           ciRepoAvatar <- getEnvVariable("DRONE_REPO_AVATAR")
           ciRepoBranch <- getEnvVariable("DRONE_REPO_BRANCH")
-          ciRepoPrivate <- getEnvVariable("DRONE_REPO_PRIVATE").map(_.toBoolean)
-          ciRepoTrusted <- getEnvVariable("DRONE_REPO_TRUSTED").map(_.toBoolean)
-        } yield RepositoryInfo(ciRepo, ciRepoOwner, ciRepoName, ciRepoScm, ciRepoLink, ciRepoAvatar, ciRepoBranch, ciRepoPrivate, ciRepoTrusted)
+          ciRepoPrivate <- getEnvVariable("DRONE_REPO_PRIVATE").map(
+            _.toBoolean)
+          ciRepoTrusted <- getEnvVariable("DRONE_REPO_TRUSTED").map(
+            _.toBoolean)
+        } yield
+          RepositoryInfo(ciRepo,
+                         ciRepoOwner,
+                         ciRepoName,
+                         ciRepoScm,
+                         ciRepoLink,
+                         ciRepoAvatar,
+                         ciRepoBranch,
+                         ciRepoPrivate,
+                         ciRepoTrusted)
 
         val buildInfo = for {
           ciBuildNumber <- getEnvVariable("DRONE_BUILD_NUMBER").map(_.toInt)
@@ -178,9 +204,22 @@ object PlatformKeys {
           ciBuildStarted <- getEnvVariable("DRONE_BUILD_STARTED")
           ciBuildFinished <- getEnvVariable("DRONE_BUILD_FINISHED")
           ciPrevBuildStatus <- getEnvVariable("DRONE_PREV_BUILD_STATUS")
-          ciPrevBuildNumber <- getEnvVariable("DRONE_PREV_BUILD_NUMBER").map(_.toInt)
+          ciPrevBuildNumber <- getEnvVariable("DRONE_PREV_BUILD_NUMBER").map(
+            _.toInt)
           ciPrevCommitSha <- getEnvVariable("DRONE_PREV_COMMIT_SHA")
-        } yield BuildInfo(ciBuildNumber, ciBuildEvent, ciBuildStatus, ciBuildLink, ciBuildCreated, ciBuildStarted, ciBuildFinished, ciPrevBuildStatus, ciPrevBuildNumber, ciPrevCommitSha)
+        } yield
+          BuildInfo(
+            ciBuildNumber,
+            ciBuildEvent,
+            ciBuildStatus,
+            ciBuildLink,
+            ciBuildCreated,
+            ciBuildStarted,
+            ciBuildFinished,
+            ciPrevBuildStatus,
+            ciPrevBuildNumber,
+            ciPrevCommitSha
+          )
 
         val commitInfo = for {
           ciCommitSha <- getEnvVariable("DRONE_COMMIT_SHA")
@@ -191,7 +230,13 @@ object PlatformKeys {
           ciAuthor <- getEnvVariable("DRONE_COMMIT_AUTHOR")
           ciAuthorEmail <- getEnvVariable("DRONE_COMMIT_AUTHOR_EMAIL")
           ciAuthorAvatar <- getEnvVariable("DRONE_COMMIT_AUTHOR_AVATAR")
-        } yield CommitInfo(ciCommitSha, ciCommitRef, ciCommitBranch, ciCommitLink, ciCommitMessage, AuthorInfo(ciAuthor, ciAuthorEmail, ciAuthorAvatar))
+        } yield
+          CommitInfo(ciCommitSha,
+                     ciCommitRef,
+                     ciCommitBranch,
+                     ciCommitLink,
+                     ciCommitMessage,
+                     AuthorInfo(ciAuthor, ciAuthorEmail, ciAuthorAvatar))
 
         for {
           ciDroneArch <- getEnvVariable("DRONE_ARCH")
@@ -200,14 +245,16 @@ object PlatformKeys {
           ciBuildInfo <- buildInfo
           ciRemoteUrl <- getEnvVariable("DRONE_REMOTE_URL")
         } yield
-          CIEnvironment(file(defaultDroneWorkspace),
+          CIEnvironment(
+            file(defaultDroneWorkspace),
             ciDroneArch,
             ciRepositoryInfo,
             ciCommitInfo,
             ciBuildInfo,
             ciRemoteUrl,
             getEnvVariable("DRONE_PULL_REQUEST").map(_.toInt),
-            getEnvVariable("DRONE_TAG"))
+            getEnvVariable("DRONE_TAG")
+          )
       }
     },
     platformLogger := streams.value.log,
@@ -246,14 +293,20 @@ object PlatformKeys {
     mimaPreviousArtifacts := {
       val highPriorityArtifacts = mimaPreviousArtifacts.value
       if (highPriorityArtifacts.isEmpty) {
-        /* This is a setting because modifies previousArtifacts, so we protect
-         * ourselves from errors if users don't have connection to Internet. */
         val targetModule = platformScalaModule.value
-        Helper.getPublishedArtifacts(targetModule)
+        Helper
+          .getPublishedArtifacts(targetModule)
+          .fold[Set[ModuleID]](
+            _ => { println(Feedback.failedConnection); Set.empty },
+            identity[Set[ModuleID]]
+          )
       } else highPriorityArtifacts
     },
     platformLatestPublishedModule := {
-      Helper.getPublishedArtifacts(platformScalaModule.value).headOption
+      Helper.getPublishedArtifacts(platformScalaModule.value).fold(
+        e => throw e,
+        identity[Set[ModuleID]]
+      ).headOption
     },
     platformLatestPublishedVersion := {
       platformLatestPublishedModule.value
@@ -317,7 +370,6 @@ object PlatformKeys {
         case None => None
       }
     },
-
     scmInfo := {
       scmInfo.value.orElse {
         platformGitHubRepo.value.map { t =>
@@ -329,7 +381,8 @@ object PlatformKeys {
     },
     platformGitHubToken := {
       val tokenEnvName = "GITHUB_PLATFORM_TOKEN"
-      sys.env.getOrElse(tokenEnvName,
+      sys.env.getOrElse(
+        tokenEnvName,
         sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName)))
     },
     platformReleaseToGitHub := {
@@ -373,15 +426,15 @@ object PlatformKeys {
     pgpPublicRing := {
       if (platformSignArtifact.value) {
         Helper.getPgpRingFile(platformCiEnvironment.value,
-          platformPgpRings.value.map(_._1),
-          platformDefaultPublicRingName.value)
+                              platformPgpRings.value.map(_._1),
+                              platformDefaultPublicRingName.value)
       } else pgpPublicRing.value
     },
     pgpSecretRing := {
       if (platformSignArtifact.value) {
         Helper.getPgpRingFile(platformCiEnvironment.value,
-          platformPgpRings.value.map(_._2),
-          platformDefaultPrivateRingName.value)
+                              platformPgpRings.value.map(_._2),
+                              platformDefaultPrivateRingName.value)
       } else pgpSecretRing.value
     },
     platformBeforePublishHook := {},
@@ -394,8 +447,9 @@ object PlatformKeys {
     implicit class XtensionCoursierVersion(v: Version) {
       def toSbtRelease: sbtrelease.Version = {
         val repr = v.repr
-        sbtrelease.Version(repr).getOrElse(
-          sys.error(Feedback.unexpectedVersionInteraction(repr)))
+        sbtrelease
+          .Version(repr)
+          .getOrElse(sys.error(Feedback.unexpectedVersionInteraction(repr)))
       }
     }
 
@@ -427,20 +481,25 @@ object PlatformKeys {
         sys.error(Feedback.invalidVersion(definedVersion)))
     }
 
-    def getPublishedArtifacts(targetModule: ScalaModule): Set[ModuleID] = {
-      val response = ModuleSearch.searchLatest(targetModule)
-      val moduleResponse = response.map(_.map(rmod =>
-        targetModule.orgId %% targetModule.artifactId % rmod.latest_version))
-      moduleResponse
-        .map(_.map(Set[ModuleID](_)).getOrElse(emptyModules))
-        .getOrElse(emptyModules)
+    def getPublishedArtifacts(
+        targetModule: ScalaModule): Either[Throwable, Set[ModuleID]] = {
+      catching(classOf[java.net.SocketException]).either {
+        val response = ModuleSearch.searchLatest(targetModule)
+        val moduleResponse = response.map(_.map(rmod =>
+          targetModule.orgId %% targetModule.artifactId % rmod.latest_version))
+        moduleResponse
+          .map(_.map(Set[ModuleID](_)).getOrElse(emptyModules))
+          .getOrElse(emptyModules)
+      }
     }
 
     def getPgpRingFile(ciEnvironment: Option[CIEnvironment],
                        customRing: Option[File],
                        defaultRingFileName: String) = {
-      ciEnvironment.map(_.rootDir / ".gnupg" / defaultRingFileName)
-        .orElse(customRing).getOrElse(sys.error(Feedback.expectedCustomRing))
+      ciEnvironment
+        .map(_.rootDir / ".gnupg" / defaultRingFileName)
+        .orElse(customRing)
+        .getOrElse(sys.error(Feedback.expectedCustomRing))
     }
   }
 
@@ -457,25 +516,28 @@ object PlatformKeys {
 
     private def generateUbiquituousVersion(version: String, st: State) = {
       val ci = st.extract.get(platformCiEnvironment)
-      val unique = ci.map(_.build.number.toString)
+      val unique = ci
+        .map(_.build.number.toString)
         .getOrElse(Random.nextLong.abs.toString)
       s"$version-$unique"
     }
 
     /** Update the SBT tasks and attribute that holds the current version value. */
     def updateCurrentVersion(definedVersion: Version, st: State): State = {
-      val updated = st.extract.append(
-        Seq(platformCurrentVersion := definedVersion), st)
+      val updated =
+        st.extract.append(Seq(platformCurrentVersion := definedVersion), st)
       updated.put(validReleaseVersion, definedVersion)
     }
 
     val decideAndValidateVersion: ReleaseStep = { (st: State) =>
       val logger = st.globalLogging.full
       val userVersion = st.get(commandLineVersion).flatten.map(validateVersion)
-      val definedVersion = userVersion.getOrElse(st.extract.get(platformSbtDefinedVersion))
+      val definedVersion =
+        userVersion.getOrElse(st.extract.get(platformSbtDefinedVersion))
       // TODO(jvican): Make sure minor and major depend on platform version
       val bumpFunction = st.extract.get(releaseVersionBump)
-      val nextVersion = bumpFunction.bump.apply(definedVersion.toSbtRelease).toCoursier
+      val nextVersion =
+        bumpFunction.bump.apply(definedVersion.toSbtRelease).toCoursier
       logger.info(s"Current version is $definedVersion.")
       logger.info(s"Next version is set to $nextVersion.")
       updateCurrentVersion(definedVersion, st)
@@ -492,7 +554,10 @@ object PlatformKeys {
         .exists(module, definedVersion)
         .flatMap { exists =>
           if (!exists) Xor.right(st)
-          else Xor.left(Error(Feedback.versionIsAlreadyPublished(definedVersion.toString)))
+          else
+            Xor.left(
+              Error(
+                Feedback.versionIsAlreadyPublished(definedVersion.toString)))
         }
         .fold(e => sys.error(e.msg), identity)
     }
@@ -543,9 +608,11 @@ object PlatformKeys {
         val extracted = Project.extract(st)
         val crossEnabled = extracted.get(releaseCrossBuild) ||
           args.contains(ParseResult.CrossBuild)
-        val selectedReleaseProcess = args.collectFirst {
-          case PlatformParseResult.ReleaseProcess(value) => value
-        }.getOrElse(Feedback.missingReleaseProcess)
+        val selectedReleaseProcess = args
+          .collectFirst {
+            case PlatformParseResult.ReleaseProcess(value) => value
+          }
+          .getOrElse(Feedback.missingReleaseProcess)
 
         val startState = st
           .copy(onFailure = Some(FailureCommand))
@@ -562,12 +629,14 @@ object PlatformKeys {
               logger.info("Nightly release process has been selected.")
               val withNightlies =
                 setBintrayRepository(PlatformNightliesRepo, startState)
-              setAndReturnReleaseParts(platformNightlyReleaseProcess, withNightlies)
+              setAndReturnReleaseParts(platformNightlyReleaseProcess,
+                                       withNightlies)
             case "stable" =>
               logger.info("Stable release process has been selected.")
               val withReleases =
                 setBintrayRepository(PlatformReleasesRepo, startState)
-              setAndReturnReleaseParts(platformStableReleaseProcess, withReleases)
+              setAndReturnReleaseParts(platformStableReleaseProcess,
+                                       withReleases)
             case rp => sys.error(Feedback.unexpectedReleaseProcess(rp))
           }
         }
@@ -586,7 +655,7 @@ object PlatformKeys {
             case _ => s
           }
         }
-        initialChecks.foreach(_ (updatedState))
+        initialChecks.foreach(_(updatedState))
         Function.chain(process :+ removeFailureCommand)(updatedState)
       }
 
@@ -620,7 +689,7 @@ object PlatformKeys {
 
       val releaseCommand =
         addCommandAlias("releaseNightly",
-          "releaseModule release-process nightly")
+                        "releaseModule release-process nightly")
 
       val releaseProcess = {
         Seq[ReleaseStep](
@@ -669,7 +738,7 @@ object PlatformKeys {
 
       val releaseCommand =
         addCommandAlias("releaseStable",
-          "releaseModule release-process stable")
+                        "releaseModule release-process stable")
 
       val releaseProcess = {
         Seq[ReleaseStep](
