@@ -1,31 +1,26 @@
 package ch.epfl.scala.platform
 
-import ch.epfl.scala.platform
 import ch.epfl.scala.platform.github.{GitHubRelease, GitHubReleaser}
 import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
-import ch.epfl.scala.platform.util.Error
 import ch.epfl.scala.platform.github.GitHubReleaser.GitHubEndpoint
 
-import cats.data.Xor
 import coursier.core.Version
-import coursier.core.Version.{Literal, Qualifier}
-import org.joda.time.DateTime
+import coursier.core.Version.{Literal}
 import sbt._
-import sbt.complete.Parser
 import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
-import sbtrelease.{Git, ReleaseStateTransformations}
+import sbtrelease.Git
 import sbtrelease.Version.Bump
 
 import scala.util.control.Exception.catching
-import scala.util.{Random, Try}
+import scala.util.Try
 
 object PlatformPlugin extends sbt.AutoPlugin {
 
   object autoImport extends PlatformSettings
 
-  override def trigger = allRequirements
+  override def trigger: PluginTrigger = allRequirements
 
-  override def requires =
+  override def requires: Plugins =
     bintray.BintrayPlugin &&
       sbtrelease.ReleasePlugin &&
       com.typesafe.sbt.SbtPgp &&
@@ -33,7 +28,7 @@ object PlatformPlugin extends sbt.AutoPlugin {
       coursier.CoursierPlugin &&
       me.vican.jorge.drone.DronePlugin
 
-  override def projectSettings = PlatformKeys.settings
+  override def projectSettings: Seq[Setting[_]] = PlatformKeys.settings
 }
 
 trait PlatformSettings {
@@ -78,16 +73,15 @@ trait PlatformSettings {
 object PlatformKeys {
 
   import PlatformPlugin.autoImport._
-  import me.vican.jorge.drone.DronePlugin.autoImport._
 
   def settings: Seq[Setting[_]] =
     resolverSettings ++ compilationSettings ++ publishSettings ++ platformSettings
 
   import sbt._, Keys._
-  import Helper._
   import sbtrelease.ReleasePlugin.autoImport._
   import bintray.BintrayPlugin.autoImport._
   import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport._
+  import me.vican.jorge.drone.DronePlugin.autoImport._
 
   private val PlatformReleases =
     Resolver.bintrayRepo("scalaplatform", PlatformReleasesRepo)
@@ -179,11 +173,12 @@ object PlatformKeys {
           )
       } else highPriorityArtifacts
     },
+    // TODO: Cache result of this in a setting
     platformLatestPublishedModule := {
-      Helper.getPublishedArtifacts(platformScalaModule.value).fold(
-        e => throw e,
-        identity[Set[ModuleID]]
-      ).headOption
+      Helper.getPublishedArtifacts(platformScalaModule.value) match {
+        case Left(error) => throw error
+        case Right(modules) => modules.headOption
+      }
     },
     platformLatestPublishedVersion := {
       platformLatestPublishedModule.value
@@ -192,7 +187,7 @@ object PlatformKeys {
     /* This is a task, not a settings as `mimaPreviousArtifacts.` */
     platformPreviousArtifacts := {
       val previousArtifacts = mimaPreviousArtifacts.value
-      // Retry in case where sbt boots up without Internet connection
+      // Retry in case sbt boots up without Internet connection
       if (previousArtifacts.nonEmpty) previousArtifacts
       else platformLatestPublishedModule.value.toSet
     },
@@ -317,47 +312,9 @@ object PlatformKeys {
     platformBeforePublishHook := {},
     platformAfterPublishHook := {},
     commands += PlatformReleaseProcess.releaseCommand
-  ) ++ PlatformReleaseProcess.aliases
+  ) ++ PlatformReleaseProcess.releaseCommandAliases
 
   object Helper {
-
-    implicit class XtensionCoursierVersion(v: Version) {
-      def toSbtRelease: sbtrelease.Version = {
-        val repr = v.repr
-        sbtrelease
-          .Version(repr)
-          .getOrElse(sys.error(Feedback.unexpectedVersionInteraction(repr)))
-      }
-    }
-
-    implicit class XtensionSbtReleaseVersion(v: sbtrelease.Version) {
-      def toCoursier: Version = validateVersion(v.string)
-    }
-
-    def getEnvVariable(key: String): Option[String] = sys.env.get(key)
-
-    def getDroneEnvVariableOrDie(key: String) = {
-      getEnvVariable(key).getOrElse(
-        sys.error(Feedback.undefinedEnvironmentVariable(key)))
-    }
-
-    def getDroneEnvVariableOrDie[T](key: String, conversion: String => T): T = {
-      getEnvVariable(key)
-        .map(conversion)
-        .getOrElse(sys.error(Feedback.undefinedEnvironmentVariable(key)))
-    }
-
-    def validateVersion(definedVersion: String): Version = {
-      val validatedVersion = for {
-        version <- Try(Version(definedVersion)).toOption
-        // Double check that literals & qualifiers are stripped off
-        if !version.items.exists(i =>
-          i.isInstanceOf[Literal] || i.isInstanceOf[Qualifier])
-      } yield version
-      validatedVersion.getOrElse(
-        sys.error(Feedback.invalidVersion(definedVersion)))
-    }
-
     def getPublishedArtifacts(
         targetModule: ScalaModule): Either[Throwable, Set[ModuleID]] = {
       catching(classOf[java.net.SocketException]).either {
@@ -372,271 +329,11 @@ object PlatformKeys {
 
     def getPgpRingFile(ciEnvironment: Option[CIEnvironment],
                        customRing: Option[File],
-                       defaultRingFileName: String) = {
+                       defaultRingFileName: String): File = {
       ciEnvironment
         .map(_.rootDir / ".gnupg" / defaultRingFileName)
         .orElse(customRing)
         .getOrElse(sys.error(Feedback.expectedCustomRing))
     }
   }
-
-  object PlatformReleaseProcess {
-
-    import ReleaseKeys._
-    import sbtrelease.Utilities._
-    import sbtrelease.ReleaseStateTransformations._
-
-    // Attributes for the custom release command
-    val releaseProcessAttr = AttributeKey[String]("releaseProcess")
-    val commandLineVersion = AttributeKey[Option[String]]("commandLineVersion")
-    val validReleaseVersion = AttributeKey[Version]("validatedReleaseVersions")
-
-    private def generateUbiquituousVersion(version: String, st: State) = {
-      val ci = st.extract.get(platformCiEnvironment)
-      val unique = ci
-        .map(_.build.number.toString)
-        .getOrElse(Random.nextLong.abs.toString)
-      s"$version-$unique"
-    }
-
-    /** Update the SBT tasks and attribute that holds the current version value. */
-    def updateCurrentVersion(definedVersion: Version, st: State): State = {
-      val updated =
-        st.extract.append(Seq(platformCurrentVersion := definedVersion), st)
-      updated.put(validReleaseVersion, definedVersion)
-    }
-
-    val decideAndValidateVersion: ReleaseStep = { (st: State) =>
-      val logger = st.globalLogging.full
-      val userVersion = st.get(commandLineVersion).flatten.map(validateVersion)
-      val definedVersion =
-        userVersion.getOrElse(st.extract.get(platformSbtDefinedVersion))
-      // TODO(jvican): Make sure minor and major depend on platform version
-      val bumpFunction = st.extract.get(releaseVersionBump)
-      val nextVersion =
-        bumpFunction.bump.apply(definedVersion.toSbtRelease).toCoursier
-      logger.info(s"Current version is $definedVersion.")
-      logger.info(s"Next version is set to $nextVersion.")
-      updateCurrentVersion(definedVersion, st)
-        .put(versions, (definedVersion.repr, nextVersion.repr))
-    }
-
-    val checkVersionIsNotPublished: ReleaseStep = { (st: State) =>
-      val definedVersion = st
-        .get(validReleaseVersion)
-        .getOrElse(sys.error(Feedback.undefinedVersion))
-      val module = st.extract.get(platformScalaModule)
-      // TODO(jvican): Improve error handling here
-      ModuleSearch
-        .exists(module, definedVersion)
-        .flatMap { exists =>
-          if (!exists) Xor.right(st)
-          else
-            Xor.left(
-              Error(
-                Feedback.versionIsAlreadyPublished(definedVersion.toString)))
-        }
-        .fold(e => sys.error(e.msg), identity)
-    }
-
-    import ReleaseKeys._
-
-    object PlatformParseResult {
-
-      case class ReleaseProcess(value: String) extends ParseResult
-
-    }
-
-    import sbt.complete.DefaultParsers.{Space, token, StringBasic}
-
-    val releaseProcessToken = "release-process"
-    val ReleaseProcess: Parser[ParseResult] =
-      (Space ~> token("release-process") ~> Space ~> token(
-        StringBasic,
-        "<nightly | stable>")) map PlatformParseResult.ReleaseProcess
-
-    val releaseParser: Parser[Seq[ParseResult]] = {
-      (ReleaseProcess ~ (ReleaseVersion | SkipTests | CrossBuild).*).map {
-        args =>
-          val (mandatoryArg, optionalArgs) = args
-          mandatoryArg +: optionalArgs
-      }
-    }
-
-    def setAndReturnReleaseParts(releaseProcess: TaskKey[Seq[ReleaseStep]],
-                                 st: State) = {
-      val extracted = Project.extract(st)
-      val (st1, parts) = extracted.runTask(releaseProcess, st)
-      // Set the active release process before returning the release parts
-      val active = platformActiveReleaseProcess := Some(parts)
-      val st2 = extracted.append(active, st1)
-      (st2, parts)
-    }
-
-    private def setBintrayRepository(repo: String, st: State): State = {
-      val extracted = Project.extract(st)
-      extracted.append(bintrayRepository := repo, st)
-    }
-
-    val FailureCommand = "--failure--"
-    val releaseCommand: Command =
-      Command("releaseModule")(_ => releaseParser) { (st, args) =>
-        val logger = st.globalLogging.full
-        val extracted = Project.extract(st)
-        val crossEnabled = extracted.get(releaseCrossBuild) ||
-          args.contains(ParseResult.CrossBuild)
-        val selectedReleaseProcess = args
-          .collectFirst {
-            case PlatformParseResult.ReleaseProcess(value) => value
-          }
-          .getOrElse(Feedback.missingReleaseProcess)
-
-        val startState = st
-          .copy(onFailure = Some(FailureCommand))
-          .put(releaseProcessAttr, selectedReleaseProcess)
-          .put(skipTests, args.contains(ParseResult.SkipTests))
-          .put(cross, crossEnabled)
-          .put(commandLineVersion, args.collectFirst {
-            case ParseResult.ReleaseVersion(value) => value
-          })
-
-        val (updatedState, releaseParts) = {
-          selectedReleaseProcess.toLowerCase match {
-            case "nightly" =>
-              logger.info("Nightly release process has been selected.")
-              val withNightlies =
-                setBintrayRepository(PlatformNightliesRepo, startState)
-              setAndReturnReleaseParts(platformNightlyReleaseProcess,
-                                       withNightlies)
-            case "stable" =>
-              logger.info("Stable release process has been selected.")
-              val withReleases =
-                setBintrayRepository(PlatformReleasesRepo, startState)
-              setAndReturnReleaseParts(platformStableReleaseProcess,
-                                       withReleases)
-            case rp => sys.error(Feedback.unexpectedReleaseProcess(rp))
-          }
-        }
-
-        val initialChecks = releaseParts.map(_.check)
-        val process = releaseParts.map { step =>
-          if (step.enableCrossBuild && crossEnabled) {
-            filterFailure(
-              ReleaseStateTransformations.runCrossBuild(step.action)) _
-          } else filterFailure(step.action) _
-        }
-
-        val removeFailureCommand = { s: State =>
-          s.remainingCommands match {
-            case FailureCommand :: tail => s.copy(remainingCommands = tail)
-            case _ => s
-          }
-        }
-        initialChecks.foreach(_(updatedState))
-        Function.chain(process :+ removeFailureCommand)(updatedState)
-      }
-
-    val aliases = {
-      // Aliases that use the custom release command
-      PlatformReleaseProcess.Nightly.releaseCommand ++
-        PlatformReleaseProcess.Stable.releaseCommand
-    }
-
-    object Nightly {
-      val tagAsNightly: ReleaseStep = { (st0: State) =>
-        val (st, logger) = st0.extract.runTask(platformLogger, st0)
-        val targetVersion = st
-          .get(validReleaseVersion)
-          .getOrElse(sys.error(Feedback.validVersionNotFound))
-        val now = DateTime.now()
-        val month = now.dayOfMonth().get
-        val day = now.monthOfYear().get
-        val year = now.year().get
-        val template = s"${targetVersion.repr}-alpha-$year-$month-$day"
-        val nightlyVersion =
-          if (!platform.testing) template
-          else generateUbiquituousVersion(template, st)
-        val generatedVersion = targetVersion.copy(nightlyVersion)
-        logger.info(s"Nightly version is set to ${generatedVersion.repr}.")
-        val previousVersions =
-          st.get(versions).getOrElse(sys.error(Feedback.undefinedVersion))
-        updateCurrentVersion(generatedVersion, st)
-          .put(versions, (generatedVersion.repr, previousVersions._2))
-      }
-
-      val releaseCommand =
-        addCommandAlias("releaseNightly",
-                        "releaseModule release-process nightly")
-
-      val releaseProcess = {
-        Seq[ReleaseStep](
-          decideAndValidateVersion,
-          tagAsNightly,
-          checkVersionIsNotPublished,
-          setReleaseVersion,
-          releaseStepTask(platformValidatePomData),
-          checkSnapshotDependencies,
-          runTest,
-          releaseStepTask(platformRunMiMa),
-          releaseStepTask(platformBeforePublishHook),
-          publishArtifacts,
-          releaseStepTask(platformAfterPublishHook),
-          releaseStepTask(bintrayRelease)
-        )
-      }
-    }
-
-    object Stable {
-      def cleanUpTag(tag: String): String =
-        if (tag.startsWith("v")) tag.replaceFirst("v", "") else tag
-
-      val setVersionFromGitTag: ReleaseStep = { (st: State) =>
-        val logger = st.globalLogging.full
-        val commandLineDefinedVersion = st.get(commandLineVersion)
-        // Command line version always takes precedence
-        val specifiedVersion = commandLineDefinedVersion.flatten match {
-          case Some(version) if version.nonEmpty => version
-          case None =>
-            val ciInfo = st.extract.get(platformCiEnvironment)
-            ciInfo.map(e => e.tag) match {
-              case Some(Some(versionTag)) => versionTag
-              case Some(None) => sys.error(Feedback.expectedGitTag)
-              case None => sys.error(Feedback.onlyCiCommand("releaseStable"))
-            }
-        }
-
-        // TODO(jvican): Separate testing from main logic
-        val stableVersion = if (platform.testing) {
-          generateUbiquituousVersion(cleanUpTag(specifiedVersion), st)
-        } else cleanUpTag(specifiedVersion)
-        logger.info(s"Version read from the git tag: $stableVersion")
-        st.put(commandLineVersion, Some(stableVersion))
-      }
-
-      val releaseCommand =
-        addCommandAlias("releaseStable",
-                        "releaseModule release-process stable")
-
-      val releaseProcess = {
-        Seq[ReleaseStep](
-          setVersionFromGitTag,
-          decideAndValidateVersion,
-          checkVersionIsNotPublished,
-          setReleaseVersion,
-          releaseStepTask(platformValidatePomData),
-          checkSnapshotDependencies,
-          runTest,
-          releaseStepTask(platformRunMiMa),
-          releaseStepTask(platformBeforePublishHook),
-          publishArtifacts,
-          releaseStepTask(platformReleaseToGitHub),
-          releaseStepTask(platformAfterPublishHook),
-          releaseStepTask(bintrayRelease)
-        )
-      }
-
-    }
-
-  }
-
 }
