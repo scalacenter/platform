@@ -1,13 +1,13 @@
 package ch.epfl.scala.platform
 
-import ch.epfl.scala.platform
-import ch.epfl.scala.platform.search.ModuleSearch
-import coursier.core.Version
-import org.joda.time.DateTime
 import bintray.BintrayPlugin.autoImport._
 import cats.data.Xor
+import ch.epfl.scala.platform
+import ch.epfl.scala.platform.search.ModuleSearch
 import ch.epfl.scala.platform.util.Error
-import sbt.{Def, _}
+import coursier.core.Version
+import org.joda.time.DateTime
+import sbt._
 import sbt.complete.Parser
 import sbtrelease.ReleaseStateTransformations
 
@@ -16,11 +16,10 @@ import scala.util.Random
 object PlatformReleaseProcess extends VersionUtils {
 
   import PlatformPlugin.autoImport._
-
-  import sbtrelease.Utilities._
+  import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys._
   import sbtrelease.ReleasePlugin.autoImport._
   import sbtrelease.ReleaseStateTransformations._
-  import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys._
+  import sbtrelease.Utilities._
 
   // Attributes for the custom release command
   val releaseProcessAttr = AttributeKey[String]("releaseProcess")
@@ -79,7 +78,7 @@ object PlatformReleaseProcess extends VersionUtils {
     case class ReleaseProcess(value: String) extends ParseResult
   }
 
-  import sbt.complete.DefaultParsers.{Space, token, StringBasic}
+  import sbt.complete.DefaultParsers.{Space, StringBasic, token}
 
   val releaseProcessToken = "release-process"
   val ReleaseProcess: Parser[ParseResult] =
