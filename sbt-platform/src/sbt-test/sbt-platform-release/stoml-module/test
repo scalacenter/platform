@@ -5,4 +5,4 @@ $ exec git checkout -t origin/sbt-platform-plugin-test
 
 # Release nightly here for mima checks to succeed
 > compile
-> releaseNightly
+> platformReleaseNightly

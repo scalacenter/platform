@@ -1,0 +1,11 @@
+$ exec git init .
+$ exec git remote add origin https://github.com/jvican/stoml
+$ exec git fetch
+$ exec git checkout -t origin/sbt-platform-plugin-test-on-merge
+$ exec git add test
+$ exec git commit -m "new commit forced"
+$ exec echo "New commit has been created"
+
+> compile
+# This command redirects to platformReleaseOnMerge only in CI
+> releaseOnMergeOnlyCi

@@ -5,7 +5,7 @@ import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
 import ch.epfl.scala.platform.github.GitHubReleaser.GitHubEndpoint
 
 import coursier.core.Version
-import coursier.core.Version.{Literal}
+import coursier.core.Version.Literal
 import sbt._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
 import sbtrelease.Git
@@ -39,7 +39,6 @@ trait PlatformSettings {
   import me.vican.jorge.drone.DronePlugin.autoImport.CIEnvironment
   val platformInsideCi = settingKey[Boolean]("Checks if CI is executing the build.")
   val platformCiEnvironment = settingKey[Option[CIEnvironment]]("Get the Drone environment.")
-  val platformReleaseOnMerge = settingKey[Boolean]("Release on every PR merge.")
   val platformModuleName = settingKey[String]("Name for the Platform module in Bintray.")
   val platformModuleTags = settingKey[Seq[String]]("Tags for the platform module package in Bintray.")
   val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
@@ -63,8 +62,12 @@ trait PlatformSettings {
   val platformGetReleaseNotes = taskKey[String]("Get the correct release notes for a release.")
   val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
   val platformActiveReleaseProcess = taskKey[Option[Seq[ReleaseStep]]]("The active release process if `releaseNightly` or `releaseStable` has been executed.")
-  val platformNightlyReleaseProcess = taskKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
-  val platformStableReleaseProcess = taskKey[Seq[ReleaseStep]]("The nightly release process for a Platform module.")
+  val platformNightlyReleaseProcess = taskKey[Seq[ReleaseStep]]("Define the nightly release process for a Platform module.")
+  val platformStableReleaseProcess = taskKey[Seq[ReleaseStep]]("Define the nightly release process for a Platform module.")
+  val platformOnMergeReleaseProcess = taskKey[Seq[ReleaseStep]]("Define the nightly release process for a Platform module.")
+  val platformReleaseNightly = taskKey[Unit]("Run the nightly release process for a Platform module.")
+  val platformReleaseStable = taskKey[Unit]("Run the nightly release process for a Platform module.")
+  val platformReleaseOnMerge = taskKey[Unit]("Run the nightly release process for a Platform module.")
   val platformBeforePublishHook = taskKey[Unit]("A hook to customize all the release processes before publishing to Bintray.")
   val platformAfterPublishHook = taskKey[Unit]("A hook to customize all the release processes after publishing to Bintray.")
   // FORMAT: ON
@@ -120,6 +123,8 @@ object PlatformKeys {
     platformActiveReleaseProcess := None,
     platformNightlyReleaseProcess :=
       PlatformReleaseProcess.Nightly.releaseProcess,
+    platformOnMergeReleaseProcess :=
+      PlatformReleaseProcess.OnMerge.releaseProcess,
     platformStableReleaseProcess :=
       PlatformReleaseProcess.Stable.releaseProcess
   )
@@ -129,7 +134,6 @@ object PlatformKeys {
     platformInsideCi := insideDrone.value,
     platformCiEnvironment := droneEnvironment.value,
     platformLogger := streams.value.log,
-    platformReleaseOnMerge := false, // By default, disabled
     platformModuleName := bintrayPackage.value,
     platformModuleTags := bintrayPackageLabels.value,
     platformTargetBranch := "platform-release",
@@ -311,8 +315,14 @@ object PlatformKeys {
     },
     platformBeforePublishHook := {},
     platformAfterPublishHook := {},
+    platformReleaseOnMerge :=
+      Helper.runCommand(PlatformReleaseProcess.OnMerge.Alias)(state.value),
+    platformReleaseStable :=
+      Helper.runCommand(PlatformReleaseProcess.Stable.Alias)(state.value),
+    platformReleaseNightly :=
+      Helper.runCommand(PlatformReleaseProcess.Nightly.Alias)(state.value),
     commands += PlatformReleaseProcess.releaseCommand
-  ) ++ PlatformReleaseProcess.releaseCommandAliases
+  )
 
   object Helper {
     def getPublishedArtifacts(
@@ -334,6 +344,25 @@ object PlatformKeys {
         .map(_.rootDir / ".gnupg" / defaultRingFileName)
         .orElse(customRing)
         .getOrElse(sys.error(Feedback.expectedCustomRing))
+    }
+
+    def runCommand(command: String): State => State = { st: State =>
+      import sbt.complete.Parser
+      @annotation.tailrec
+      def runCommand0(command: String, state: State): State = {
+        val nextState = Parser.parse(command, state.combinedParser) match {
+          case Right(cmd) => cmd()
+          case Left(msg) =>
+            throw sys.error(s"Invalid programmatic input:\n$msg")
+        }
+        nextState.remainingCommands.toList match {
+          case Nil => nextState
+          case head :: tail =>
+            runCommand0(head, nextState.copy(remainingCommands = tail))
+        }
+      }
+      runCommand0(command, st.copy(remainingCommands = Nil))
+        .copy(remainingCommands = st.remainingCommands)
     }
   }
 }

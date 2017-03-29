@@ -72,6 +72,9 @@ object Feedback {
   val undefinedPreviousMiMaVersions =
     "MiMa could not find previous versions. MiMa will not be executed."
 
+  val undefinedCommitHash =
+    "The commit hash from the drone environment does not exist or is empty."
+
   val emptyReleaseNotes = "Release notes are empty."
   val parsingError = "JSON response could not be parsed."
   val expectedGitTag = "Expected git tag was not found."

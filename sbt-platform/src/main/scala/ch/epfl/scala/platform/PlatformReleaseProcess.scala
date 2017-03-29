@@ -96,7 +96,7 @@ object PlatformReleaseProcess extends VersionUtils {
   }
 
   def setAndReturnReleaseParts(releaseProcess: TaskKey[Seq[ReleaseStep]],
-                               st: State) = {
+                               st: State): (State, Seq[ReleaseStep]) = {
     val extracted = Project.extract(st)
     val (st1, parts) = extracted.runTask(releaseProcess, st)
     // Set the active release process before returning the release parts
@@ -134,6 +134,12 @@ object PlatformReleaseProcess extends VersionUtils {
 
       val (updatedState, releaseParts) = {
         selectedReleaseProcess.toLowerCase match {
+          case "on-merge" =>
+            logger.info("On-merge release process has been selected.")
+            val withRepo =
+              setBintrayRepository(PlatformNightliesRepo, startState)
+            setAndReturnReleaseParts(platformOnMergeReleaseProcess,
+                                     withRepo)
           case "nightly" =>
             logger.info("Nightly release process has been selected.")
             val withNightlies =
@@ -167,13 +173,55 @@ object PlatformReleaseProcess extends VersionUtils {
       Function.chain(process :+ removeFailureCommand)(updatedState)
     }
 
-  val releaseCommandAliases: Seq[Def.Setting[(State) => State]] = {
-    // Aliases that use the custom release command
-    PlatformReleaseProcess.Nightly.releaseCommand ++
-      PlatformReleaseProcess.Stable.releaseCommand
+  object OnMerge {
+    val Alias: String = "releaseModule release-process on-merge"
+
+    val tagOnMerge: ReleaseStep = { (st0: State) =>
+      val extracted = st0.extract
+      val (st, logger) = extracted.runTask(platformLogger, st0)
+      val targetVersion = st
+        .get(validReleaseVersion)
+        .getOrElse(sys.error(Feedback.validVersionNotFound))
+      val droneEnv = st.extract.get(platformCiEnvironment)
+
+      val mergeVersion: Version = {
+        val maybeVersion = droneEnv.flatMap { env =>
+          env.commit.sha match {
+            case "" => None
+            case sha => Some(Version(s"${targetVersion.repr}-$sha"))
+          }
+        }
+        maybeVersion.getOrElse(sys.error(Feedback.undefinedCommitHash))
+      }
+
+      logger.info(s"On-merge version is set to $mergeVersion")
+      val previousVersions =
+        st.get(versions).getOrElse(sys.error(Feedback.undefinedVersion))
+      updateCurrentVersion(mergeVersion, st)
+        .put(versions, (mergeVersion.repr, previousVersions._2))
+    }
+
+    val releaseProcess: Seq[ReleaseStep] = {
+      Seq[ReleaseStep](
+        decideAndValidateVersion,
+        tagOnMerge,
+        checkVersionIsNotPublished,
+        setReleaseVersion,
+        releaseStepTask(platformValidatePomData),
+        checkSnapshotDependencies,
+        runTest,
+        releaseStepTask(platformRunMiMa),
+        releaseStepTask(platformBeforePublishHook),
+        publishArtifacts,
+        releaseStepTask(platformAfterPublishHook),
+        releaseStepTask(bintrayRelease)
+      )
+    }
   }
 
   object Nightly {
+    val Alias = "releaseModule release-process nightly"
+
     val tagAsNightly: ReleaseStep = { (st0: State) =>
       val (st, logger) = st0.extract.runTask(platformLogger, st0)
       val targetVersion = st
@@ -195,10 +243,6 @@ object PlatformReleaseProcess extends VersionUtils {
         .put(versions, (generatedVersion.repr, previousVersions._2))
     }
 
-    val releaseCommand: Seq[Def.Setting[(State) => State]] =
-      addCommandAlias("releaseNightly",
-                      "releaseModule release-process nightly")
-
     val releaseProcess: Seq[ReleaseStep] = {
       Seq[ReleaseStep](
         decideAndValidateVersion,
@@ -218,6 +262,8 @@ object PlatformReleaseProcess extends VersionUtils {
   }
 
   object Stable {
+    val Alias = "releaseModule release-process stable"
+
     def cleanUpTag(tag: String): String =
       if (tag.startsWith("v")) tag.replaceFirst("v", "") else tag
 
@@ -243,9 +289,6 @@ object PlatformReleaseProcess extends VersionUtils {
       logger.info(s"Version read from the git tag: $stableVersion")
       st.put(commandLineVersion, Some(stableVersion))
     }
-
-    val releaseCommand: Seq[Def.Setting[(State) => State]] =
-      addCommandAlias("releaseStable", "releaseModule release-process stable")
 
     val releaseProcess: Seq[ReleaseStep] = {
       Seq[ReleaseStep](
