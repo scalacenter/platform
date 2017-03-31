@@ -202,7 +202,7 @@ object PlatformReleaseProcess extends VersionUtils {
         val maybeVersion = droneEnv.flatMap { env =>
           env.commit.sha match {
             case "" => None
-            case sha => Some(Version(s"${targetVersion.repr}-$sha"))
+            case sha => Some(Version(s"${targetVersion.repr}-alpha+$sha"))
           }
         }
         maybeVersion.getOrElse(sys.error(Feedback.undefinedCommitHash))
