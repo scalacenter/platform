@@ -41,18 +41,33 @@ object PlatformReleaseProcess extends VersionUtils {
     updated.put(validReleaseVersion, definedVersion)
   }
 
-  val decideAndValidateVersion: ReleaseStep = { (st: State) =>
-    val logger = st.globalLogging.full
-    val userVersion = st.get(commandLineVersion).flatten.map(validateVersion)
-    val definedVersion =
-      userVersion.getOrElse(st.extract.get(platformSbtDefinedVersion))
-    // TODO(jvican): Make sure minor and major depend on platform version
-    val bumpFunction = st.extract.get(releaseVersionBump)
-    val nextVersion =
-      bumpFunction.bump.apply(definedVersion.toSbtRelease).toCoursier
+  /**
+    * Decide the version to be used for releasing and validate it's correct.
+    *
+    * The version is chosen first from the sbt command if the user has specified
+    * it. Otherwise, it fallbacks to the sbt version defined for the module.
+    */
+  val decideAndValidateVersion: ReleaseStep = { (st0: State) =>
+    val (st1, logger) = st0.extract.runTask(platformLogger, st0)
+    val userVersion = st1.get(commandLineVersion).flatten.map(validateVersion)
+    val extracted = st1.extract
+    val definedVersion: Version =
+      userVersion.getOrElse(extracted.get(platformSbtDefinedVersion))
     logger.info(s"Current version is $definedVersion.")
-    logger.info(s"Next version is set to $nextVersion.")
-    updateCurrentVersion(definedVersion, st)
+
+    val (st2, activeRelease) =
+      extracted.runTask(platformActiveReleaseProcess, st1)
+    val (finalSt, nextVersion) = activeRelease match {
+      case Some(Stable.releaseProcess) =>
+        // We need to set the current version because user defined version
+        // takes precedence over the statically set version in sbt files
+        val setDefinedVersion = platformCurrentVersion := definedVersion
+        val st3 = extracted.append(Seq(setDefinedVersion), st2)
+        st3.extract.runTask(platformNextVersion, st3)
+      case _ => st2 -> definedVersion
+    }
+
+    updateCurrentVersion(definedVersion, finalSt)
       .put(versions, (definedVersion.repr, nextVersion.repr))
   }
 
@@ -84,7 +99,7 @@ object PlatformReleaseProcess extends VersionUtils {
   val ReleaseProcess: Parser[ParseResult] =
     (Space ~> token("release-process") ~> Space ~> token(
       StringBasic,
-      "<nightly | stable>")) map PlatformParseResult.ReleaseProcess
+      "<nightly | stable | on-merge>")) map PlatformParseResult.ReleaseProcess
 
   val releaseParser: Parser[Seq[ParseResult]] = {
     (ReleaseProcess ~ (ReleaseVersion | SkipTests | CrossBuild).*).map {
@@ -137,8 +152,7 @@ object PlatformReleaseProcess extends VersionUtils {
             logger.info("On-merge release process has been selected.")
             val withRepo =
               setBintrayRepository(PlatformNightliesRepo, startState)
-            setAndReturnReleaseParts(platformOnMergeReleaseProcess,
-                                     withRepo)
+            setAndReturnReleaseParts(platformOnMergeReleaseProcess, withRepo)
           case "nightly" =>
             logger.info("Nightly release process has been selected.")
             val withNightlies =

@@ -55,6 +55,7 @@ trait PlatformSettings {
   val platformLogger = taskKey[Logger]("Return the sbt logger.")
   val platformValidatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
   val platformCurrentVersion = taskKey[Version]("Get the current version to be released.")
+  val platformNextVersion = taskKey[Version]("Derive and set the next version from the current version.")
   val platformPreviousArtifacts = taskKey[Set[ModuleID]]("Get `mimaPreviousArtifacts` or fetch latest artifact to run MiMa.")
   val platformLatestPublishedModule = taskKey[Option[ModuleID]]("Fetch latest published stable module.")
   val platformLatestPublishedVersion = taskKey[Option[Version]]("Fetch latest published stable version.")
@@ -73,7 +74,7 @@ trait PlatformSettings {
   // FORMAT: ON
 }
 
-object PlatformKeys {
+object PlatformKeys extends VersionUtils {
 
   import PlatformPlugin.autoImport._
 
@@ -120,6 +121,16 @@ object PlatformKeys {
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     // Empty the default release process to avoid errors
     releaseProcess := Seq.empty[ReleaseStep],
+    platformNextVersion := {
+      val logger = platformLogger.value
+      val definedVersion = platformCurrentVersion.value
+      // TODO(jvican): Make sure minor and major depend on platform version
+      val bumpFunction = releaseVersionBump.value
+      val nextVersion = bumpFunction.bump.apply(definedVersion.toSbtRelease).toCoursier
+      logger.info(s"Deriving next version from $definedVersion.")
+      logger.info(s"Next version is set to $nextVersion.")
+      nextVersion
+    },
     platformActiveReleaseProcess := None,
     platformNightlyReleaseProcess :=
       PlatformReleaseProcess.Nightly.releaseProcess,
