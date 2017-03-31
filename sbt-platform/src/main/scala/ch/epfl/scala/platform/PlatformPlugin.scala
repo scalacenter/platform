@@ -159,9 +159,11 @@ object PlatformKeys extends VersionUtils {
       if (version.value.isEmpty)
         sys.error(Feedback.unexpectedEmptyVersion)
       val definedVersion = version.value
+      val skipVersionCheck =
+        platformOnMergeReleaseProcess.value == platformActiveReleaseProcess.value
       val validatedVersion = for {
         version <- Try(Version(definedVersion)).toOption
-        if !version.items.exists(_.isInstanceOf[Literal])
+        if skipVersionCheck || !version.items.exists(_.isInstanceOf[Literal])
       } yield version
       validatedVersion.getOrElse(
         sys.error(Feedback.invalidVersion(definedVersion)))
