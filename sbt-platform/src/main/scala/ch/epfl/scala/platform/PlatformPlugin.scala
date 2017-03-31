@@ -180,6 +180,7 @@ object PlatformKeys extends VersionUtils {
       val highPriorityArtifacts = mimaPreviousArtifacts.value
       if (highPriorityArtifacts.isEmpty) {
         val targetModule = platformScalaModule.value
+        // FIX: This is horrible and clunky
         Helper
           .getPublishedArtifacts(targetModule)
           .fold[Set[ModuleID]](
@@ -188,7 +189,6 @@ object PlatformKeys extends VersionUtils {
           )
       } else highPriorityArtifacts
     },
-    // TODO: Cache result of this in a setting
     platformLatestPublishedModule := {
       Helper.getPublishedArtifacts(platformScalaModule.value) match {
         case Left(error) => throw error

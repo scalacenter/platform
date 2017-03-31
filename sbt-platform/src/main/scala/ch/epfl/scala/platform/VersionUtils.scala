@@ -19,6 +19,9 @@ trait VersionUtils {
     def toCoursier: Version = validateVersion(v.string)
   }
 
+  def stripSnapshot(version: String): String =
+    version.stripSuffix("-SNAPSHOT")
+
   def validateVersion(definedVersion: String): Version = {
     val validatedVersion = for {
       version <- Try(Version(definedVersion)).toOption

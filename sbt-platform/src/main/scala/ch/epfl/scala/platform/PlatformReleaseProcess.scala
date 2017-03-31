@@ -49,10 +49,11 @@ object PlatformReleaseProcess extends VersionUtils {
     */
   val decideAndValidateVersion: ReleaseStep = { (st0: State) =>
     val (st1, logger) = st0.extract.runTask(platformLogger, st0)
-    val userVersion = st1.get(commandLineVersion).flatten.map(validateVersion)
+    val userVersion = st1.get(commandLineVersion).flatten
+    val validatedVersion = userVersion.map(stripSnapshot).map(validateVersion)
     val extracted = st1.extract
     val definedVersion: Version =
-      userVersion.getOrElse(extracted.get(platformSbtDefinedVersion))
+      validatedVersion.getOrElse(extracted.get(platformSbtDefinedVersion))
     logger.info(s"Current version is $definedVersion.")
 
     val (st2, activeRelease) =
@@ -62,7 +63,7 @@ object PlatformReleaseProcess extends VersionUtils {
         // We need to set the current version because user defined version
         // takes precedence over the statically set version in sbt files
         val setDefinedVersion = platformCurrentVersion := definedVersion
-        val st3 = extracted.append(Seq(setDefinedVersion), st2)
+        val st3 = st2.extract.append(Seq(setDefinedVersion), st2)
         st3.extract.runTask(platformNextVersion, st3)
       case _ => st2 -> definedVersion
     }
