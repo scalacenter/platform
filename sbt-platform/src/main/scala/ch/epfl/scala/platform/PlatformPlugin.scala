@@ -5,7 +5,6 @@ import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
 import ch.epfl.scala.platform.github.GitHubReleaser.GitHubEndpoint
 
 import coursier.core.Version
-import coursier.core.Version.Literal
 import sbt._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
 import sbtrelease.Git
@@ -322,8 +321,16 @@ object PlatformKeys extends VersionUtils {
     },
     platformBeforePublishHook := {},
     platformAfterPublishHook := {},
-    platformReleaseOnMerge :=
-      Helper.runCommand(PlatformReleaseProcess.OnMerge.Alias)(state.value),
+    platformReleaseOnMerge := {
+      platformCiEnvironment.value match {
+        case Some(env) =>
+          if (env.pullRequest.isEmpty)
+            Helper.runCommand(PlatformReleaseProcess.OnMerge.Alias)(state.value)
+          else platformLogger.value.info("Skipped release for pull-request.")
+        case None =>
+          Helper.runCommand(PlatformReleaseProcess.OnMerge.Alias)(state.value)
+      }
+    },
     platformReleaseStable :=
       Helper.runCommand(PlatformReleaseProcess.Stable.Alias)(state.value),
     platformReleaseNightly :=
