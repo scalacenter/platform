@@ -200,7 +200,7 @@ lazy val `sbt-platform` = project
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.11"),
     addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0"),
     addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M15-5"),
-    addSbtPlugin("me.vican.jorge" % "sbt-drone" % "0.1.0"),
+    addSbtPlugin("me.vican.jorge" % "sbt-drone" % "0.1.1"),
     libraryDependencies ++= testDependencies,
     publishLocal := {
       publishLocal
