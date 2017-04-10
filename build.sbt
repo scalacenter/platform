@@ -58,6 +58,7 @@ lazy val testDependencies = Seq(
 )
 
 lazy val noPublish = Seq(
+  publishArtifact := false,
   publish := {},
   publishLocal := {}
 )

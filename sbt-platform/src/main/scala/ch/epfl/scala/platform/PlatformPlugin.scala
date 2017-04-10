@@ -65,9 +65,8 @@ trait PlatformSettings {
   val platformNightlyReleaseProcess = taskKey[Seq[ReleaseStep]]("Define the nightly release process for a Platform module.")
   val platformStableReleaseProcess = taskKey[Seq[ReleaseStep]]("Define the nightly release process for a Platform module.")
   val platformOnMergeReleaseProcess = taskKey[Seq[ReleaseStep]]("Define the nightly release process for a Platform module.")
-  val platformReleaseNightly = taskKey[Unit]("Run the nightly release process for a Platform module.")
-  val platformReleaseStable = taskKey[Unit]("Run the nightly release process for a Platform module.")
-  val platformReleaseOnMerge = taskKey[Unit]("Run the nightly release process for a Platform module.")
+
+  val platformReleaseModule = taskKey[Unit]("Release a module on the CI.")
   val platformBeforePublishHook = taskKey[Unit]("A hook to customize all the release processes before publishing to Bintray.")
   val platformAfterPublishHook = taskKey[Unit]("A hook to customize all the release processes after publishing to Bintray.")
   // FORMAT: ON
@@ -125,7 +124,8 @@ object PlatformKeys extends VersionUtils {
       val definedVersion = platformCurrentVersion.value
       // TODO(jvican): Make sure minor and major depend on platform version
       val bumpFunction = releaseVersionBump.value
-      val nextVersion = bumpFunction.bump.apply(definedVersion.toSbtRelease).toCoursier
+      val nextVersion =
+        bumpFunction.bump.apply(definedVersion.toSbtRelease).toCoursier
       logger.info(s"Deriving next version from $definedVersion.")
       logger.info(s"Next version is set to $nextVersion.")
       nextVersion
@@ -148,11 +148,18 @@ object PlatformKeys extends VersionUtils {
     platformModuleTags := bintrayPackageLabels.value,
     platformTargetBranch := "platform-release",
     platformValidatePomData := {
-      if (scmInfo.value.isEmpty)
-        throw new NoSuchElementException(Feedback.forceDefinitionOfScmInfo)
-      if (licenses.value.isEmpty)
-        throw new NoSuchElementException(Feedback.forceValidLicense)
-      bintrayEnsureLicenses.value
+      Def.taskDyn {
+        if (publishArtifact.value) {
+          Def.task {
+            if (scmInfo.value.isEmpty)
+              throw new NoSuchElementException(
+                Feedback.forceDefinitionOfScmInfo)
+            if (licenses.value.isEmpty)
+              throw new NoSuchElementException(Feedback.forceValidLicense)
+            bintrayEnsureLicenses.value
+          }
+        } else Def.task { () }
+      }
     },
     platformSbtDefinedVersion := {
       if (version.value.isEmpty)
@@ -217,6 +224,9 @@ object PlatformKeys extends VersionUtils {
         sys.error(Feedback.forceDefinitionOfPreviousArtifacts)
       mimaReportBinaryIssues.value
     },
+    ///////////////////////////////////////////////////////////////////////////
+    ////////////////////////////// RELEASE NOTES //////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     platformReleaseNotesDir := baseDirectory.value / "notes",
     platformGetReleaseNotes := {
       val version = platformCurrentVersion.value
@@ -234,6 +244,9 @@ object PlatformKeys extends VersionUtils {
         platformLogger.value.warn(Feedback.emptyReleaseNotes)
       notes
     },
+    ///////////////////////////////////////////////////////////////////////////
+    ////////////////////////////// GITHUB LOGIC ///////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     platformGitHubRepo := {
       releaseVcs.value match {
         case Some(g: Git) =>
@@ -283,6 +296,9 @@ object PlatformKeys extends VersionUtils {
         sys.error(Feedback.incorrectGitHubRepo))
       createReleaseInGitHub(org, repo, token)
     },
+    ///////////////////////////////////////////////////////////////////////////
+    //////////////////////////// SIGNED PUBLISH ///////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     platformSignArtifact := true,
     platformDefaultPublicRingName := "platform.pubring.asc",
     platformDefaultPrivateRingName := "platform.secring.asc",
@@ -319,22 +335,23 @@ object PlatformKeys extends VersionUtils {
                               platformDefaultPrivateRingName.value)
       } else pgpSecretRing.value
     },
+    ///////////////////////////////////////////////////////////////////////////
+    /////////////////////////// PLATFORM RELEASE //////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
     platformBeforePublishHook := {},
     platformAfterPublishHook := {},
-    platformReleaseOnMerge := {
-      platformCiEnvironment.value match {
+    platformReleaseModule := {
+      val commandToExecute = platformCiEnvironment.value match {
         case Some(env) =>
-          if (env.pullRequest.isEmpty)
-            Helper.runCommand(PlatformReleaseProcess.OnMerge.Alias)(state.value)
-          else platformLogger.value.info("Skipped release for pull-request.")
-        case None =>
-          Helper.runCommand(PlatformReleaseProcess.OnMerge.Alias)(state.value)
+          if (env.tag.isDefined) Some(PlatformReleaseProcess.Stable.Alias)
+          else if (env.pullRequest.isDefined) None
+          else Some(PlatformReleaseProcess.OnMerge.Alias)
+        case None => sys.error(Feedback.onlyCiCommand("platformReleaseModule"))
       }
+      commandToExecute
+        .map(cmd => Helper.runCommand(cmd)(state.value))
+        .getOrElse(platformLogger.value.info(Feedback.skipRelease))
     },
-    platformReleaseStable :=
-      Helper.runCommand(PlatformReleaseProcess.Stable.Alias)(state.value),
-    platformReleaseNightly :=
-      Helper.runCommand(PlatformReleaseProcess.Nightly.Alias)(state.value),
     commands += PlatformReleaseProcess.releaseCommand
   )
 

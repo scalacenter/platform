@@ -75,6 +75,7 @@ object Feedback {
   val undefinedCommitHash =
     "The commit hash from the drone environment does not exist or is empty."
 
+  val skipRelease = "Detected pull request. Skipping release."
   val emptyReleaseNotes = "Release notes are empty."
   val parsingError = "JSON response could not be parsed."
   val expectedGitTag = "Expected git tag was not found."

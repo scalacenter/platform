@@ -7,6 +7,4 @@ $ exec git commit -m "new commit forced"
 $ exec echo "New commit has been created"
 
 > compile
-# This command redirects to platformReleaseOnMerge only in CI
-> inspect releaseOnMergeOnlyCi
-> releaseOnMergeOnlyCi
+> platformReleaseModule
