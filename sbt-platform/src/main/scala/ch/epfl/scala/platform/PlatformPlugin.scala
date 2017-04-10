@@ -105,6 +105,7 @@ object PlatformKeys extends VersionUtils {
     publishTo := (publishTo in bintray).value,
     // Necessary for synchronization with Maven Central
     publishMavenStyle := true,
+    // Don't publish tests by default
     publishArtifact in Test := false,
     bintrayReleaseOnPublish in ThisBuild := false,
     bintrayRepository := PlatformReleasesRepo,
@@ -159,7 +160,7 @@ object PlatformKeys extends VersionUtils {
             bintrayEnsureLicenses.value
           }
         } else Def.task { () }
-      }
+      }.value
     },
     platformSbtDefinedVersion := {
       if (version.value.isEmpty)
