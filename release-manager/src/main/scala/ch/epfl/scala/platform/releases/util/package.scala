@@ -13,4 +13,12 @@ package object util {
       }.get
     }
   }
+
+  implicit class OptionWrapper[T](o: Option[T]) {
+    def toReleaseResult(errorFeedback: String): ReleaseResult[T] = {
+      o.map(Right.apply).getOrElse {
+        Left(Error(errorFeedback, None))
+      }
+    }
+  }
 }

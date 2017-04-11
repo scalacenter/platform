@@ -13,7 +13,7 @@ import sbtrelease.ReleaseStateTransformations
 
 import scala.util.Random
 
-object PlatformReleaseProcess extends VersionUtils {
+object PlatformReleaseProcess extends Utils {
 
   import PlatformPlugin.autoImport._
   import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys._

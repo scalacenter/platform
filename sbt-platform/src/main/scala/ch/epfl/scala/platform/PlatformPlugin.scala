@@ -72,7 +72,7 @@ trait PlatformSettings {
   // FORMAT: ON
 }
 
-object PlatformKeys extends VersionUtils {
+object PlatformKeys extends Utils {
 
   import PlatformPlugin.autoImport._
 
@@ -250,18 +250,7 @@ object PlatformKeys extends VersionUtils {
     ///////////////////////////////////////////////////////////////////////////
     platformGitHubRepo := {
       releaseVcs.value match {
-        case Some(g: Git) =>
-          // Fetch git endpoint automatically
-          if (g.trackingRemote.isEmpty) sys.error(Feedback.incorrectGitHubRepo)
-          val trackingRemote = g.trackingRemote
-          val p = g.cmd("config", "remote.%s.url" format trackingRemote)
-          val gitResult = p.!!.trim
-          gitResult match {
-            case GitHubReleaser.SshGitHubUrl(org, repo) => Some(org, repo)
-            case GitHubReleaser.HttpsGitHubUrl(org, repo) => Some(org, repo)
-            case _ =>
-              sys.error(Feedback.incorrectGitHubUrl(trackingRemote, gitResult))
-          }
+        case Some(g: Git) => getRemoteUrl(g)
         case Some(vcs) => sys.error("Only git is supported for now.")
         case None => None
       }

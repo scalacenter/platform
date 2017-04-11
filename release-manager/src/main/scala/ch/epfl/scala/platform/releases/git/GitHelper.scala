@@ -1,15 +1,13 @@
 package ch.epfl.scala.platform.releases.git
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, Path}
 
 import ch.epfl.scala.platform.releases.{Feedback, Module}
 import ch.epfl.scala.platform.releases.util._
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.errors.GitAPIException
 import org.eclipse.jgit.lib.Ref
 
 import scala.util.Try
-import scala.util.control.NonFatal
 
 trait GitHelper {
   type GitRepo = ReleaseResult[Git]
@@ -31,6 +29,25 @@ trait GitHelper {
         case t: Throwable =>
           Left(Error(Feedback.FailedRepoCreation, Some(t)))
       }.get
+    }
+  }
+
+  final class GitDirWrapper(repoDir: java.io.File) {
+    def getTrackingRemote(repo: GitRepo): ReleaseResult[String] = {
+      import scala.collection.JavaConversions._
+      repo.right.flatMap { r =>
+        val remotes: List[String] =
+          r.getRepository.getRemoteNames.iterator().toList
+        lazy val config = r.getRepository.getConfig
+        val currentBranch = r.getRepository.getBranch
+        val currentRemote = {
+          if (remotes.size == 1) Some(remotes.head)
+          else Option(config.getString("branch", currentBranch, "remote"))
+        }
+        currentRemote
+          .flatMap(name => Option(config.getString("remote", name, "url")))
+          .toReleaseResult(Feedback.missingRemote(currentBranch))
+      }
     }
   }
 

@@ -11,6 +11,8 @@ object Feedback {
   val UnexpectedSbtReleaseError = "Execution of the sbt release failed."
   val ExpectedOnlyOneArgument = "Expected modules filepath as argument."
 
+  def missingRemote(branch: String) =
+    s"Could not find a remote for branch $branch."
   def foundUnexpectedElement(found: Toml.Elem, expected: String) =
     s"Invalid element $found, expected $expected."
   def missingModuleAttribute(attribute: String): String =
