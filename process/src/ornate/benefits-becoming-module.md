@@ -3,8 +3,8 @@
 The focus of the Scala Platform process is on *growing communities
 around the Platform modules*. For that, it enforces commonly-approved
 open-source rules that optimize the experience of contributors and
-maintainers, and provides infrastructure that makes easier developers'
-life.
+maintainers, and provides infrastructure that makes developers'
+lives easier.
 
 1.  High-quality build machines that ensure a fast and responsive development cycle.
     
