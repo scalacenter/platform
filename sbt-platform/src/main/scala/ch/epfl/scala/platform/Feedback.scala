@@ -1,4 +1,4 @@
-package ch.epfl.scala.platform;
+package ch.epfl.scala.platform
 
 object Feedback {
   val PlatformRepo = "https://github.com/scalacenter/platform-staging."

@@ -164,50 +164,21 @@ lazy val `release-manager` = project
     ) ++ testDependencies
   )
 
-val circeVersion = "0.5.1"
-lazy val `sbt-platform-utils` = project
-  .in(file("sbt-platform-utils"))
-  .settings(allSettings)
-  .settings(
-    publishMavenStyle := false,
-    scalaVersion := "2.10.6",
-    libraryDependencies ++= Seq(
-      "com.lihaoyi" %% "sourcecode" % "0.1.3",
-      "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
-      "io.circe" %% "circe-core" % circeVersion,
-      "io.circe" %% "circe-generic" % circeVersion,
-      "io.circe" %% "circe-parser" % circeVersion,
-      "com.github.nscala-time" %% "nscala-time" % "2.14.0",
-      "io.get-coursier" %% "coursier" % "1.0.0-M15-5"
-    ),
-    // Required for circe to work in 2.10
-    addCompilerPlugin(
-      "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full
-    )
-  )
-
 val ivyScriptedCachePath = settingKey[String]("Ivy scripted cache path.")
 
 lazy val `sbt-platform` = project
   .in(file("sbt-platform"))
-  .dependsOn(`sbt-platform-utils`)
   .settings(allSettings)
   .settings(ScriptedPlugin.scriptedSettings)
   .settings(
     sbtPlugin := true,
     publishMavenStyle := false,
-    addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0"),
-    addSbtPlugin("ch.epfl.scala" % "sbt-release" % "1.0.7"),
-    addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.11"),
-    addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0"),
-    addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M15-5"),
+    addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.18"),
+    addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-RC11"),
     addSbtPlugin("me.vican.jorge" % "sbt-drone" % "0.1.1"),
+    addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "1.2.0"),
+    addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.9.3"),
     libraryDependencies ++= testDependencies,
-    publishLocal := {
-      publishLocal
-        .dependsOn(publishLocal in `sbt-platform-utils`)
-        .value
-    },
     scriptedLaunchOpts := Seq(
       "-Dplugin.version=" + version.value,
       "-Xmx1g",
@@ -220,7 +191,5 @@ lazy val `sbt-platform` = project
       sys.props.get(bootProps).map(x => s"-D$bootProps=$x").toList
     },
     scriptedBufferLog := false,
-    fork in Test := true,
-    javaOptions in Test ++= Seq("-Dplatform.debug=true",
-                                "-Dplatform.test=true")
+    javaOptions in Test ++= Seq("-Dplatform.debug=true", "-Dplatform.test=true")
   )
