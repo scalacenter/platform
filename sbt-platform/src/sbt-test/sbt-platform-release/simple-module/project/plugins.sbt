@@ -1,4 +1,3 @@
-// Extracted from sbt-release and licensed under Apache License 2.0
 {
   val pluginVersion = System.getProperty("plugin.version")
   if(pluginVersion == null)

@@ -1,6 +1,6 @@
 package ch.epfl.scala.platform
 
-import sbt.{AutoPlugin, Def, PluginTrigger, Plugins, Keys, Compile, Test, ThisBuild}
+import sbt.{AutoPlugin, Def, PluginTrigger, Plugins, Keys, Compile, Test, ThisBuild, Project}
 import java.io.File
 
 object PlatformPlugin extends AutoPlugin {
@@ -38,6 +38,10 @@ object AutoImportedKeys extends PlatformKeys.PlatformSettings with PlatformKeys.
 
   def inCompileAndTest(ss: Def.Setting[_]*): Seq[Def.Setting[_]] =
     List(Compile, Test).flatMap(sbt.inConfig(_)(ss))
+
+  // We can add more stuff here in the future, I'm sure it'll be handy
+  def makeRoot(project: sbt.Project): sbt.Project =
+    project.settings(noPublishSettings)
 }
 
 object PlatformKeys {
@@ -55,9 +59,8 @@ object PlatformKeys {
 }
 
 object PlatformPluginImplementation {
-  import sbt.{Task, file, fileToRichFile}
+  import sbt.{Task, file, fileToRichFile, url, IO}
   import ch.epfl.scala.platform.{AutoImportedKeys => ThisPluginKeys}
-  import bintray.BintrayPlugin.{autoImport => BintrayKeys}
   import sbtdynver.DynVerPlugin.{autoImport => DynVerKeys}
   import com.typesafe.tools.mima.plugin.MimaPlugin.{autoImport => MimaKeys}
   import ch.epfl.scala.sbt.release.{AutoImported => ReleaseEarlyKeys}
@@ -69,9 +72,6 @@ object PlatformPluginImplementation {
   private final val twoLastScalaVersions = List("2.12.3", "2.11.11")
 
   val projectSettings: Seq[Def.Setting[_]] = List(
-    // Following the SPP process, projects should cross-compile to the last two versions
-    Keys.crossScalaVersions := twoLastScalaVersions,
-    // Don't publish test artifacts by default
     Keys.publishArtifact in Test := false,
     Keys.publishMavenStyle := true,
     MimaKeys.mimaReportBinaryIssues := Defaults.mimaReportBinaryIssues.value,
@@ -85,7 +85,13 @@ object PlatformPluginImplementation {
       Defaults.publishDocAndSourceArtifact.value
   )
 
-  val buildSettings: Seq[Def.Setting[_]] = List()
+  val buildSettings: Seq[Def.Setting[_]] = List(
+    Keys.organizationName := "The Scala Platform",
+    Keys.organization := "org.scala-lang.platform",
+    Keys.organizationHomepage := Some(url("https://platform.scala-lang.org")),
+    // Following the SPP process, projects should cross-compile to the last two versions
+    Keys.crossScalaVersions := twoLastScalaVersions,
+  )
 
   val globalSettings: Seq[Def.Setting[_]] = List(
     ThisPluginKeys.platformGitHubToken := Defaults.platformGitHubToken.value,
@@ -99,7 +105,6 @@ object PlatformPluginImplementation {
   )
 
   object Defaults {
-    import sbt.IO
     import org.kohsuke.github.GHRelease
 
     val mimaReportBinaryIssues: Def.Initialize[Task[Unit]] = Def.taskDyn {
