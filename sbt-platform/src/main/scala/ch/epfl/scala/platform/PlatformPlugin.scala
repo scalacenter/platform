@@ -29,7 +29,6 @@ object PlatformKeys {
   trait PlatformSettings {
     val platformRootDir = settingKey[Option[File]]("Tells where the root directory is located.")
     val platformInsideCi = settingKey[Boolean]("Checks if CI is executing the build.")
-    val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
     val platformGitHubToken = settingKey[String]("Token to publish releases to GitHub.")
     val platformDefaultPublicRingName =
       settingKey[String]("Default file name for fetching the public gpg keys.")
@@ -87,7 +86,6 @@ object PlatformPluginImplementation {
 
   lazy val platformSettings: Seq[Def.Setting[_]] = Seq(
     ThisPluginKeys.platformInsideCi := sys.env.get("CI").nonEmpty,
-    ThisPluginKeys.platformTargetBranch := "platform-release",
     ThisPluginKeys.platformGitHubToken := Defaults.platformGitHubToken.value,
     ThisPluginKeys.platformDefaultPublicRingName := Defaults.platformDefaultPublicRingName.value,
     ThisPluginKeys.platformDefaultPrivateRingName := Defaults.platformDefaultPrivateRingName.value,
@@ -100,6 +98,7 @@ object PlatformPluginImplementation {
   )
 
   object Defaults {
+    import sbt.IO
     import org.kohsuke.github.GHRelease
 
     val mimaReportBinaryIssues: Def.Initialize[Task[Unit]] = Def.taskDyn {
@@ -121,9 +120,12 @@ object PlatformPluginImplementation {
       Def.setting("platform.secring.asc")
 
     final val GithubPlatformTokenKey = "GITHUB_PLATFORM_TOKEN"
+    private val missingToken = Feedback.undefinedEnvironmentVariable(GithubPlatformTokenKey)
+    private val configFile = file(System.getProperty("user.home")) / ".github"
     val platformGitHubToken: Def.Initialize[String] = Def.setting {
-      sys.env.getOrElse(GithubPlatformTokenKey,
-                        sys.error(Feedback.undefinedEnvironmentVariable(GithubPlatformTokenKey)))
+      val token = sys.env.getOrElse(GithubPlatformTokenKey, sys.error(missingToken))
+      IO.write(configFile, s"oauth = $token")
+      token
     }
 
     private final val PlatformPgpKey = "11BCFDCC60929524"

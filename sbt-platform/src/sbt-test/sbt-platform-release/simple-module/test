@@ -9,31 +9,12 @@ $ exec git commit -m "test"
 > compile
 > run
 $ exists target/scala-2.11
+
+> show version
+> show pgpPublicRing
+> show pgpPrivateRing
+
+> inspect platformRootDir
 > inspect platformInsideCi
-> inspect platformCiEnvironment
-> inspect platformModuleName
-> inspect platformModuleTags
-> inspect platformTargetBranch
-> inspect platformScalaModule
-> inspect platformSbtDefinedVersion
-> inspect platformGitHubToken
-> inspect platformReleaseNotesDir
-> inspect platformGitHubRepo
-> inspect platformSignArtifact
-> inspect platformPgpRings
-> inspect platformDefaultPublicRingName
-> inspect platformDefaultPrivateRingName
-> inspect platformLogger
-> inspect platformValidatePomData
-> inspect platformCurrentVersion
-> inspect platformLatestPublishedVersion
-> inspect platformRunMiMa
-> inspect platformGetReleaseNotes
-> inspect platformReleaseToGitHub
-> inspect platformNightlyReleaseProcess
-> inspect platformStableReleaseProcess
-> inspect platformBeforePublishHook
-> inspect platformAfterPublishHook
-> checkVariablesContent
-> platformValidatePomData
-> checkPreviousArtifact
+
+> releaseEarly
