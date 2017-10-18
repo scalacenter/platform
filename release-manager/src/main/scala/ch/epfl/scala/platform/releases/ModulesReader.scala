@@ -38,9 +38,9 @@ object ModulesReader {
     val tomlContent: ReleaseResult[TomlContent] = {
       readContent.right.flatMap { content =>
         parseToml(content) match {
-          case s: Parsed.Success[TomlContent] =>
+          case s: Parsed.Success[TomlContent, _, _] =>
             Right(s.value)
-          case f: Parsed.Failure =>
+          case f: Parsed.Failure[_, _] =>
             val msg = s"${Feedback.UnexpectedFileArgument}\n${f.msg}"
             Left(Error(msg))
         }

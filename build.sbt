@@ -21,6 +21,7 @@ lazy val publishSettings = Seq(
       </developer>
     </developers>
 )
+
 lazy val buildSettings = Seq(
   organization := "ch.epfl.scala",
   resolvers += Resolver.jcenterRepo,
@@ -53,7 +54,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val testDependencies = Seq(
-  "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.4" % "test",
   "junit" % "junit" % "4.12" % "test"
 )
 
@@ -69,40 +70,38 @@ lazy val platform = project
   .in(file("."))
   .settings(allSettings)
   .settings(noPublish)
-  .settings(scalaVersion := "2.11.8")
+  .settings(scalaVersion := "2.12.3")
   .aggregate(process, `release-manager`)
   .dependsOn(process, `release-manager`)
 
-lazy val mergeDocs = taskKey[Unit]("Merge Process and `sbt-platform docs.")
-lazy val makeProcess = taskKey[Unit]("Make the process.")
-lazy val createProcessIndex = taskKey[Unit]("Create index.html.")
-lazy val publishProcessAndDocs = taskKey[Unit]("Make and publish the process.")
-lazy val unmergeDocs =
-  taskKey[Unit]("Remote the `sbt-platform` docs from the source folder.")
 lazy val process: Project = project
   .in(file("process"))
   .settings(allSettings)
-  .settings(scalaVersion := "2.11.8")
+  .settings(scalaVersion := "2.12.3")
   .settings(name := "platform-process")
 
 lazy val `release-manager` = project
   .in(file("release-manager"))
   .settings(allSettings)
-  .settings(scalaVersion := "2.11.8")
+  .settings(scalaVersion := "2.12.3")
   .settings(
     libraryDependencies ++= Seq(
       "org.eclipse.jgit" % "org.eclipse.jgit" % "4.5.0.201609210915-r",
-      "me.vican.jorge" %% "stoml" % "0.2",
-      "org.typelevel" %% "cats" % "0.7.2"
+      "me.vican.jorge" %% "stoml" % "0.4",
+      "org.typelevel" %% "cats" % "0.8.1"
     ) ++ testDependencies
   )
 
 lazy val `sbt-platform` = project
   .in(file("sbt-platform"))
+  .enablePlugins(ScriptedPlugin)
   .settings(allSettings)
   .settings(
     sbtPlugin := true,
+    scalaVersion := "2.12.3",
     publishMavenStyle := false,
+    resolvers += "Jenkins repo" at "http://repo.jenkins-ci.org/public/",
+    addSbtPlugin("ohnosequences" % "sbt-github-release" % "0.5.0"),
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.18"),
     addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-RC12"),
     addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "2.0.0"),

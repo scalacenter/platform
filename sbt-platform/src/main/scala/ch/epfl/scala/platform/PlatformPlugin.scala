@@ -1,7 +1,6 @@
 package ch.epfl.scala.platform
 
-import coursier.core.Version
-import sbt.{AutoPlugin, Def, ModuleID, PluginTrigger, Plugins}
+import sbt.{AutoPlugin, Def, PluginTrigger, Plugins}
 import java.io.File
 
 object PlatformPlugin extends AutoPlugin {
@@ -12,7 +11,8 @@ object PlatformPlugin extends AutoPlugin {
     bintray.BintrayPlugin &&
       com.typesafe.sbt.SbtPgp &&
       com.typesafe.tools.mima.plugin.MimaPlugin &&
-      coursier.CoursierPlugin
+      coursier.CoursierPlugin &&
+      ohnosequences.sbt.SbtGithubReleasePlugin
 
   override def globalSettings: Seq[Def.Setting[_]] = super.globalSettings
   override def buildSettings: Seq[Def.Setting[_]] = super.buildSettings
@@ -46,6 +46,7 @@ object PlatformPluginImplementation {
   import bintray.BintrayPlugin.{autoImport => BintrayKeys}
   import com.typesafe.tools.mima.plugin.MimaPlugin.{autoImport => MimaKeys}
   import ch.epfl.scala.sbt.release.{AutoImported => ReleaseEarlyKeys}
+  import ohnosequences.sbt.SbtGithubReleasePlugin.{autoImport => GithubKeys}
 
   private val PlatformReleases =
     Resolver.bintrayRepo("scalaplatform", PlatformReleasesRepo)
@@ -95,13 +96,23 @@ object PlatformPluginImplementation {
     PgpKeys.pgpPassphrase := Defaults.pgpPassphrase.value,
     PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
     PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
+    GithubKeys.githubRelease := Defaults.githubRelease.value
   )
 
   object Defaults {
+    import org.kohsuke.github.GHRelease
+
     val mimaReportBinaryIssues: Def.Initialize[Task[Unit]] = Def.taskDyn {
       val canBreakCompat = Keys.version.value.startsWith("0.")
       if (canBreakCompat) Def.task(())
       else MimaKeys.mimaReportBinaryIssues
+    }
+
+    val githubRelease: Def.Initialize[Task[GHRelease]] = Def.taskDyn {
+      // If empty string, this should be the fallback, but force it just in case sth changes.
+      val version = Keys.version.value
+      val githubTask = GithubKeys.githubRelease.toTask(version)
+      githubTask.triggeredBy(ReleaseEarlyKeys.releaseEarly)
     }
 
     val platformDefaultPublicRingName: Def.Initialize[String] =
