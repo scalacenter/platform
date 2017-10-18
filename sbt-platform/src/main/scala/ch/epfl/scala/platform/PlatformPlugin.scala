@@ -14,8 +14,8 @@ object PlatformPlugin extends AutoPlugin {
       coursier.CoursierPlugin &&
       ohnosequences.sbt.SbtGithubReleasePlugin
 
-  override def globalSettings: Seq[Def.Setting[_]] = super.globalSettings
-  override def buildSettings: Seq[Def.Setting[_]] = super.buildSettings
+  override def globalSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.globalSettings
+  override def buildSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.buildSettings
   override def projectSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.projectSettings
 }
 
@@ -29,11 +29,15 @@ object AutoImportedKeys extends PlatformKeys.PlatformSettings with PlatformKeys.
     Keys.skip in Keys.publish := true,
   )
 
+  // This will be updated in future versions of the plugin
   object ScalaVersions {
     val latest210: String = "2.10.6"
     val latest211: String = "2.11.11"
     val latest212: String = "2.12.3"
   }
+
+  def inCompileAndTest(ss: Def.Setting[_]*): Seq[Def.Setting[_]] =
+    List(Compile, Test).flatMap(sbt.inConfig(_)(ss))
 }
 
 object PlatformKeys {
@@ -54,6 +58,7 @@ object PlatformPluginImplementation {
   import sbt.{Task, file, fileToRichFile}
   import ch.epfl.scala.platform.{AutoImportedKeys => ThisPluginKeys}
   import bintray.BintrayPlugin.{autoImport => BintrayKeys}
+  import sbtdynver.DynVerPlugin.{autoImport => DynVerKeys}
   import com.typesafe.tools.mima.plugin.MimaPlugin.{autoImport => MimaKeys}
   import ch.epfl.scala.sbt.release.{AutoImported => ReleaseEarlyKeys}
   import ohnosequences.sbt.SbtGithubReleasePlugin.{autoImport => GithubKeys}
@@ -71,11 +76,16 @@ object PlatformPluginImplementation {
     Keys.publishMavenStyle := true,
     MimaKeys.mimaReportBinaryIssues := Defaults.mimaReportBinaryIssues.value,
     GithubKeys.githubRelease := Defaults.githubRelease.value,
+  ) ++ publishArtifactSettings
+
+  private val publishArtifactSettings = AutoImportedKeys.inCompileAndTest(
+    Keys.publishArtifact in (Compile, Keys.packageDoc) :=
+      Defaults.publishDocAndSourceArtifact.value,
+    Keys.publishArtifact in (Compile, Keys.packageSrc) :=
+      Defaults.publishDocAndSourceArtifact.value
   )
 
-  val buildSettings: Seq[Def.Setting[_]] = List(
-    BintrayKeys.bintrayRepository := PlatformReleasesRepo,
-  )
+  val buildSettings: Seq[Def.Setting[_]] = List()
 
   val globalSettings: Seq[Def.Setting[_]] = List(
     ThisPluginKeys.platformGitHubToken := Defaults.platformGitHubToken.value,
@@ -153,6 +163,31 @@ object PlatformPluginImplementation {
       if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
         getPgpRingFile(ThisPluginKeys.platformDefaultPrivateRingName.value)
       } else Def.setting(pgpSecretRing.value)
+    }
+
+    /**
+      * This setting figures out whether the version is a snapshot or not and configures
+      * the source and doc artifacts that are published by the build.
+      *
+      * Snapshot is a term with no clear definition. In this code, a snapshot is a revision
+      * that has either build or time metadata in its representation. In those cases, the
+      * build will not publish doc and source artifacts by any of the publishing actions.
+      */
+    val publishDocAndSourceArtifact: Def.Initialize[Boolean] = Def.setting {
+      import sbtdynver.GitDescribeOutput
+      def isDynVerSnapshot(gitInfo: Option[GitDescribeOutput], defaultValue: Boolean): Boolean = {
+        val isStable = gitInfo.map { info =>
+          info.ref.value.startsWith("v") &&
+          (info.commitSuffix.distance <= 0 || info.commitSuffix.sha.isEmpty)
+        }
+        val isNewSnapshot =
+          isStable.map(stable => !stable || defaultValue)
+        // Return previous snapshot definition in case users has overridden version
+        isNewSnapshot.getOrElse(defaultValue)
+      }
+
+      // We publish doc and source artifacts if the version is not a snapshot
+      !isDynVerSnapshot(DynVerKeys.dynverGitDescribeOutput.value, Keys.isSnapshot.value)
     }
   }
 }
