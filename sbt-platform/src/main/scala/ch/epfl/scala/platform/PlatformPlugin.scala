@@ -102,7 +102,8 @@ object PlatformPluginImplementation {
     PgpKeys.pgpPassphrase := Defaults.pgpPassphrase.value,
     PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
     PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
-    ReleaseEarlyKeys.releaseEarlyWith := ReleaseEarlyKeys.SonatypePublisher
+    ReleaseEarlyKeys.releaseEarlyWith := ReleaseEarlyKeys.SonatypePublisher,
+    Keys.onLoadMessage := Defaults.intro(Keys.name.value, Keys.onLoadMessage.value),
   )
 
   object Defaults {
@@ -195,5 +196,20 @@ object PlatformPluginImplementation {
       // We publish doc and source artifacts if the version is not a snapshot
       !isDynVerSnapshot(DynVerKeys.dynverGitDescribeOutput.value, Keys.isSnapshot.value)
     }
+
+    def intro(projectName: String, previousMessage: String): String =
+      s"""
+        |    _____            __         ____  __      __  ____
+        |   / ___/_________ _/ /___ _   / __ \/ /___ _/ /_/ __/___  _________ ___
+        |   \__ \/ ___/ __ `/ / __ `/  / /_/ / / __ `/ __/ /_/ __ \/ ___/ __ `__ \
+        |  ___/ / /__/ /_/ / / /_/ /  / ____/ / /_/ / /_/ __/ /_/ / /  / / / / / /
+        | /____/\___/\__,_/_/\__,_/  /_/   /_/\__,_/\__/_/  \____/_/  /_/ /_/ /_/
+        |
+        | * ******************************************************************* *
+        | * Welcome! Remember to learn the CONTRIBUTING guide to use the build. *
+        | * ******************************************************************* *
+        |
+        | $previousMessage
+      """.stripMargin
   }
 }
