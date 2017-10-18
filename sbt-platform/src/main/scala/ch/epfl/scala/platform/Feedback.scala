@@ -7,6 +7,9 @@ object Feedback {
   val BugReport =
     s"Please, report this bug at $PlatformRepo."
 
+  def skipMiMa(name: String, version: String): String =
+    s"Skip MiMa checks because module $name $version starts with '0' and can break bincompat."
+
   def versionIsAlreadyPublished(version: String) =
     s"The version $version is already published. Try another one."
 

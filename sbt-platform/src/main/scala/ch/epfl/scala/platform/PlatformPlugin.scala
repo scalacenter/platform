@@ -1,6 +1,6 @@
 package ch.epfl.scala.platform
 
-import sbt.{AutoPlugin, Def, PluginTrigger, Plugins}
+import sbt.{AutoPlugin, Def, PluginTrigger, Plugins, Keys, Compile, Test, ThisBuild}
 import java.io.File
 
 object PlatformPlugin extends AutoPlugin {
@@ -16,85 +16,76 @@ object PlatformPlugin extends AutoPlugin {
 
   override def globalSettings: Seq[Def.Setting[_]] = super.globalSettings
   override def buildSettings: Seq[Def.Setting[_]] = super.buildSettings
-  override def projectSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.settings
+  override def projectSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.projectSettings
 }
 
-object AutoImportedKeys extends PlatformKeys.PlatformSettings with PlatformKeys.PlatformTasks
+object AutoImportedKeys extends PlatformKeys.PlatformSettings with PlatformKeys.PlatformTasks {
+  val noPublishSettings: Seq[Def.Setting[_]] = List(
+    Keys.publish := {},
+    Keys.publishLocal := {},
+    Keys.publishArtifact in Compile := false,
+    Keys.publishArtifact in Test := false,
+    Keys.publishArtifact := false,
+    Keys.skip in Keys.publish := true,
+  )
+
+  object ScalaVersions {
+    val latest210: String = "2.10.6"
+    val latest211: String = "2.11.11"
+    val latest212: String = "2.12.3"
+  }
+}
 
 object PlatformKeys {
   import sbt.{settingKey, taskKey}
-
-  case class PgpRings(`public`: File, `private`: File)
 
   trait PlatformSettings {
     val platformRootDir = settingKey[Option[File]]("Tells where the root directory is located.")
     val platformInsideCi = settingKey[Boolean]("Checks if CI is executing the build.")
     val platformGitHubToken = settingKey[String]("Token to publish releases to GitHub.")
-    val platformDefaultPublicRingName =
-      settingKey[String]("Default file name for fetching the public gpg keys.")
-    val platformDefaultPrivateRingName =
-      settingKey[String]("Default file name for fetching the private gpg keys.")
+    val platformDefaultPublicRingName = settingKey[String]("Default file name of pgp public key.")
+    val platformDefaultPrivateRingName = settingKey[String]("Default file name of pgp private key.")
   }
 
   trait PlatformTasks {}
 }
 
 object PlatformPluginImplementation {
-  import sbt.{Resolver, Keys, Compile, Test, ThisBuild, Task, file, fileToRichFile}
+  import sbt.{Task, file, fileToRichFile}
   import ch.epfl.scala.platform.{AutoImportedKeys => ThisPluginKeys}
   import bintray.BintrayPlugin.{autoImport => BintrayKeys}
   import com.typesafe.tools.mima.plugin.MimaPlugin.{autoImport => MimaKeys}
   import ch.epfl.scala.sbt.release.{AutoImported => ReleaseEarlyKeys}
   import ohnosequences.sbt.SbtGithubReleasePlugin.{autoImport => GithubKeys}
-
-  private val PlatformReleases =
-    Resolver.bintrayRepo("scalaplatform", PlatformReleasesRepo)
-  private val PlatformTools =
-    Resolver.bintrayRepo("scalaplatform", "tools")
+  import com.typesafe.sbt.SbtPgp.{autoImport => PgpKeys}
 
   private final val PlatformReleasesRepo = "releases"
   private final val PlatformNightliesRepo = "nightlies"
   private final val twoLastScalaVersions = List("2.12.3", "2.11.11")
-  private final val defaultCompilationFlags =
-    List("-deprecation", "-encoding", "UTF-8", "-unchecked")
 
-  val settings: Seq[Def.Setting[_]] = List(
+  val projectSettings: Seq[Def.Setting[_]] = List(
+    // Following the SPP process, projects should cross-compile to the last two versions
     Keys.crossScalaVersions := twoLastScalaVersions,
-    Keys.resolvers ++= Seq(PlatformReleases, PlatformTools),
-    Keys.scalacOptions in Compile := {
-      val currentOptions = (Keys.scalacOptions in Compile).value
-      currentOptions.foldLeft(defaultCompilationFlags) {
-        case (opts, defaultOpt) =>
-          if (opts.contains(defaultOpt)) opts else opts :+ defaultOpt
-      }
-    },
-    Keys.publishArtifact in Test := false
-  ) ++ publishSettings ++ platformSettings
-
-  lazy val publishSettings: Seq[Def.Setting[_]] = Seq(
-    Keys.publishTo := (Keys.publishTo in BintrayKeys.bintray).value,
-    // Necessary for synchronization with Maven Central
+    // Don't publish test artifacts by default
+    Keys.publishArtifact in Test := false,
     Keys.publishMavenStyle := true,
-    // Don't publish tests by default
-    BintrayKeys.bintrayReleaseOnPublish in ThisBuild := false,
-    BintrayKeys.bintrayRepository := PlatformReleasesRepo,
-    BintrayKeys.bintrayOrganization := Some("scalaplatform")
+    MimaKeys.mimaReportBinaryIssues := Defaults.mimaReportBinaryIssues.value,
+    GithubKeys.githubRelease := Defaults.githubRelease.value,
   )
 
-  /** Define custom release steps and add them to the default pipeline. */
-  import com.typesafe.sbt.SbtPgp.{autoImport => PgpKeys}
+  val buildSettings: Seq[Def.Setting[_]] = List(
+    BintrayKeys.bintrayRepository := PlatformReleasesRepo,
+  )
 
-  lazy val platformSettings: Seq[Def.Setting[_]] = Seq(
-    ThisPluginKeys.platformInsideCi := sys.env.get("CI").nonEmpty,
+  val globalSettings: Seq[Def.Setting[_]] = List(
     ThisPluginKeys.platformGitHubToken := Defaults.platformGitHubToken.value,
+    ThisPluginKeys.platformInsideCi := sys.env.get("CI").nonEmpty,
     ThisPluginKeys.platformDefaultPublicRingName := Defaults.platformDefaultPublicRingName.value,
     ThisPluginKeys.platformDefaultPrivateRingName := Defaults.platformDefaultPrivateRingName.value,
-    MimaKeys.mimaReportBinaryIssues := Defaults.mimaReportBinaryIssues.value,
     PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
     PgpKeys.pgpPassphrase := Defaults.pgpPassphrase.value,
     PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
     PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
-    GithubKeys.githubRelease := Defaults.githubRelease.value
   )
 
   object Defaults {
@@ -102,8 +93,10 @@ object PlatformPluginImplementation {
     import org.kohsuke.github.GHRelease
 
     val mimaReportBinaryIssues: Def.Initialize[Task[Unit]] = Def.taskDyn {
-      val canBreakCompat = Keys.version.value.startsWith("0.")
-      if (canBreakCompat) Def.task(())
+      val name = Keys.name.value
+      val version = Keys.version.value
+      val logger = Keys.streams.value.log
+      if (version.startsWith("0.")) Def.task(logger.warn(Feedback.skipMiMa(name, version)))
       else MimaKeys.mimaReportBinaryIssues
     }
 
