@@ -11,8 +11,8 @@ object PlatformPlugin extends AutoPlugin {
     bintray.BintrayPlugin &&
       com.typesafe.sbt.SbtPgp &&
       com.typesafe.tools.mima.plugin.MimaPlugin &&
-      coursier.CoursierPlugin &&
-      ohnosequences.sbt.SbtGithubReleasePlugin
+      ohnosequences.sbt.SbtGithubReleasePlugin &&
+      com.thoughtworks.sbtApiMappings.ApiMappings
 
   override def globalSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.globalSettings
   override def buildSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.buildSettings
