@@ -105,7 +105,7 @@ lazy val `sbt-platform` = project
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.18"),
     addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-RC12"),
     addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "2.0.0"),
-    addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.9.3"),
+    addSbtPlugin("com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings" % "2.0.0"),
     libraryDependencies ++= testDependencies,
     scriptedLaunchOpts := Seq(
       "-Dplugin.version=" + version.value,
