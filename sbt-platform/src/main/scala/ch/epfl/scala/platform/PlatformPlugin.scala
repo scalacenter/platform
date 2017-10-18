@@ -74,6 +74,7 @@ object PlatformPluginImplementation {
   val projectSettings: Seq[Def.Setting[_]] = List(
     Keys.publishArtifact in Test := false,
     Keys.publishMavenStyle := true,
+    Keys.autoAPIMappings := true,
     MimaKeys.mimaReportBinaryIssues := Defaults.mimaReportBinaryIssues.value,
     GithubKeys.githubRelease := Defaults.githubRelease.value,
   ) ++ publishArtifactSettings

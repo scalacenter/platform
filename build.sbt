@@ -23,7 +23,7 @@ lazy val publishSettings = Seq(
 )
 
 lazy val buildSettings = Seq(
-  organization := "ch.epfl.scala",
+  organization := "org.scala-lang.platform",
   resolvers += Resolver.jcenterRepo,
   resolvers += Resolver.bintrayRepo("jvican", "releases"),
   resolvers += Resolver.bintrayRepo("scalaplatform", "tools"),
