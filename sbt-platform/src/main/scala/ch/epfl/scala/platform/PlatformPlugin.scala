@@ -59,7 +59,7 @@ object PlatformKeys {
 }
 
 object PlatformPluginImplementation {
-  import sbt.{Task, file, fileToRichFile, url, IO}
+  import sbt.{Task, file, fileToRichFile, url, IO, Global}
   import ch.epfl.scala.platform.{AutoImportedKeys => ThisPluginKeys}
   import sbtdynver.DynVerPlugin.{autoImport => DynVerKeys}
   import com.typesafe.tools.mima.plugin.MimaPlugin.{autoImport => MimaKeys}
@@ -71,6 +71,13 @@ object PlatformPluginImplementation {
   private final val PlatformNightliesRepo = "nightlies"
   private final val twoLastScalaVersions = List("2.12.3", "2.11.11")
 
+  private val publishArtifactSettings = AutoImportedKeys.inCompileAndTest(
+    Keys.publishArtifact in (Compile, Keys.packageDoc) :=
+      Defaults.publishDocAndSourceArtifact.value,
+    Keys.publishArtifact in (Compile, Keys.packageSrc) :=
+      Defaults.publishDocAndSourceArtifact.value
+  )
+
   val projectSettings: Seq[Def.Setting[_]] = List(
     Keys.publishArtifact in Test := false,
     Keys.publishMavenStyle := true,
@@ -78,13 +85,6 @@ object PlatformPluginImplementation {
     MimaKeys.mimaReportBinaryIssues := Defaults.mimaReportBinaryIssues.value,
     GithubKeys.githubRelease := Defaults.githubRelease.value,
   ) ++ publishArtifactSettings
-
-  private val publishArtifactSettings = AutoImportedKeys.inCompileAndTest(
-    Keys.publishArtifact in (Compile, Keys.packageDoc) :=
-      Defaults.publishDocAndSourceArtifact.value,
-    Keys.publishArtifact in (Compile, Keys.packageSrc) :=
-      Defaults.publishDocAndSourceArtifact.value
-  )
 
   val buildSettings: Seq[Def.Setting[_]] = List(
     Keys.organizationName := "The Scala Platform",
@@ -104,7 +104,8 @@ object PlatformPluginImplementation {
     PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
     PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
     ReleaseEarlyKeys.releaseEarlyWith := ReleaseEarlyKeys.SonatypePublisher,
-    Keys.onLoadMessage := Defaults.intro(Keys.name.value, Keys.onLoadMessage.value),
+    Keys.onLoadMessage := Defaults.intro,
+    Keys.homepage := Keys.scmInfo.value.map(_.browseUrl),
   )
 
   object Defaults {
@@ -198,19 +199,18 @@ object PlatformPluginImplementation {
       !isDynVerSnapshot(DynVerKeys.dynverGitDescribeOutput.value, Keys.isSnapshot.value)
     }
 
-    def intro(projectName: String, previousMessage: String): String =
+    // For some weird reason, in 2.12 we need to escape '\'
+    val intro: String =
       s"""
         |    _____            __         ____  __      __  ____
-        |   / ___/_________ _/ /___ _   / __ \/ /___ _/ /_/ __/___  _________ ___
-        |   \__ \/ ___/ __ `/ / __ `/  / /_/ / / __ `/ __/ /_/ __ \/ ___/ __ `__ \
+        |   / ___/_________ _/ /___ _   / __ \\/ /___ _/ /_/ __/___  _________ ___
+        |   \\__ \\/ ___/ __ `/ / __ `/  / /_/ / / __ `/ __/ /_/ __ \\/ ___/ __ `__ \\
         |  ___/ / /__/ /_/ / / /_/ /  / ____/ / /_/ / /_/ __/ /_/ / /  / / / / / /
-        | /____/\___/\__,_/_/\__,_/  /_/   /_/\__,_/\__/_/  \____/_/  /_/ /_/ /_/
+        | /____/\\___/\\__,_/_/\\__,_/  /_/   /_/\\__,_/\\__/_/  \\____/_/  /_/ /_/ /_/
         |
-        | * ******************************************************************* *
-        | * Welcome! Remember to learn the CONTRIBUTING guide to use the build. *
-        | * ******************************************************************* *
-        |
-        | $previousMessage
+        | *************************************************************************
+        | ** Welcome! Read the CONTRIBUTING guide to learn how to use the build. **
+        | *************************************************************************
       """.stripMargin
   }
 }
