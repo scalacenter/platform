@@ -12,8 +12,7 @@ object PlatformPlugin extends AutoPlugin {
     bintray.BintrayPlugin &&
       com.typesafe.sbt.SbtPgp &&
       com.typesafe.tools.mima.plugin.MimaPlugin &&
-      coursier.CoursierPlugin &&
-      me.vican.jorge.drone.DronePlugin
+      coursier.CoursierPlugin
 
   override def globalSettings: Seq[Def.Setting[_]] = super.globalSettings
   override def buildSettings: Seq[Def.Setting[_]] = super.buildSettings
@@ -24,17 +23,14 @@ object AutoImportedKeys extends PlatformKeys.PlatformSettings with PlatformKeys.
 
 object PlatformKeys {
   import sbt.{settingKey, taskKey}
-  import me.vican.jorge.drone.DronePlugin.autoImport.CIEnvironment
 
   case class PgpRings(`public`: File, `private`: File)
 
   trait PlatformSettings {
+    val platformRootDir = settingKey[Option[File]]("Tells where the root directory is located.")
     val platformInsideCi = settingKey[Boolean]("Checks if CI is executing the build.")
-    val platformCiEnvironment = settingKey[Option[CIEnvironment]]("Get the Drone environment.")
     val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
     val platformGitHubToken = settingKey[String]("Token to publish releases to GitHub.")
-    val platformPgpRings = settingKey[Option[PgpRings]](
-      "Files that store the pgp public and secret ring respectively.")
     val platformDefaultPublicRingName =
       settingKey[String]("Default file name for fetching the public gpg keys.")
     val platformDefaultPrivateRingName =
@@ -45,12 +41,10 @@ object PlatformKeys {
 }
 
 object PlatformPluginImplementation {
-
-  import sbt.{Resolver, Keys, Compile, Test, ThisBuild, Task, file, richFile}
+  import sbt.{Resolver, Keys, Compile, Test, ThisBuild, Task, file, fileToRichFile}
   import ch.epfl.scala.platform.{AutoImportedKeys => ThisPluginKeys}
   import bintray.BintrayPlugin.{autoImport => BintrayKeys}
   import com.typesafe.tools.mima.plugin.MimaPlugin.{autoImport => MimaKeys}
-  import me.vican.jorge.drone.DronePlugin.{autoImport => DroneKeys}
   import ch.epfl.scala.sbt.release.{AutoImported => ReleaseEarlyKeys}
 
   private val PlatformReleases =
@@ -60,7 +54,7 @@ object PlatformPluginImplementation {
 
   private final val PlatformReleasesRepo = "releases"
   private final val PlatformNightliesRepo = "nightlies"
-  private final val twoLastScalaVersions = List("2.11.11", "2.11.11")
+  private final val twoLastScalaVersions = List("2.12.3", "2.11.11")
   private final val defaultCompilationFlags =
     List("-deprecation", "-encoding", "UTF-8", "-unchecked")
 
@@ -91,18 +85,16 @@ object PlatformPluginImplementation {
   import com.typesafe.sbt.SbtPgp.{autoImport => PgpKeys}
 
   lazy val platformSettings: Seq[Def.Setting[_]] = Seq(
-    ThisPluginKeys.platformInsideCi := DroneKeys.insideDrone.value,
-    ThisPluginKeys.platformCiEnvironment := DroneKeys.droneEnvironment.value,
+    ThisPluginKeys.platformInsideCi := sys.env.get("CI").nonEmpty,
     ThisPluginKeys.platformTargetBranch := "platform-release",
     ThisPluginKeys.platformGitHubToken := Defaults.platformGitHubToken.value,
     ThisPluginKeys.platformDefaultPublicRingName := Defaults.platformDefaultPublicRingName.value,
     ThisPluginKeys.platformDefaultPrivateRingName := Defaults.platformDefaultPrivateRingName.value,
-    ThisPluginKeys.platformPgpRings := Defaults.platformPgpRings.value,
     MimaKeys.mimaReportBinaryIssues := Defaults.mimaReportBinaryIssues.value,
     PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
     PgpKeys.pgpPassphrase := Defaults.pgpPassphrase.value,
     PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
-    PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value
+    PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
   )
 
   object Defaults {
@@ -123,15 +115,6 @@ object PlatformPluginImplementation {
                         sys.error(Feedback.undefinedEnvironmentVariable(GithubPlatformTokenKey)))
     }
 
-    val platformPgpRings: Def.Initialize[Option[PlatformKeys.PgpRings]] = Def.setting {
-      val homeFolder = System.getProperty("user.home")
-      if (homeFolder.isEmpty) sys.error(Feedback.expectedCustomRing)
-      val gpgFolder = file(s"$homeFolder/.gnupg")
-      val publicRing = gpgFolder / ThisPluginKeys.platformDefaultPublicRingName.value
-      val privateRing = gpgFolder / ThisPluginKeys.platformDefaultPrivateRingName.value
-      Some(PlatformKeys.PgpRings(publicRing, privateRing))
-    }
-
     private final val PlatformPgpKey = "11BCFDCC60929524"
     val pgpSigningKey: Def.Initialize[Option[Long]] = Def.setting {
       if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
@@ -145,26 +128,24 @@ object PlatformPluginImplementation {
       } else None
     }
 
-    def getPgpRingFile(customRing: Option[File],
-                       defaultRingFileName: String): Def.Initialize[File] = Def.setting {
-      val ciEnvironment = ThisPluginKeys.platformCiEnvironment.value
-      ciEnvironment
-        .map(_.rootDir / ".gnupg" / defaultRingFileName)
-        .orElse(customRing)
+    def getPgpRingFile(defaultRingFileName: String): Def.Initialize[File] = Def.setting {
+      val rootDir = ThisPluginKeys.platformRootDir.value
+      ThisPluginKeys.platformRootDir.value
+        .filter(_.exists())
+        .orElse(Option(file(System.getProperty("user.home"))))
+        .map(_ / ".gnupg" / defaultRingFileName)
         .getOrElse(sys.error(Feedback.expectedCustomRing))
     }
 
     val pgpPublicRing: Def.Initialize[File] = Def.settingDyn {
       if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
-        getPgpRingFile(ThisPluginKeys.platformPgpRings.value.map(_.`public`),
-                       ThisPluginKeys.platformDefaultPublicRingName.value)
+        getPgpRingFile(ThisPluginKeys.platformDefaultPublicRingName.value)
       } else Def.setting(pgpPublicRing.value)
     }
 
     val pgpSecretRing: Def.Initialize[File] = Def.settingDyn {
       if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
-        getPgpRingFile(ThisPluginKeys.platformPgpRings.value.map(_.`private`),
-                       ThisPluginKeys.platformDefaultPrivateRingName.value)
+        getPgpRingFile(ThisPluginKeys.platformDefaultPrivateRingName.value)
       } else Def.setting(pgpSecretRing.value)
     }
   }

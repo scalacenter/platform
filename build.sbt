@@ -81,76 +81,9 @@ lazy val unmergeDocs =
   taskKey[Unit]("Remote the `sbt-platform` docs from the source folder.")
 lazy val process: Project = project
   .in(file("process"))
-  .enablePlugins(OrnatePlugin)
   .settings(allSettings)
   .settings(scalaVersion := "2.11.8")
-  .settings(
-    ghpages.settings,
-    git.remoteRepo := "git@github.com:scalacenter/platform-staging",
-    name := "platform-process",
-    ornateSourceDir := Some(baseDirectory.value / "src" / "ornate"),
-    ornateTargetDir := Some(target.value / "site"),
-    siteSourceDirectory := ornateTargetDir.value.get,
-    mergeDocs := {
-      val logger = streams.value.log
-      logger.info("Merging the docs...")
-      val ornateTarget = ornateSourceDir.value
-        .getOrElse(sys.error("Ornate source dir is not set."))
-      IO.copyDirectory(`sbt-platform`.base / "docs", ornateTarget)
-    },
-    unmergeDocs := {
-      val ornateTarget = ornateSourceDir.value
-        .getOrElse(sys.error("Ornate source dir is not set."))
-      val sbtPlatformDocs = `sbt-platform`.base / "docs"
-      sbt.Path.allSubpaths(sbtPlatformDocs).foreach { t =>
-        val (_, relativePath) = t
-        val pathInGlobalDocs = ornateTarget / relativePath
-        IO.delete(pathInGlobalDocs)
-      }
-    },
-    makeProcess := {
-      val logger = streams.value.log
-      ornate.value
-      // Work around Ornate limitation to add custom CSS
-      val targetDir = ornateTargetDir.value.get
-      val cssFolder = targetDir / "_theme" / "css"
-      if (!cssFolder.exists) cssFolder.mkdirs()
-      val processDir = baseDirectory.value
-      val resourcesFolder = processDir / "src" / "resources"
-      val customCss = resourcesFolder / "css" / "custom.css"
-      val mainCss = cssFolder / "app.css"
-      logger.info("Adding custom CSS...")
-      IO.append(mainCss, IO.read(customCss))
-    },
-    createProcessIndex := {
-      val logger = streams.value.log
-      // Redirecting index to contents...
-      val repositoryTarget = GhPagesKeys.repository.value
-      import java.nio.file.{Paths, Files}
-      def getPath(f: java.io.File): java.nio.file.Path =
-        Paths.get(f.toPath.toAbsolutePath.toString)
-
-      val destFile = getPath(repositoryTarget / "index.html")
-      logger.info(s"Checking that $destFile does not exist.")
-      if (!Files.isSymbolicLink(destFile)) {
-        val srcLink = Paths.get("contents.html")
-        logger.info(s"Generating index.html poiting to $srcLink.")
-        Files.createSymbolicLink(destFile, srcLink)
-      }
-    },
-    GhPagesKeys.synchLocal :=
-      GhPagesKeys.synchLocal.dependsOn(createProcessIndex).value,
-    publishProcessAndDocs := Def
-      .sequential(
-        mergeDocs,
-        makeProcess,
-        GhPagesKeys.cleanSite,
-        GhPagesKeys.synchLocal,
-        GhPagesKeys.pushSite,
-        unmergeDocs
-      )
-      .value
-  )
+  .settings(name := "platform-process")
 
 lazy val `release-manager` = project
   .in(file("release-manager"))
@@ -164,19 +97,15 @@ lazy val `release-manager` = project
     ) ++ testDependencies
   )
 
-val ivyScriptedCachePath = settingKey[String]("Ivy scripted cache path.")
-
 lazy val `sbt-platform` = project
   .in(file("sbt-platform"))
   .settings(allSettings)
-  .settings(ScriptedPlugin.scriptedSettings)
   .settings(
     sbtPlugin := true,
     publishMavenStyle := false,
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.18"),
-    addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-RC11"),
-    addSbtPlugin("me.vican.jorge" % "sbt-drone" % "0.1.1"),
-    addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "1.2.0"),
+    addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-RC12"),
+    addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "2.0.0"),
     addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.9.3"),
     libraryDependencies ++= testDependencies,
     scriptedLaunchOpts := Seq(
