@@ -22,13 +22,13 @@ lazy val publishSettings = Seq(
     </developers>
 )
 
-lazy val buildSettings = Seq(
+inThisBuild(Seq(
   organization := "org.scala-lang.platform",
   resolvers += Resolver.jcenterRepo,
   resolvers += Resolver.bintrayRepo("jvican", "releases"),
   resolvers += Resolver.bintrayRepo("scalaplatform", "tools"),
   updateOptions := updateOptions.value.withCachedResolution(true)
-)
+))
 
 lazy val compilerOptions = Seq(
   "-deprecation",
@@ -64,7 +64,7 @@ lazy val noPublish = Seq(
   publishLocal := {}
 )
 
-lazy val allSettings = commonSettings ++ buildSettings ++ publishSettings
+lazy val allSettings = commonSettings ++ publishSettings
 
 lazy val platform = project
   .in(file("."))
