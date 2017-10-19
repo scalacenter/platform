@@ -6,15 +6,16 @@ $ exec git checkout -t origin/empty
 $ exec git add .
 $ exec git commit -m "test"
 
-> compile
-> run
-$ exists target/scala-2.11
-
 > show version
 > show pgpPublicRing
 > show pgpSecretRing
 
 > inspect platformRootDir
 > inspect platformInsideCi
+> inspect scmInfo
+
+> compile
+> run
+$ exists target/scala-2.11
 
 > releaseEarly
