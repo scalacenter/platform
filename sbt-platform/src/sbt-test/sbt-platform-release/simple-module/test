@@ -12,7 +12,7 @@ $ exists target/scala-2.11
 
 > show version
 > show pgpPublicRing
-> show pgpPrivateRing
+> show pgpSecretRing
 
 > inspect platformRootDir
 > inspect platformInsideCi

@@ -95,8 +95,9 @@ object PlatformPluginImplementation {
   )
 
   val globalSettings: Seq[Def.Setting[_]] = List(
-    ThisPluginKeys.platformGitHubToken := Defaults.platformGitHubToken.value,
+    ThisPluginKeys.platformRootDir := Some(file("/drone")),
     ThisPluginKeys.platformInsideCi := sys.env.get("CI").nonEmpty,
+    ThisPluginKeys.platformGitHubToken := Defaults.platformGitHubToken.value,
     ThisPluginKeys.platformDefaultPublicRingName := Defaults.platformDefaultPublicRingName.value,
     ThisPluginKeys.platformDefaultPrivateRingName := Defaults.platformDefaultPrivateRingName.value,
     PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
