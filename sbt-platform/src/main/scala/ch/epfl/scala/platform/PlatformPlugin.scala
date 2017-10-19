@@ -105,6 +105,7 @@ object PlatformPluginImplementation {
     PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
     ReleaseEarlyKeys.releaseEarlyWith := ReleaseEarlyKeys.SonatypePublisher,
     Keys.onLoadMessage := Defaults.intro,
+    // Must be added to sbt-release-early instead of sbt-platform
     Keys.homepage := Keys.scmInfo.value.map(_.browseUrl),
   )
 
