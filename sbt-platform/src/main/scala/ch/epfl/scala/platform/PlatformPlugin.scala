@@ -95,7 +95,6 @@ object PlatformPluginImplementation {
     Keys.crossScalaVersions := twoLastScalaVersions,
     // Can be removed from here when https://github.com/sbt/sbt-pgp/issues/111 is fixed
     PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
-    PgpKeys.pgpPassphrase := Defaults.pgpPassphrase.value,
     PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
     PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
   )
@@ -107,7 +106,6 @@ object PlatformPluginImplementation {
     ThisPluginKeys.platformDefaultPublicRingName := Defaults.platformDefaultPublicRingName.value,
     ThisPluginKeys.platformDefaultPrivateRingName := Defaults.platformDefaultPrivateRingName.value,
     PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
-    PgpKeys.pgpPassphrase := Defaults.pgpPassphrase.value,
     PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
     PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
     ReleaseEarlyKeys.releaseEarlyWith := ReleaseEarlyKeys.SonatypePublisher,
@@ -150,12 +148,6 @@ object PlatformPluginImplementation {
     val pgpSigningKey: Def.Initialize[Option[Long]] = Def.setting {
       if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
         Some(new java.math.BigInteger(PlatformPgpKey, 16).longValue)
-      } else None
-    }
-
-    val pgpPassphrase: Def.Initialize[Option[Array[Char]]] = Def.setting {
-      if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
-        sys.env.get("PLATFORM_PGP_PASSPHRASE").map(_.toCharArray)
       } else None
     }
 
