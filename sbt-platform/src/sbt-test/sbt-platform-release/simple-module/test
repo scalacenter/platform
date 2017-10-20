@@ -16,7 +16,11 @@ $ exec git commit -m "test"
 > inspect platformRootDir
 > inspect platformInsideCi
 
+> show pgpPassphrase
+> show pgpPublicRing
+> show pgpSecretRing
 > compile
+
 > run
 $ exists target/scala-2.11
 
