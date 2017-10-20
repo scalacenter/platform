@@ -89,7 +89,7 @@ lazy val `sbt-platform` = project
   .settings(
     sbtPlugin := true,
     scalaVersion := "2.12.3",
-    publishMavenStyle := true,
+    publishMavenStyle := false,
     addSbtPlugin(
       ("ohnosequences" % "sbt-github-release" % "0.5.1").classifier("fat").intransitive()),
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.18"),
