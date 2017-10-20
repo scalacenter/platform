@@ -2,25 +2,32 @@ pipeline:
   sftp_cache:
     image: plugins/sftp-cache
     restore: true
+    ignore_branch: true
+    when:
+      event: [ push, pull_request, tag, deployment ]
     mount:
       - /drone/.ivy2
-      - /drone/.coursier-cache
+      - /drone/.coursier
       - /drone/.sbt
       - /drone/.git
 
   build:
-    image: scalaplatform/scala:0.5
-    pull: true
+    image: scalaplatform/scala:2.0
     volumes:
-      - /platform:/keys
+      - /fake-scalacenter:/keys
     commands:
+      - git log | head -n 20
       - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
 
   sftp_cache:
     image: plugins/sftp-cache
     rebuild: true
+    ignore_branch: true
+    when:
+      status: [ success, failure ]
+      event: [ push, pull_request, tag, deployment ]
     mount:
       - /drone/.ivy2
-      - /drone/.coursier-cache
+      - /drone/.coursier
       - /drone/.sbt
       - /drone/.git

@@ -1,21 +1,13 @@
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
   publishArtifact in Test := false,
-  licenses := Seq(
-    // Scala Center license... BSD 3-clause
-    "BSD" -> url("http://opensource.org/licenses/BSD-3-Clause")
-  ),
+  // Scala Center license... BSD 3-clause
+  licenses := Seq("BSD" -> url("http://opensource.org/licenses/BSD-3-Clause")),
   homepage := Some(url("https://github.com/scalaplatform/platform")),
-  autoAPIMappings := true,
-  apiURL := Some(url("https://scalaplatform.github.io/platform")),
-  pomExtra :=
-    <developers>
-      <developer>
-        <id>jvican</id>
-        <name>Jorge Vicente Cantero</name>
-        <url></url>
-      </developer>
-    </developers>
+  developers += Developer("jvican",
+                          "Jorge Vicente Cantero",
+                          "jorge@vican.me",
+                          url("https://jorge.vican.me"))
 )
 
 inThisBuild(

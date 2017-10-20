@@ -12,7 +12,6 @@ $ exec git commit -m "test"
 
 > inspect platformRootDir
 > inspect platformInsideCi
-> inspect scmInfo
 
 > compile
 > run
