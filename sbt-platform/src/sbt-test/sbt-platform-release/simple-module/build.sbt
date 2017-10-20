@@ -1,7 +1,7 @@
 name := "foobar"
 
 // Minimum configuration settings to release
-inScope(Scope.GlobalScope)(List(
+inThisBuild(List(
   organization := "org.bitbucket.jplantdev",
   scalaVersion := "2.11.11",
   licenses := Seq("MPL-2.0" -> url("http://opensource.org/licenses/MPL-2.0")),
