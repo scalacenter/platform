@@ -93,6 +93,7 @@ lazy val `sbt-platform` = project
     addSbtPlugin(
       ("ohnosequences" % "sbt-github-release" % "0.5.1").classifier("fat").intransitive()),
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.18"),
+    addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-RC12"),
     addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "2.0.0"),
     addSbtPlugin("com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings" % "2.0.0"),
     libraryDependencies ++= testDependencies,
