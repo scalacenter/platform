@@ -12,7 +12,8 @@ object PlatformPlugin extends AutoPlugin {
       com.typesafe.sbt.SbtPgp &&
       com.typesafe.tools.mima.plugin.MimaPlugin &&
       ohnosequences.sbt.SbtGithubReleasePlugin &&
-      com.thoughtworks.sbtApiMappings.ApiMappings
+      com.thoughtworks.sbtApiMappings.ApiMappings &&
+      ch.epfl.scala.sbt.release.ReleaseEarlyPlugin
 
   override def globalSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.globalSettings
   override def buildSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.buildSettings
@@ -65,7 +66,7 @@ object PlatformPluginImplementation {
   import com.typesafe.tools.mima.plugin.MimaPlugin.{autoImport => MimaKeys}
   import ch.epfl.scala.sbt.release.{AutoImported => ReleaseEarlyKeys}
   import ohnosequences.sbt.SbtGithubReleasePlugin.{autoImport => GithubKeys}
-  import com.typesafe.sbt.SbtPgp.{autoImport => PgpKeys}
+  import com.typesafe.sbt.pgp.PgpKeys
 
   private final val PlatformReleasesRepo = "releases"
   private final val PlatformNightliesRepo = "nightlies"
@@ -92,6 +93,11 @@ object PlatformPluginImplementation {
     Keys.organizationHomepage := Some(url("https://platform.scala-lang.org")),
     // Following the SPP process, projects should cross-compile to the last two versions
     Keys.crossScalaVersions := twoLastScalaVersions,
+    // Can be removed from here when https://github.com/sbt/sbt-pgp/issues/111 is fixed
+    PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
+    PgpKeys.pgpPassphrase := Defaults.pgpPassphrase.value,
+    PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
+    PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
   )
 
   val globalSettings: Seq[Def.Setting[_]] = List(
@@ -158,22 +164,21 @@ object PlatformPluginImplementation {
     def getPgpRingFile(defaultRingFileName: String): Def.Initialize[File] = Def.setting {
       val rootDir = ThisPluginKeys.platformRootDir.value
       ThisPluginKeys.platformRootDir.value
-        .filter(_.exists())
-        .orElse(Option(file(System.getProperty("user.home"))))
         .map(_ / ".gnupg" / defaultRingFileName)
+        .filter(_.exists())
         .getOrElse(sys.error(Feedback.expectedCustomRing))
     }
 
     val pgpPublicRing: Def.Initialize[File] = Def.settingDyn {
       if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
         getPgpRingFile(ThisPluginKeys.platformDefaultPublicRingName.value)
-      } else Def.setting(pgpPublicRing.value)
+      } else Def.setting(PgpKeys.pgpPublicRing.value)
     }
 
     val pgpSecretRing: Def.Initialize[File] = Def.settingDyn {
       if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
         getPgpRingFile(ThisPluginKeys.platformDefaultPrivateRingName.value)
-      } else Def.setting(pgpSecretRing.value)
+      } else Def.setting(PgpKeys.pgpSecretRing.value)
     }
 
     /**

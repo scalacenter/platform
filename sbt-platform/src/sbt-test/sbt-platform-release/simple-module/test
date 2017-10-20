@@ -7,8 +7,10 @@ $ exec git add .
 $ exec git commit -m "test"
 
 > show version
-> show pgpPublicRing
-> show pgpSecretRing
+> inspect pgpPassphrase
+> inspect pgpPublicRing
+> inspect pgpSecretRing
+> inspect releaseEarlyNoGpg
 
 > inspect platformRootDir
 > inspect platformInsideCi
