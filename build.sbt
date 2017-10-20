@@ -97,17 +97,21 @@ lazy val `sbt-platform` = project
     addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "2.0.0"),
     addSbtPlugin("com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings" % "2.0.0"),
     libraryDependencies ++= testDependencies,
-    scriptedLaunchOpts := Seq(
-      "-Dplugin.version=" + version.value,
-      "-Xmx1g",
-      "-Xss16m",
-      "-Dplatform.debug=true",
-      "-Dplatform.test=true"
-    ) ++ {
-      // Pass along custom boot properties if specified
-      val bootProps = "sbt.boot.properties"
-      sys.props.get(bootProps).map(x => s"-D$bootProps=$x").toList
-    },
     scriptedBufferLog := false,
-    javaOptions in Test ++= Seq("-Dplatform.debug=true", "-Dplatform.test=true")
+    scriptedLaunchOpts := {
+      val name = Keys.name.value
+      val version = Keys.version.value
+      val baseDirectory = Keys.baseDirectory.in(platform).value
+      Seq(
+        s"-Dplugin.version=$version",
+        "-Xmx1g",
+        "-Xss16m",
+        s"-Dsourcedep.name=$name",
+        s"-Dsourcedep.basedir=${baseDirectory.getAbsolutePath()}",
+      ) ++ {
+        // Pass along custom boot properties if specified
+        val bootProps = "sbt.boot.properties"
+        sys.props.get(bootProps).map(x => s"-D$bootProps=$x").toList
+      }
+    },
   )
