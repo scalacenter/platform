@@ -95,8 +95,8 @@ object PlatformPluginImplementation {
     Keys.crossScalaVersions := twoLastScalaVersions,
     // Can be removed from here when https://github.com/sbt/sbt-pgp/issues/111 is fixed
     PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
-    PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
-    PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
+    PgpKeys.pgpPublicRing := file("/drone/.gnupg/pubring.asc"),
+    PgpKeys.pgpSecretRing := file("/drone/.gnupg/secring.asc"),
   )
 
   val globalSettings: Seq[Def.Setting[_]] = List(
@@ -105,9 +105,9 @@ object PlatformPluginImplementation {
     ThisPluginKeys.platformGitHubToken := Defaults.platformGitHubToken.value,
     ThisPluginKeys.platformDefaultPublicRingName := Defaults.platformDefaultPublicRingName.value,
     ThisPluginKeys.platformDefaultPrivateRingName := Defaults.platformDefaultPrivateRingName.value,
+    PgpKeys.pgpPublicRing := file("/drone/.gnupg/pubring.asc"),
+    PgpKeys.pgpSecretRing := file("/drone/.gnupg/secring.asc"),
     PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
-    PgpKeys.pgpPublicRing := Defaults.pgpPublicRing.value,
-    PgpKeys.pgpSecretRing := Defaults.pgpSecretRing.value,
     ReleaseEarlyKeys.releaseEarlyWith := ReleaseEarlyKeys.SonatypePublisher,
     Keys.onLoadMessage := Defaults.intro,
     // Must be added to sbt-release-early instead of sbt-platform
