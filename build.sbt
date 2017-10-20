@@ -1,9 +1,5 @@
 lazy val publishSettings = Seq(
   publishMavenStyle := true,
-  bintrayOrganization := Some("scalaplatform"),
-  bintrayRepository := "tools",
-  bintrayPackageLabels := Seq("scala", "platform", "tools", "sbt"),
-  publishTo := (publishTo in bintray).value,
   publishArtifact in Test := false,
   licenses := Seq(
     // Scala Center license... BSD 3-clause
@@ -22,13 +18,15 @@ lazy val publishSettings = Seq(
     </developers>
 )
 
-inThisBuild(Seq(
-  organization := "org.scala-lang.platform",
-  resolvers += Resolver.jcenterRepo,
-  resolvers += Resolver.bintrayRepo("jvican", "releases"),
-  resolvers += Resolver.bintrayRepo("scalaplatform", "tools"),
-  updateOptions := updateOptions.value.withCachedResolution(true)
-))
+inThisBuild(
+  Seq(
+    organization := "org.scala-lang.platform",
+    resolvers += Resolver.jcenterRepo,
+    resolvers += Resolver.bintrayRepo("jvican", "releases"),
+    resolvers += Resolver.bintrayRepo("scalaplatform", "tools"),
+    updateOptions := updateOptions.value.withCachedResolution(true)
+  )
+)
 
 lazy val compilerOptions = Seq(
   "-deprecation",
@@ -100,8 +98,8 @@ lazy val `sbt-platform` = project
     sbtPlugin := true,
     scalaVersion := "2.12.3",
     publishMavenStyle := false,
-    resolvers += "Jenkins repo" at "http://repo.jenkins-ci.org/public/",
-    addSbtPlugin("ohnosequences" % "sbt-github-release" % "0.5.0"),
+    addSbtPlugin(
+      ("ohnosequences" % "sbt-github-release" % "0.5.1").classifier("fat").intransitive()),
     addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.1.18"),
     addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "2.0.0"),
     addSbtPlugin("com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings" % "2.0.0"),
