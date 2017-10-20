@@ -134,10 +134,8 @@ object PlatformPluginImplementation {
       githubTask.triggeredBy(ReleaseEarlyKeys.releaseEarly)
     }
 
-    val platformDefaultPublicRingName: Def.Initialize[String] =
-      Def.setting("platform.pubring.asc")
-    val platformDefaultPrivateRingName: Def.Initialize[String] =
-      Def.setting("platform.secring.asc")
+    val platformDefaultPublicRingName: Def.Initialize[String] = Def.setting("pubring.asc")
+    val platformDefaultPrivateRingName: Def.Initialize[String] = Def.setting("secring.asc")
 
     final val GithubPlatformTokenKey = "GITHUB_PLATFORM_TOKEN"
     private val missingToken = Feedback.undefinedEnvironmentVariable(GithubPlatformTokenKey)
@@ -161,24 +159,27 @@ object PlatformPluginImplementation {
       } else None
     }
 
-    def getPgpRingFile(defaultRingFileName: String): Def.Initialize[File] = Def.setting {
+    def getPgpRingFile(defaultRingFileName: String,
+                       defaultRing: File): Def.Initialize[File] = Def.setting {
       val rootDir = ThisPluginKeys.platformRootDir.value
       ThisPluginKeys.platformRootDir.value
         .map(_ / ".gnupg" / defaultRingFileName)
         .filter(_.exists())
-        .getOrElse(sys.error(Feedback.expectedCustomRing))
+        .getOrElse(defaultRing)
     }
 
     val pgpPublicRing: Def.Initialize[File] = Def.settingDyn {
+      val defaultRing = PgpKeys.pgpPublicRing.value
       if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
-        getPgpRingFile(ThisPluginKeys.platformDefaultPublicRingName.value)
-      } else Def.setting(PgpKeys.pgpPublicRing.value)
+        getPgpRingFile(ThisPluginKeys.platformDefaultPublicRingName.value, defaultRing)
+      } else Def.setting(defaultRing)
     }
 
     val pgpSecretRing: Def.Initialize[File] = Def.settingDyn {
+      val defaultRing = PgpKeys.pgpSecretRing.value
       if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
-        getPgpRingFile(ThisPluginKeys.platformDefaultPrivateRingName.value)
-      } else Def.setting(PgpKeys.pgpSecretRing.value)
+        getPgpRingFile(ThisPluginKeys.platformDefaultPrivateRingName.value, defaultRing)
+      } else Def.setting(defaultRing)
     }
 
     /**

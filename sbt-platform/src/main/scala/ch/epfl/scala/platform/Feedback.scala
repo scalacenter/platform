@@ -70,7 +70,7 @@ object Feedback {
     "Undefined $HOME disallows the default pgp ring folder. Set it or redefine `platformPgpRings`."
 
   val expectedCustomRing =
-    "Default rings were not found. Define `platformPgpRings` to point to existing pgp rings."
+    "Either the public or the private pgp ring or both could not be found."
 
   val undefinedPreviousMiMaVersions =
     "MiMa could not find previous versions. MiMa will not be executed."

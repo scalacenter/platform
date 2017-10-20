@@ -7,6 +7,7 @@ $ exec git add .
 $ exec git commit -m "test"
 
 > show version
+> show useGpg
 > inspect pgpPassphrase
 > inspect pgpPublicRing
 > inspect pgpSecretRing
