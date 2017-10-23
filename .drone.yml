@@ -15,7 +15,7 @@ pipeline:
       - /fake-scalacenter:/keys
     commands:
       - git log | head -n 20
-      - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
+      - sbt clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
 
   rebuild-cache:
     image: drillster/drone-volume-cache
