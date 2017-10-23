@@ -6,7 +6,7 @@ inThisBuild(List(
   scalaVersion := "2.12.3",
   licenses := Seq("MPL-2.0" -> url("http://opensource.org/licenses/MPL-2.0")),
   developers := List(Developer("foobar", "Foo Bar",  "foobar@gmail.com", url("https://foo.bar"))),
-  releaseEarlyWith := SonatypePublisher,
+  // Only necessary for scripted
   releaseEarlyEnableLocalReleases := true,
   scmInfo := Some(
   ScmInfo(
