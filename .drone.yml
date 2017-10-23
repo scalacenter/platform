@@ -1,18 +1,14 @@
 pipeline:
-  restore_cache:
-    image: appleboy/drone-sftp-cache
-    server: scalagesrv2.epfl.ch
-    port: 22
-    username: cachesftp
-    password: @/platform/id_rsa
-    path: /home/cachesftp/cache
+  restore-cache:
+    image: drillster/drone-volume-cache
     restore: true
-    ignore_branch: true
     mount:
       - /drone/.ivy2
       - /drone/.coursier
       - /drone/.sbt
       - /drone/.git
+    volumes:
+      - /tmp/cache:/cache
 
   build:
     image: scalaplatform/scala:2.0
@@ -22,17 +18,13 @@ pipeline:
       - git log | head -n 20
       - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
 
-  rebuild_cache:
-    image: appleboy/drone-sftp-cache
-    server: scalagesrv2.epfl.ch
-    port: 22
-    username: cachesftp
-    password: @/platform/id_rsa
-    path: /home/cachesftp/cache
+  rebuild-cache:
+    image: drillster/drone-volume-cache
     rebuild: true
-    ignore_branch: true
     mount:
       - /drone/.ivy2
       - /drone/.coursier
       - /drone/.sbt
       - /drone/.git
+    volumes:
+      - /tmp/cache:/cache
