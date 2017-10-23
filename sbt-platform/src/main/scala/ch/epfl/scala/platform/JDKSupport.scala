@@ -1,6 +1,7 @@
 package ch.epfl.scala.platform
 
 import sbt.{AutoPlugin, Def, PluginTrigger, Plugins, Keys, Compile, Test}
+import sbt.librarymanagement.CrossVersion
 import java.io.File
 
 object JDKSupport extends AutoPlugin {
@@ -56,14 +57,24 @@ object JavaImplementations {
     val javaHomeId = Keys.javaHome.key.label
     val javaHome: Def.Initialize[Option[File]] = Def.setting {
       val logger = Keys.sLog.value
+      val scalaVersion = Keys.scalaVersion.value
       if (SbtPlatformKeys.platformInsideCi.value) {
-        val supposedHome =
-          if (useJDK("7")) ThisPluginKeys.platformJavaHome7.value
-          else if (useJDK("9")) ThisPluginKeys.platformJavaHome9.value
-          else ThisPluginKeys.platformJavaHome8.value // default is JDK8
+        val (supposedHome, isPostJDK7) =
+          if (useJDK("7")) (ThisPluginKeys.platformJavaHome7.value, false)
+          else if (useJDK("9")) (ThisPluginKeys.platformJavaHome9.value, true)
+          else (ThisPluginKeys.platformJavaHome8.value, true) // default is JDK8
 
         supposedHome.flatMap {
-          case home if home.exists() && CURRENT_JAVA_HOME != home.getAbsolutePath() => supposedHome
+          case home if home.exists() && CURRENT_JAVA_HOME != home.getAbsolutePath() =>
+            if (isPostJDK7) {
+              // The JDK home is correct, but let's check that it's valid with our scala version
+              CrossVersion.partialVersion(scalaVersion) match {
+                case Some((2, n)) if n >= 12 => supposedHome
+                case Some((2, n)) =>
+                  logger.error(s"Scala version $scalaVersion needs JDK8 or previous."); supposedHome
+                case n @ None => logger.error(s"Unrecognised scala version $scalaVersion."); n
+              }
+            } else supposedHome
           case home =>
             if (!home.exists()) logger.warn(s"`$javaHomeId` is undefined; '$home' does not exist.")
             else logger.warn(s"`$javaHomeId` is undefined; it's the same as the running JDK.")
