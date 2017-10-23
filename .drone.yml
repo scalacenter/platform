@@ -3,10 +3,9 @@ pipeline:
     image: drillster/drone-volume-cache
     restore: true
     mount:
-      - /drone/.ivy2
-      - /drone/.coursier
+      - /drone/.ivy2/cache
+      - /drone/.coursier/cache
       - /drone/.sbt
-      - /drone/.git
     volumes:
       - /tmp/cache:/cache
 
@@ -22,9 +21,8 @@ pipeline:
     image: drillster/drone-volume-cache
     rebuild: true
     mount:
-      - /drone/.ivy2
-      - /drone/.coursier
+      - /drone/.ivy2/cache
+      - /drone/.coursier/cache
       - /drone/.sbt
-      - /drone/.git
     volumes:
       - /tmp/cache:/cache
