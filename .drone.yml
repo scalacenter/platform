@@ -1,10 +1,13 @@
 pipeline:
-  sftp_cache:
-    image: plugins/sftp-cache
+  restore_cache:
+    image: appleboy/drone-sftp-cache
+    server: scalagesrv2.epfl.ch
+    port: 22
+    username: cachesftp
+    password: @/platform/id_rsa
+    path: /home/cachesftp/cache
     restore: true
     ignore_branch: true
-    when:
-      event: [ push, pull_request, tag, deployment ]
     mount:
       - /drone/.ivy2
       - /drone/.coursier
@@ -19,13 +22,15 @@ pipeline:
       - git log | head -n 20
       - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
 
-  sftp_cache:
-    image: plugins/sftp-cache
+  rebuild_cache:
+    image: appleboy/drone-sftp-cache
+    server: scalagesrv2.epfl.ch
+    port: 22
+    username: cachesftp
+    password: @/platform/id_rsa
+    path: /home/cachesftp/cache
     rebuild: true
     ignore_branch: true
-    when:
-      status: [ success, failure ]
-      event: [ push, pull_request, tag, deployment ]
     mount:
       - /drone/.ivy2
       - /drone/.coursier
