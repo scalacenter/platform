@@ -13,6 +13,9 @@ pipeline:
     image: scalaplatform/scala:2.0
     # These secrets are all fake and uninteresting.
     secrets: [ sonatype_user, sonatype_password, github_platform_token, pgp_password ]
+    # Do not repeat CI run if pull request is made in another branch that is not master.
+    when:
+      branch: master
     volumes:
       - /fake-scalacenter:/keys
     commands:
