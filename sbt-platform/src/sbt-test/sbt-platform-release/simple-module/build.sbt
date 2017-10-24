@@ -14,9 +14,10 @@ inThisBuild(List(
 ))
 
 val foobar = project.in(file("."))
-.settings(
-    pgpPublicRing := file("/drone/.gnupg/pubring.asc"),
-    pgpSecretRing := file("/drone/.gnupg/secring.asc"),
+  .settings(
     // We override this since we don't have the full Platform environment here.
-    pgpSigningKey := None
-)
+    pgpSigningKey := None,
+    // To test that the release works, make sure that we enable doc and source jar gen
+    Keys.publishArtifact in (Compile, Keys.packageDoc) := true,
+    Keys.publishArtifact in (Compile, Keys.packageSrc) := true,
+  )
