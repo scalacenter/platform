@@ -14,6 +14,8 @@ pipeline:
     volumes:
       - /fake-scalacenter:/keys
     commands:
+      - echo $${SONATYPE_USER}
+      - echo $${GITHUB_PLATFORM_TOKEN}
       - git log | head -n 20
       - sbt clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
 
