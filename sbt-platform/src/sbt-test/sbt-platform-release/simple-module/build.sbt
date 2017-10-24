@@ -17,5 +17,6 @@ val foobar = project.in(file("."))
 .settings(
     pgpPublicRing := file("/drone/.gnupg/pubring.asc"),
     pgpSecretRing := file("/drone/.gnupg/secring.asc"),
-    pgpSigningKey := Some(new java.math.BigInteger("11BCFDCC60929524", 16).longValue)
+    // We override this since we don't have the full Platform environment here.
+    pgpSigningKey := None
 )
