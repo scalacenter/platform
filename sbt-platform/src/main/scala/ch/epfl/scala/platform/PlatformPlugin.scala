@@ -67,6 +67,7 @@ object PlatformPluginImplementation {
   import ch.epfl.scala.sbt.release.{AutoImported => ReleaseEarlyKeys}
   import ohnosequences.sbt.SbtGithubReleasePlugin.{autoImport => GithubKeys}
   import com.typesafe.sbt.pgp.PgpKeys
+  import bintray.BintrayPlugin.{autoImport => BintrayKeys}
 
   private final val PlatformReleasesRepo = "releases"
   private final val PlatformNightliesRepo = "nightlies"
@@ -85,6 +86,8 @@ object PlatformPluginImplementation {
     Keys.autoAPIMappings := true,
     MimaKeys.mimaReportBinaryIssues := Defaults.mimaReportBinaryIssues.value,
     GithubKeys.githubRelease := Defaults.githubRelease.value,
+    // Remove the default bintray credentials because they are not present in CI
+    Keys.credentials --= (Keys.credentials in BintrayKeys.bintray).value,
   ) ++ publishArtifactSettings
 
   val buildSettings: Seq[Def.Setting[_]] = List(
