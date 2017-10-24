@@ -22,6 +22,4 @@ $ exec git commit -m "test"
 > compile
 
 > run
-$ exists target/scala-2.11
-
 > releaseEarly

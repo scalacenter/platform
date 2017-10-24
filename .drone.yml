@@ -11,12 +11,13 @@ pipeline:
 
   build:
     image: scalaplatform/scala:2.0
+    # These secrets are all fake and uninteresting.
     secrets: [ sonatype_user, sonatype_password, github_platform_token, pgp_password ]
     volumes:
       - /fake-scalacenter:/keys
     commands:
-      - echo $SONATYPE_USER
-      - echo $GITHUB_PLATFORM_TOKEN
+      - git log | head -n 20
+      - sbt clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
 
   rebuild-cache:
     image: drillster/drone-volume-cache
