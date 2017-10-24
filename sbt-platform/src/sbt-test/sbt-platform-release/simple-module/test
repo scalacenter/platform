@@ -16,7 +16,6 @@ $ exec git commit -m "test"
 > inspect foobar/pgpPassphrase
 > inspect foobar/pgpPublicRing
 > inspect foobar/pgpSecretRing
-> compile
 
-> foobar/run
+> compile
 > foobar/releaseEarly
