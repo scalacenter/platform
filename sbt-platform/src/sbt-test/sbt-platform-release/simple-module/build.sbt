@@ -1,5 +1,3 @@
-name := "foobar"
-
 // Minimum configuration settings to release
 inThisBuild(List(
   organization := "org.bitbucket.jplantdev",
@@ -14,3 +12,5 @@ inThisBuild(List(
     "scm:git:git@github.com:scalacenter/sbt-platform.git"
   )),
 ))
+
+val foobar = project.in(file("."))

@@ -139,7 +139,6 @@ object PlatformPluginImplementation {
     private val missingToken = Feedback.undefinedEnvironmentVariable(GithubPlatformTokenKey)
     private val configFile = file(System.getProperty("user.home")) / ".github"
     val platformGitHubToken: Def.Initialize[String] = Def.setting {
-      println(sys.env)
       val token = sys.env.getOrElse(GithubPlatformTokenKey, sys.error(missingToken))
       IO.write(configFile, s"oauth = $token")
       token

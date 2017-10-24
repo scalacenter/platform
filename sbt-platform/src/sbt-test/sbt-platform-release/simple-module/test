@@ -7,19 +7,15 @@ $ exec git add .
 $ exec git commit -m "test"
 
 > show version
-> show useGpg
-> inspect pgpPassphrase
-> inspect pgpPublicRing
-> inspect pgpSecretRing
-> inspect releaseEarlyNoGpg
 
+> inspect releaseEarlyNoGpg
 > inspect platformRootDir
 > inspect platformInsideCi
 
-> show pgpPassphrase
-> show pgpPublicRing
-> show pgpSecretRing
+> inspect foobar/pgpPassphrase
+> inspect foobar/pgpPublicRing
+> inspect foobar/pgpSecretRing
 > compile
 
-> run
-> releaseEarly
+> foobar/run
+> foobar/releaseEarly
