@@ -1,4 +1,4 @@
-package ch.epfl.scala.platform;
+package ch.epfl.scala.platform
 
 object Feedback {
   val PlatformRepo = "https://github.com/scalacenter/platform-staging."
@@ -6,6 +6,9 @@ object Feedback {
     "Make sure your versioning scheme follows semantic versioning."
   val BugReport =
     s"Please, report this bug at $PlatformRepo."
+
+  def skipMiMa(name: String, version: String): String =
+    s"Skip MiMa checks because module $name $version starts with '0' and can break bincompat."
 
   def versionIsAlreadyPublished(version: String) =
     s"The version $version is already published. Try another one."
@@ -67,7 +70,7 @@ object Feedback {
     "Undefined $HOME disallows the default pgp ring folder. Set it or redefine `platformPgpRings`."
 
   val expectedCustomRing =
-    "Default rings were not found. Define `platformPgpRings` to point to existing pgp rings."
+    "Either the public or the private pgp ring or both could not be found."
 
   val undefinedPreviousMiMaVersions =
     "MiMa could not find previous versions. MiMa will not be executed."

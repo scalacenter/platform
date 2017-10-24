@@ -1,26 +1,33 @@
 pipeline:
-  sftp_cache:
-    image: plugins/sftp-cache
+  restore-cache:
+    image: drillster/drone-volume-cache
     restore: true
     mount:
-      - /drone/.ivy2
-      - /drone/.coursier-cache
+      - /drone/.ivy2/cache
+      - /drone/.coursier/cache
       - /drone/.sbt
-      - /drone/.git
+    volumes:
+      - /tmp/cache:/cache
 
   build:
-    image: scalaplatform/scala:0.5
-    pull: true
+    image: scalaplatform/scala:2.0
+    # These secrets are all fake and uninteresting.
+    secrets: [ sonatype_user, sonatype_password, github_platform_token, pgp_password ]
+    # Do not repeat CI run if pull request is made in another branch that is not master.
+    when:
+      branch: master
     volumes:
-      - /platform:/keys
+      - /fake-scalacenter:/keys
     commands:
-      - sbt clean test sbt-platform/clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
+      - git log | head -n 20
+      - sbt clean sbt-platform/test sbt-platform/publishLocal sbt-platform/scripted
 
-  sftp_cache:
-    image: plugins/sftp-cache
+  rebuild-cache:
+    image: drillster/drone-volume-cache
     rebuild: true
     mount:
-      - /drone/.ivy2
-      - /drone/.coursier-cache
+      - /drone/.ivy2/cache
+      - /drone/.coursier/cache
       - /drone/.sbt
-      - /drone/.git
+    volumes:
+      - /tmp/cache:/cache

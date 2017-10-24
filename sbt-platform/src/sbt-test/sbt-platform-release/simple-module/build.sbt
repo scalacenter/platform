@@ -1,20 +1,27 @@
-// This is obviously a trick so that `platformFetchPreviousArtifacts` succeed
-organization := "me.vican.jorge"
-name := "stoml"
-scalaVersion in Global := "2.11.8"
+// Minimum configuration settings to release
+inThisBuild(List(
+  organization := "org.bitbucket.jplantdev",
+  scalaVersion := "2.12.3",
+  licenses := Seq("MPL-2.0" -> url("http://opensource.org/licenses/MPL-2.0")),
+  homepage := Some(url("https://github.com/scalaplatform/platform")),
+  developers := List(Developer("foobar", "Foo Bar",  "foobar@gmail.com", url("https://foo.bar"))),
+  // Only necessary for scripted
+  releaseEarlyEnableLocalReleases := true,
+  scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/scalacenter/platform"),
+    "scm:git:git@github.com:scalacenter/platform.git"
+  )),
+))
 
-licenses := Seq("MPL-2.0" -> url("http://opensource.org/licenses/MPL-2.0"))
-
-lazy val checkVariablesContent =
-  taskKey[Unit]("Check the content of variables")
-checkVariablesContent := {
-  if (platformInsideCi.value) {
-    assert(platformCiEnvironment.value != None)
-  }
-}
-
-lazy val checkPreviousArtifact =
-  taskKey[Unit]("Check mimaPreviousArtifacts is set.")
-checkPreviousArtifact := {
-  assert(mimaPreviousArtifacts.value.nonEmpty)
-}
+val foobar = project.in(file("."))
+  .settings(
+    // We override this since we don't have the full Platform environment here.
+    pgpSigningKey := None,
+    // to test that the release works, make sure that we enable doc and source jar gen
+    Keys.publishArtifact in (Compile, Keys.packageDoc) := true,
+    Keys.publishArtifact in (Compile, Keys.packageSrc) := true,
+    // This for some reason is not overridden
+    pgpPublicRing := file("/drone/.gnupg/pubring.asc"),
+    pgpSecretRing := file("/drone/.gnupg/secring.asc"),
+  )

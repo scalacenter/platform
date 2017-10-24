@@ -1,7 +1,0 @@
-$ exec git init .
-$ exec git remote add origin https://github.com/scalaplatform/dummy
-$ exec git fetch
-$ exec git checkout -t origin/platform-release
-
-> compile
-> platformReleaseToGitHub

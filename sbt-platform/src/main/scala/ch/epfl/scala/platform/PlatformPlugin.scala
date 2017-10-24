@@ -1,389 +1,219 @@
 package ch.epfl.scala.platform
 
-import ch.epfl.scala.platform.github.{GitHubRelease, GitHubReleaser}
-import ch.epfl.scala.platform.search.{ModuleSearch, ScalaModule}
-import ch.epfl.scala.platform.github.GitHubReleaser.GitHubEndpoint
+import sbt.{AutoPlugin, Def, PluginTrigger, Plugins, Keys, Compile, Test, ThisBuild, Project}
+import java.io.File
 
-import coursier.core.Version
-import sbt._
-import sbtrelease.ReleasePlugin.autoImport.ReleaseStep
-import sbtrelease.Git
-import sbtrelease.Version.Bump
-
-import scala.util.control.Exception.catching
-import scala.util.Try
-
-object PlatformPlugin extends sbt.AutoPlugin {
-
-  object autoImport extends PlatformSettings
-
+object PlatformPlugin extends AutoPlugin {
+  val autoImport = AutoImportedKeys
   override def trigger: PluginTrigger = allRequirements
 
   override def requires: Plugins =
     bintray.BintrayPlugin &&
-      sbtrelease.ReleasePlugin &&
       com.typesafe.sbt.SbtPgp &&
       com.typesafe.tools.mima.plugin.MimaPlugin &&
-      coursier.CoursierPlugin &&
-      me.vican.jorge.drone.DronePlugin
+      ohnosequences.sbt.SbtGithubReleasePlugin &&
+      com.thoughtworks.sbtApiMappings.ApiMappings &&
+      ch.epfl.scala.sbt.release.ReleaseEarlyPlugin
 
-  override def projectSettings: Seq[Setting[_]] = PlatformKeys.settings
+  override def globalSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.globalSettings
+  override def buildSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.buildSettings
+  override def projectSettings: Seq[Def.Setting[_]] = PlatformPluginImplementation.projectSettings
 }
 
-trait PlatformSettings {
-  // FORMAT: OFF
-  val PlatformReleasesRepo = "releases"
-  val PlatformNightliesRepo = "nightlies"
+object AutoImportedKeys extends PlatformKeys.PlatformSettings with PlatformKeys.PlatformTasks {
+  val noPublishSettings: Seq[Def.Setting[_]] = List(
+    Keys.publish := {},
+    Keys.publishLocal := {},
+    Keys.publishArtifact in Compile := false,
+    Keys.publishArtifact in Test := false,
+    Keys.publishArtifact := false,
+    Keys.skip in Keys.publish := true,
+  )
 
-  import me.vican.jorge.drone.DronePlugin.autoImport.CIEnvironment
-  val platformInsideCi = settingKey[Boolean]("Checks if CI is executing the build.")
-  val platformCiEnvironment = settingKey[Option[CIEnvironment]]("Get the Drone environment.")
-  val platformModuleName = settingKey[String]("Name for the Platform module in Bintray.")
-  val platformModuleTags = settingKey[Seq[String]]("Tags for the platform module package in Bintray.")
-  val platformTargetBranch = settingKey[String]("Branch used for the platform release.")
-  val platformScalaModule = settingKey[ScalaModule]("Create the ScalaModule from the basic assert info.")
-  val platformSbtDefinedVersion = settingKey[Version]("Get the sbt-defined version of the current module.")
-  val platformGitHubToken = settingKey[String]("Token to publish releases to GitHub.")
-  val platformReleaseNotesDir = settingKey[File]("Directory with the markdown release notes.")
-  val platformGitHubRepo = settingKey[Option[(String, String)]]("Get GitHub organization and repository from .git folder.")
-  val platformSignArtifact = settingKey[Boolean]("Enable to sign artifacts with the platform pgp key.")
-  val platformPgpRings = settingKey[Option[(File, File)]]("Files that store the pgp public and secret ring respectively.")
-  val platformDefaultPublicRingName = settingKey[String]("Default file name for fetching the public gpg keys.")
-  val platformDefaultPrivateRingName = settingKey[String]("Default file name for fetching the private gpg keys.")
+  // This will be updated in future versions of the plugin
+  object ScalaVersions {
+    val latest210: String = "2.10.6"
+    val latest211: String = "2.11.11"
+    val latest212: String = "2.12.3"
+  }
 
-  val platformLogger = taskKey[Logger]("Return the sbt logger.")
-  val platformValidatePomData = taskKey[Unit]("Ensure that all the data is available before generating a POM file.")
-  val platformCurrentVersion = taskKey[Version]("Get the current version to be released.")
-  val platformNextVersion = taskKey[Version]("Derive and set the next version from the current version.")
-  val platformPreviousArtifacts = taskKey[Set[ModuleID]]("Get `mimaPreviousArtifacts` or fetch latest artifact to run MiMa.")
-  val platformLatestPublishedModule = taskKey[Option[ModuleID]]("Fetch latest published stable module.")
-  val platformLatestPublishedVersion = taskKey[Option[Version]]("Fetch latest published stable version.")
-  val platformRunMiMa = taskKey[Unit]("Run MiMa and report results based on current version.")
-  val platformGetReleaseNotes = taskKey[String]("Get the correct release notes for a release.")
-  val platformReleaseToGitHub = taskKey[Unit]("Create a release in GitHub.")
-  val platformActiveReleaseProcess = taskKey[Option[Seq[ReleaseStep]]]("The active release process if `releaseNightly` or `releaseStable` has been executed.")
-  val platformNightlyReleaseProcess = taskKey[Seq[ReleaseStep]]("Define the nightly release process for a Platform module.")
-  val platformStableReleaseProcess = taskKey[Seq[ReleaseStep]]("Define the nightly release process for a Platform module.")
-  val platformOnMergeReleaseProcess = taskKey[Seq[ReleaseStep]]("Define the nightly release process for a Platform module.")
+  def inCompileAndTest(ss: Def.Setting[_]*): Seq[Def.Setting[_]] =
+    List(Compile, Test).flatMap(sbt.inConfig(_)(ss))
 
-  val platformReleaseModule = taskKey[Unit]("Release a module on the CI.")
-  val platformBeforePublishHook = taskKey[Unit]("A hook to customize all the release processes before publishing to Bintray.")
-  val platformAfterPublishHook = taskKey[Unit]("A hook to customize all the release processes after publishing to Bintray.")
-  // FORMAT: ON
+  // We can add more stuff here in the future, I'm sure it'll be handy
+  def makeRoot(project: sbt.Project): sbt.Project =
+    project.settings(noPublishSettings)
 }
 
-object PlatformKeys extends Utils {
+object PlatformKeys {
+  import sbt.{settingKey, taskKey}
 
-  import PlatformPlugin.autoImport._
+  trait PlatformSettings {
+    val platformRootDir = settingKey[Option[File]]("Tells where the root directory is located.")
+    val platformInsideCi = settingKey[Boolean]("Checks if CI is executing the build.")
+    val platformGitHubToken = settingKey[String]("Token to publish releases to GitHub.")
+    val platformDefaultPublicRingName = settingKey[String]("Default file name of pgp public key.")
+    val platformDefaultPrivateRingName = settingKey[String]("Default file name of pgp private key.")
+  }
 
-  def settings: Seq[Setting[_]] =
-    resolverSettings ++ compilationSettings ++ publishSettings ++ platformSettings
+  trait PlatformTasks {}
+}
 
-  import sbt._, Keys._
-  import sbtrelease.ReleasePlugin.autoImport._
-  import bintray.BintrayPlugin.autoImport._
-  import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport._
-  import me.vican.jorge.drone.DronePlugin.autoImport._
+object PlatformPluginImplementation {
+  import sbt.{Task, file, fileToRichFile, url, IO, Global}
+  import ch.epfl.scala.platform.{AutoImportedKeys => ThisPluginKeys}
+  import sbtdynver.DynVerPlugin.{autoImport => DynVerKeys}
+  import com.typesafe.tools.mima.plugin.MimaPlugin.{autoImport => MimaKeys}
+  import ch.epfl.scala.sbt.release.{AutoImported => ReleaseEarlyKeys}
+  import ohnosequences.sbt.SbtGithubReleasePlugin.{autoImport => GithubKeys}
+  import com.typesafe.sbt.pgp.PgpKeys
+  import bintray.BintrayPlugin.{autoImport => BintrayKeys}
 
-  private val PlatformReleases =
-    Resolver.bintrayRepo("scalaplatform", PlatformReleasesRepo)
-  private val PlatformTools =
-    Resolver.bintrayRepo("scalaplatform", "tools")
+  private final val PlatformReleasesRepo = "releases"
+  private final val PlatformNightliesRepo = "nightlies"
+  private final val twoLastScalaVersions = List("2.12.3", "2.11.11")
 
-  lazy val resolverSettings = Seq(
-    resolvers ++= Seq(PlatformReleases, PlatformTools))
-
-  private val defaultCompilationFlags =
-    Seq("-deprecation", "-encoding", "UTF-8", "-unchecked")
-  private val twoLastScalaVersions = Seq("2.10.6", "2.11.8")
-  lazy val compilationSettings: Seq[Setting[_]] = Seq(
-    scalacOptions in Compile ++= defaultCompilationFlags,
-    crossScalaVersions in Compile := twoLastScalaVersions
+  private val publishArtifactSettings = AutoImportedKeys.inCompileAndTest(
+    Keys.publishArtifact in (Compile, Keys.packageDoc) :=
+      Defaults.publishDocAndSourceArtifact.value,
+    Keys.publishArtifact in (Compile, Keys.packageSrc) :=
+      Defaults.publishDocAndSourceArtifact.value
   )
 
-  lazy val publishSettings: Seq[Setting[_]] = Seq(
-    publishTo := (publishTo in bintray).value,
-    // Necessary for synchronization with Maven Central
-    publishMavenStyle := true,
-    // Don't publish tests by default
-    publishArtifact in Test := false,
-    bintrayReleaseOnPublish in ThisBuild := false,
-    bintrayRepository := PlatformReleasesRepo,
-    bintrayOrganization := Some("scalaplatform"),
-    releaseCrossBuild := true
-  ) ++ defaultReleaseSettings
+  val projectSettings: Seq[Def.Setting[_]] = List(
+    Keys.publishArtifact in Test := false,
+    Keys.publishMavenStyle := true,
+    Keys.autoAPIMappings := true,
+    MimaKeys.mimaReportBinaryIssues := Defaults.mimaReportBinaryIssues.value,
+    GithubKeys.githubRelease := Defaults.githubRelease.value,
+    // Remove the default bintray credentials because they are not present in CI
+    Keys.credentials --= (Keys.credentials in BintrayKeys.bintray).value,
+  ) ++ publishArtifactSettings
 
-  /** Define custom release steps and add them to the default pipeline. */
-  import com.typesafe.sbt.SbtPgp.autoImport._
-
-  lazy val defaultReleaseSettings = Seq(
-    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-    // Empty the default release process to avoid errors
-    releaseProcess := Seq.empty[ReleaseStep],
-    platformNextVersion := {
-      val logger = platformLogger.value
-      val definedVersion = platformCurrentVersion.value
-      // TODO(jvican): Make sure minor and major depend on platform version
-      val bumpFunction = releaseVersionBump.value
-      val nextVersion =
-        bumpFunction.bump.apply(definedVersion.toSbtRelease).toCoursier
-      logger.info(s"Deriving next version from $definedVersion.")
-      logger.info(s"Next version is set to $nextVersion.")
-      nextVersion
-    },
-    platformActiveReleaseProcess := None,
-    platformNightlyReleaseProcess :=
-      PlatformReleaseProcess.Nightly.releaseProcess,
-    platformOnMergeReleaseProcess :=
-      PlatformReleaseProcess.OnMerge.releaseProcess,
-    platformStableReleaseProcess :=
-      PlatformReleaseProcess.Stable.releaseProcess
+  val buildSettings: Seq[Def.Setting[_]] = List(
+    Keys.organizationName := "The Scala Platform",
+    Keys.organization := "org.scala-lang.platform",
+    Keys.organizationHomepage := Some(url("https://platform.scala-lang.org")),
+    // Following the SPP process, projects should cross-compile to the last two versions
+    Keys.crossScalaVersions := twoLastScalaVersions,
+    // Can be removed from here when https://github.com/sbt/sbt-pgp/issues/111 is fixed
+    PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
+    PgpKeys.pgpPublicRing := file("/drone/.gnupg/pubring.asc"),
+    PgpKeys.pgpSecretRing := file("/drone/.gnupg/secring.asc"),
   )
 
-  val emptyModules = Set.empty[ModuleID]
-  lazy val platformSettings: Seq[Setting[_]] = Seq(
-    platformInsideCi := insideDrone.value,
-    platformCiEnvironment := droneEnvironment.value,
-    platformLogger := streams.value.log,
-    platformModuleName := bintrayPackage.value,
-    platformModuleTags := bintrayPackageLabels.value,
-    platformTargetBranch := "platform-release",
-    platformValidatePomData := {
-      Def.taskDyn {
-        if (publishArtifact.value) {
-          Def.task {
-            if (scmInfo.value.isEmpty)
-              throw new NoSuchElementException(
-                Feedback.forceDefinitionOfScmInfo)
-            if (licenses.value.isEmpty)
-              throw new NoSuchElementException(Feedback.forceValidLicense)
-            bintrayEnsureLicenses.value
-          }
-        } else Def.task { () }
-      }.value
-    },
-    platformSbtDefinedVersion := {
-      if (version.value.isEmpty)
-        sys.error(Feedback.unexpectedEmptyVersion)
-      val definedVersion = version.value
-      Try(Version(definedVersion))
-        .getOrElse(sys.error(Feedback.invalidVersion(definedVersion)))
-    },
-    platformCurrentVersion := {
-      // Current version is a task whose value changes over time
-      platformSbtDefinedVersion.value
-    },
-    platformScalaModule := {
-      val org = organization.value
-      val artifact = moduleName.value
-      val version = scalaBinaryVersion.value
-      ScalaModule(org, artifact, version)
-    },
-    mimaPreviousArtifacts := {
-      val highPriorityArtifacts = mimaPreviousArtifacts.value
-      if (highPriorityArtifacts.isEmpty) {
-        val targetModule = platformScalaModule.value
-        // FIX: This is horrible and clunky
-        Helper
-          .getPublishedArtifacts(targetModule)
-          .fold[Set[ModuleID]](
-            _ => { println(Feedback.failedConnection); Set.empty },
-            identity[Set[ModuleID]]
-          )
-      } else highPriorityArtifacts
-    },
-    platformLatestPublishedModule := {
-      Helper.getPublishedArtifacts(platformScalaModule.value) match {
-        case Left(error) => throw error
-        case Right(modules) => modules.headOption
-      }
-    },
-    platformLatestPublishedVersion := {
-      platformLatestPublishedModule.value
-        .map(m => Version(m.revision))
-    },
-    /* This is a task, not a settings as `mimaPreviousArtifacts.` */
-    platformPreviousArtifacts := {
-      val previousArtifacts = mimaPreviousArtifacts.value
-      // Retry in case sbt boots up without Internet connection
-      if (previousArtifacts.nonEmpty) previousArtifacts
-      else platformLatestPublishedModule.value.toSet
-    },
-    releaseVersionBump := Bump.Minor,
-    platformRunMiMa := {
-      val currentVersion = platformCurrentVersion.value
-      val previousVersions = platformPreviousArtifacts.value
-        .map(m => Version(m.revision))
-      if (previousVersions.isEmpty)
-        platformLogger.value.error(Feedback.undefinedPreviousMiMaVersions)
-      val canBreakCompat = currentVersion.repr.startsWith("0.")
-      val majorCurrentNumber = currentVersion.items.head
-      val majorBumps = previousVersions.map(previousVersion =>
-        majorCurrentNumber > previousVersion.items.head)
-      mimaFailOnProblem := !canBreakCompat && majorBumps.exists(b => b)
-      if (canBreakCompat && mimaPreviousArtifacts.value.isEmpty)
-        sys.error(Feedback.forceDefinitionOfPreviousArtifacts)
-      mimaReportBinaryIssues.value
-    },
-    ///////////////////////////////////////////////////////////////////////////
-    ////////////////////////////// RELEASE NOTES //////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    platformReleaseNotesDir := baseDirectory.value / "notes",
-    platformGetReleaseNotes := {
-      val version = platformCurrentVersion.value
-      val mdFile = s"$version.md"
-      val markdownFile = s"$version.markdown"
-      val notes = List(mdFile, markdownFile).foldLeft("") { (acc, curr) =>
-        if (acc.nonEmpty) acc
-        else {
-          val presumedFile = platformReleaseNotesDir.value / curr
-          if (!presumedFile.exists) acc
-          else IO.read(presumedFile)
-        }
-      }
-      if (notes.isEmpty)
-        platformLogger.value.warn(Feedback.emptyReleaseNotes)
-      notes
-    },
-    ///////////////////////////////////////////////////////////////////////////
-    ////////////////////////////// GITHUB LOGIC ///////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    platformGitHubRepo := {
-      releaseVcs.value match {
-        case Some(g: Git) => getRemoteUrl(g)
-        case Some(vcs) => sys.error("Only git is supported for now.")
-        case None => None
-      }
-    },
-    scmInfo := {
-      scmInfo.value.orElse {
-        platformGitHubRepo.value.map { t =>
-          val (org, repo) = t
-          val gitHubUrl = GitHubReleaser.generateGitHubUrl(org, repo)
-          ScmInfo(url(gitHubUrl), s"scm:git:$gitHubUrl")
-        }
-      }
-    },
-    platformGitHubToken := {
-      val tokenEnvName = "GITHUB_PLATFORM_TOKEN"
-      sys.env.getOrElse(
-        tokenEnvName,
-        sys.error(Feedback.undefinedEnvironmentVariable(tokenEnvName)))
-    },
-    platformReleaseToGitHub := {
-      def createReleaseInGitHub(org: String, repo: String, token: String) = {
-        val endpoint = GitHubEndpoint(org, repo, token)
-        val notes = platformGetReleaseNotes.value
-        val releaseVersion = platformCurrentVersion.value
-        platformLogger.value.info(
-          s"Creating a GitHub release for $releaseVersion in $org:$repo.")
-        val release = GitHubRelease(releaseVersion, notes)
-        endpoint.pushRelease(release)
-      }
+  val globalSettings: Seq[Def.Setting[_]] = List(
+    ThisPluginKeys.platformRootDir := Some(file("/drone")),
+    ThisPluginKeys.platformInsideCi := sys.env.get("CI").nonEmpty,
+    ThisPluginKeys.platformGitHubToken := Defaults.platformGitHubToken.value,
+    ThisPluginKeys.platformDefaultPublicRingName := Defaults.platformDefaultPublicRingName.value,
+    ThisPluginKeys.platformDefaultPrivateRingName := Defaults.platformDefaultPrivateRingName.value,
+    PgpKeys.pgpPublicRing := file("/drone/.gnupg/pubring.asc"),
+    PgpKeys.pgpSecretRing := file("/drone/.gnupg/secring.asc"),
+    PgpKeys.pgpSigningKey := Defaults.pgpSigningKey.value,
+    ReleaseEarlyKeys.releaseEarlyWith := ReleaseEarlyKeys.SonatypePublisher,
+    Keys.onLoadMessage := Defaults.intro,
+    // Must be added to sbt-release-early instead of sbt-platform
+    Keys.homepage := Keys.scmInfo.value.map(_.browseUrl),
+  )
 
-      val token = platformGitHubToken.value
-      val (org, repo) = platformGitHubRepo.value.getOrElse(
-        sys.error(Feedback.incorrectGitHubRepo))
-      createReleaseInGitHub(org, repo, token)
-    },
-    ///////////////////////////////////////////////////////////////////////////
-    //////////////////////////// SIGNED PUBLISH ///////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    platformSignArtifact := true,
-    platformDefaultPublicRingName := "platform.pubring.asc",
-    platformDefaultPrivateRingName := "platform.secring.asc",
-    platformPgpRings := {
-      val homeFolder = System.getProperty("user.home")
-      if (homeFolder.isEmpty) sys.error(Feedback.expectedCustomRing)
-      val gpgFolder = file(s"$homeFolder/.gnupg")
-      val publicRing = gpgFolder / platformDefaultPublicRingName.value
-      val privateRing = gpgFolder / platformDefaultPrivateRingName.value
-      Some(publicRing -> privateRing)
-    },
-    pgpSigningKey := {
-      val PlatformPgpKey = "11BCFDCC60929524"
-      if (platformSignArtifact.value) {
+  object Defaults {
+    import org.kohsuke.github.GHRelease
+
+    val mimaReportBinaryIssues: Def.Initialize[Task[Unit]] = Def.taskDyn {
+      val name = Keys.name.value
+      val version = Keys.version.value
+      val logger = Keys.streams.value.log
+      if (version.startsWith("0.")) Def.task(logger.warn(Feedback.skipMiMa(name, version)))
+      else MimaKeys.mimaReportBinaryIssues
+    }
+
+    val githubRelease: Def.Initialize[Task[GHRelease]] = Def.taskDyn {
+      // If empty string, this should be the fallback, but force it just in case sth changes.
+      val version = Keys.version.value
+      val githubTask = GithubKeys.githubRelease.toTask(version)
+      githubTask.triggeredBy(ReleaseEarlyKeys.releaseEarly)
+    }
+
+    val platformDefaultPublicRingName: Def.Initialize[String] = Def.setting("pubring.asc")
+    val platformDefaultPrivateRingName: Def.Initialize[String] = Def.setting("secring.asc")
+
+    final val GithubPlatformTokenKey = "GITHUB_PLATFORM_TOKEN"
+    private val missingToken = Feedback.undefinedEnvironmentVariable(GithubPlatformTokenKey)
+    private val configFile = file(System.getProperty("user.home")) / ".github"
+    val platformGitHubToken: Def.Initialize[String] = Def.setting {
+      val token = sys.env.getOrElse(GithubPlatformTokenKey, sys.error(missingToken))
+      IO.write(configFile, s"oauth = $token")
+      token
+    }
+
+    private final val PlatformPgpKey = "11BCFDCC60929524"
+    val pgpSigningKey: Def.Initialize[Option[Long]] = Def.setting {
+      if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
         Some(new java.math.BigInteger(PlatformPgpKey, 16).longValue)
       } else None
-    },
-    pgpPassphrase := {
-      if (platformSignArtifact.value)
-        sys.env.get("PLATFORM_PGP_PASSPHRASE").map(_.toCharArray)
-      else None
-    },
-    pgpPublicRing := {
-      if (platformSignArtifact.value) {
-        Helper.getPgpRingFile(platformCiEnvironment.value,
-                              platformPgpRings.value.map(_._1),
-                              platformDefaultPublicRingName.value)
-      } else pgpPublicRing.value
-    },
-    pgpSecretRing := {
-      if (platformSignArtifact.value) {
-        Helper.getPgpRingFile(platformCiEnvironment.value,
-                              platformPgpRings.value.map(_._2),
-                              platformDefaultPrivateRingName.value)
-      } else pgpSecretRing.value
-    },
-    ///////////////////////////////////////////////////////////////////////////
-    /////////////////////////// PLATFORM RELEASE //////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    platformBeforePublishHook := {},
-    platformAfterPublishHook := {},
-    platformReleaseModule := {
-      val commandToExecute = platformCiEnvironment.value match {
-        case Some(env) =>
-          if (env.tag.isDefined) Some(PlatformReleaseProcess.Stable.Alias)
-          else if (env.pullRequest.isDefined) None
-          else Some(PlatformReleaseProcess.OnMerge.Alias)
-        case None => sys.error(Feedback.onlyCiCommand("platformReleaseModule"))
-      }
-      commandToExecute
-        .map(cmd => Helper.runCommand(cmd)(state.value))
-        .getOrElse(platformLogger.value.info(Feedback.skipRelease))
-    },
-    commands += PlatformReleaseProcess.releaseCommand
-  )
-
-  object Helper {
-    def getPublishedArtifacts(
-        targetModule: ScalaModule): Either[Throwable, Set[ModuleID]] = {
-      catching(classOf[java.net.SocketException]).either {
-        val response = ModuleSearch.searchLatest(targetModule)
-        val moduleResponse = response.map(_.map(rmod =>
-          targetModule.orgId %% targetModule.artifactId % rmod.latest_version))
-        moduleResponse
-          .map(_.map(Set[ModuleID](_)).getOrElse(emptyModules))
-          .getOrElse(emptyModules)
-      }
     }
 
-    def getPgpRingFile(ciEnvironment: Option[CIEnvironment],
-                       customRing: Option[File],
-                       defaultRingFileName: String): File = {
-      ciEnvironment
-        .map(_.rootDir / ".gnupg" / defaultRingFileName)
-        .orElse(customRing)
-        .getOrElse(sys.error(Feedback.expectedCustomRing))
+    def getPgpRingFile(defaultRingFileName: String,
+                       defaultRing: File): Def.Initialize[File] = Def.setting {
+      val rootDir = ThisPluginKeys.platformRootDir.value
+      ThisPluginKeys.platformRootDir.value
+        .map(_ / ".gnupg" / defaultRingFileName)
+        .filter(_.exists())
+        .getOrElse(defaultRing)
     }
 
-    def runCommand(command: String): State => State = { st: State =>
-      import sbt.complete.Parser
-      @annotation.tailrec
-      def runCommand0(command: String, state: State): State = {
-        val nextState = Parser.parse(command, state.combinedParser) match {
-          case Right(cmd) => cmd()
-          case Left(msg) =>
-            throw sys.error(s"Invalid programmatic input:\n$msg")
+    val pgpPublicRing: Def.Initialize[File] = Def.settingDyn {
+      val defaultRing = PgpKeys.pgpPublicRing.value
+      if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
+        getPgpRingFile(ThisPluginKeys.platformDefaultPublicRingName.value, defaultRing)
+      } else Def.setting(defaultRing)
+    }
+
+    val pgpSecretRing: Def.Initialize[File] = Def.settingDyn {
+      val defaultRing = PgpKeys.pgpSecretRing.value
+      if (!ReleaseEarlyKeys.releaseEarlyNoGpg.value) {
+        getPgpRingFile(ThisPluginKeys.platformDefaultPrivateRingName.value, defaultRing)
+      } else Def.setting(defaultRing)
+    }
+
+    /**
+      * This setting figures out whether the version is a snapshot or not and configures
+      * the source and doc artifacts that are published by the build.
+      *
+      * Snapshot is a term with no clear definition. In this code, a snapshot is a revision
+      * that has either build or time metadata in its representation. In those cases, the
+      * build will not publish doc and source artifacts by any of the publishing actions.
+      */
+    val publishDocAndSourceArtifact: Def.Initialize[Boolean] = Def.setting {
+      import sbtdynver.GitDescribeOutput
+      def isDynVerSnapshot(gitInfo: Option[GitDescribeOutput], defaultValue: Boolean): Boolean = {
+        val isStable = gitInfo.map { info =>
+          info.ref.value.startsWith("v") &&
+          (info.commitSuffix.distance <= 0 || info.commitSuffix.sha.isEmpty)
         }
-        nextState.remainingCommands.toList match {
-          case Nil => nextState
-          case head :: tail =>
-            runCommand0(head, nextState.copy(remainingCommands = tail))
-        }
+        val isNewSnapshot =
+          isStable.map(stable => !stable || defaultValue)
+        // Return previous snapshot definition in case users has overridden version
+        isNewSnapshot.getOrElse(defaultValue)
       }
-      runCommand0(command, st.copy(remainingCommands = Nil))
-        .copy(remainingCommands = st.remainingCommands)
+
+      // We publish doc and source artifacts if the version is not a snapshot
+      !isDynVerSnapshot(DynVerKeys.dynverGitDescribeOutput.value, Keys.isSnapshot.value)
     }
+
+    // For some weird reason, in 2.12 we need to escape '\'
+    val intro: String =
+      s"""
+        |    _____            __         ____  __      __  ____
+        |   / ___/_________ _/ /___ _   / __ \\/ /___ _/ /_/ __/___  _________ ___
+        |   \\__ \\/ ___/ __ `/ / __ `/  / /_/ / / __ `/ __/ /_/ __ \\/ ___/ __ `__ \\
+        |  ___/ / /__/ /_/ / / /_/ /  / ____/ / /_/ / /_/ __/ /_/ / /  / / / / / /
+        | /____/\\___/\\__,_/_/\\__,_/  /_/   /_/\\__,_/\\__/_/  \\____/_/  /_/ /_/ /_/
+        |
+        | *************************************************************************
+        | ** Welcome! Read the CONTRIBUTING guide to learn how to use the build. **
+        | *************************************************************************
+      """.stripMargin
   }
 }
