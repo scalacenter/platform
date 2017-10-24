@@ -11,6 +11,7 @@ pipeline:
 
   build:
     image: scalaplatform/scala:2.0
+    secrets: [ sonatype_user, sonatype_password, github_platform_token, pgp_password ]
     volumes:
       - /fake-scalacenter:/keys
     commands:
